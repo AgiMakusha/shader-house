@@ -8,9 +8,9 @@
   --smoke: 12 12 16;
   
   /* Forest palette */
-  --forest-dark: 10 25 10;
-  --forest-medium: 20 40 20;
-  --forest-light: 40 60 40;
+  --forest-dark: 15 35 15;
+  --forest-medium: 25 50 25;
+  --forest-light: 45 70 45;
   --sunlight: 250 255 210;
   --magic-glow: 100 200 100;
   
@@ -22,7 +22,11 @@
 }
 
 html, body { 
-  background: rgb(var(--smoke)); 
+  background: linear-gradient(135deg, 
+    rgb(var(--forest-dark)) 0%, 
+    rgb(var(--forest-medium)) 50%, 
+    rgb(var(--forest-light)) 100%
+  ); 
 }
 
 /* Pixel/voxel utilities */
