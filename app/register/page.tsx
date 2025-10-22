@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
-import { BuildTools, GameController } from "@/components/icons";
+import { BuildTools, GameControllerNeo } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 
 export default function RegisterPage() {
@@ -121,7 +121,7 @@ export default function RegisterPage() {
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <GameController className="w-2/3 h-2/3 icon-ink" title="Gamer" />
+                    <GameControllerNeo className="w-2/3 h-2/3 icon-ink" title="Gamer" />
                   </GameIcon>
                 </div>
                 <h2 
