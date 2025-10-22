@@ -119,7 +119,7 @@ export default function RegisterPage() {
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <GameController className="w-4/5 h-4/5 icon-ink" title="Gamer" />
+                    <GameController className="w-[85%] h-[85%] icon-ink" title="Gamer" />
                   </GameIcon>
                 </div>
                 <h2 
