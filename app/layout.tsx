@@ -1,5 +1,5 @@
 import "./globals.css";
-import GradientBg from "@/components/layout/GradientBg";
+import ForestBg from "@/components/layout/ForestBg";
 import { AudioProvider, MuteButton } from "@/components/audio/AudioProvider";
 
 export const metadata = {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-dvh text-white antialiased">
         <AudioProvider>
-          <GradientBg />
+          <ForestBg />
           <MuteButton />
           {children}
         </AudioProvider>
