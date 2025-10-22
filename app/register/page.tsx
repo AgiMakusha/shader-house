@@ -73,7 +73,7 @@ export default function RegisterPage() {
                     tone="primary" 
                     size={72} 
                     glow 
-                    rounded 
+                    rounded={false}
                     aria-hidden
                     data-testid="developer-icon"
                   >
@@ -118,7 +118,7 @@ export default function RegisterPage() {
                     tone="secondary" 
                     size={72} 
                     glow 
-                    rounded 
+                    rounded={false}
                     aria-hidden
                     data-testid="gamer-icon"
                   >

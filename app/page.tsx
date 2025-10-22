@@ -185,7 +185,7 @@ export default function Page() {
                   tone="primary" 
                   size={80} 
                   glow 
-                  rounded 
+                  rounded={false}
                   aria-hidden
                   data-testid="home-icon"
                 >

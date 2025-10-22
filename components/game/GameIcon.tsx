@@ -31,6 +31,27 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
       success: "icon-success"
     };
 
+    // If no frame is needed, just return the icon directly
+    if (!rounded) {
+      return (
+        <div
+          ref={ref}
+          className={cn("flex items-center justify-center", toneClasses[tone], className)}
+          style={{ 
+            width: `${size}px`, 
+            height: `${size}px`,
+            filter: glow ? "drop-shadow(0 2px 8px rgba(255,255,255,.08)) drop-shadow(0 6px 18px rgba(147, 197, 253, .18))" : "none"
+          }}
+          aria-hidden={ariaHidden}
+          data-testid={testId}
+          {...props}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    // With frame (original behavior)
     const containerClasses = cn(
       "relative flex items-center justify-center",
       rounded ? "rounded-2xl" : "",
