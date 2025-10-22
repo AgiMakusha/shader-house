@@ -179,7 +179,7 @@ export default function Page() {
                 variants={iconVariants}
                 initial="hidden"
                 animate="visible"
-                className="mb-4"
+                className="mb-2"
               >
                 <GameIcon 
                   tone="primary" 

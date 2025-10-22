@@ -68,7 +68,7 @@ export default function RegisterPage() {
               data-testid="developer-card"
             >
               <GameCardContent>
-                <div className="mb-4">
+                <div className="mb-2">
                   <GameIcon 
                     tone="primary" 
                     size={96} 
@@ -113,7 +113,7 @@ export default function RegisterPage() {
               data-testid="gamer-card"
             >
               <GameCardContent>
-                <div className="mb-4">
+                <div className="mb-2">
                   <GameIcon 
                     tone="secondary" 
                     size={96} 
