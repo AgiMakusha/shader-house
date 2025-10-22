@@ -1,0 +1,107 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Forest gradients -->
+    <radialGradient id="sunlight" cx="20%" cy="20%" r="40%">
+      <stop offset="0%" stop-color="rgba(250,255,210,0.3)"/>
+      <stop offset="60%" stop-color="rgba(255,248,200,0.1)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    
+    <linearGradient id="forestGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(20,40,20,0.9)"/>
+      <stop offset="50%" stop-color="rgba(15,35,15,0.95)"/>
+      <stop offset="100%" stop-color="rgba(10,25,10,0.98)"/>
+    </linearGradient>
+    
+    <linearGradient id="clearingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(45,70,45,0.3)"/>
+      <stop offset="40%" stop-color="rgba(25,50,25,0.7)"/>
+      <stop offset="100%" stop-color="rgba(15,35,15,0.9)"/>
+    </linearGradient>
+    
+    <!-- Path gradient -->
+    <linearGradient id="pathGradient" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="30%" stop-color="rgba(60,80,60,0.1)"/>
+      <stop offset="50%" stop-color="rgba(80,100,80,0.15)"/>
+      <stop offset="70%" stop-color="rgba(60,80,60,0.1)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background forest -->
+  <rect width="100%" height="100%" fill="url(#forestGradient)"/>
+  
+  <!-- Sunlight filtering through trees -->
+  <rect width="100%" height="100%" fill="url(#sunlight)"/>
+  
+  <!-- Tree silhouettes -->
+  <g opacity="0.4">
+    <!-- Left trees -->
+    <rect x="0" y="200" width="80" height="400" fill="rgba(8,18,8,0.4)"/>
+    <rect x="50" y="150" width="60" height="450" fill="rgba(12,22,12,0.3)"/>
+    <rect x="100" y="180" width="70" height="420" fill="rgba(10,20,10,0.4)"/>
+    
+    <!-- Right trees -->
+    <rect x="1050" y="180" width="80" height="420" fill="rgba(8,18,8,0.3)"/>
+    <rect x="1000" y="150" width="60" height="450" fill="rgba(12,22,12,0.3)"/>
+    <rect x="950" y="200" width="70" height="400" fill="rgba(10,20,10,0.4)"/>
+    
+    <!-- Background trees -->
+    <rect x="200" y="300" width="40" height="300" fill="rgba(6,16,6,0.3)" opacity="0.6"/>
+    <rect x="300" y="280" width="35" height="320" fill="rgba(8,18,8,0.2)" opacity="0.6"/>
+    <rect x="850" y="300" width="40" height="300" fill="rgba(6,16,6,0.3)" opacity="0.6"/>
+    <rect x="750" y="280" width="35" height="320" fill="rgba(8,18,8,0.2)" opacity="0.6"/>
+  </g>
+  
+  <!-- Magical clearing -->
+  <ellipse cx="600" cy="400" rx="300" ry="200" fill="url(#clearingGradient)"/>
+  
+  <!-- Path leading to house -->
+  <ellipse cx="600" cy="500" rx="80" ry="200" fill="url(#pathGradient)"/>
+  
+  <!-- Pixelated house -->
+  <g transform="translate(500, 300) scale(1.2)">
+    <!-- House base -->
+    <rect x="20" y="40" width="60" height="50" fill="rgba(120,140,120,0.8)" stroke="rgba(100,120,100,0.6)" stroke-width="1"/>
+    
+    <!-- Roof -->
+    <polygon points="10,40 50,10 90,40" fill="rgba(100,80,80,0.8)" stroke="rgba(80,100,80,0.6)" stroke-width="1"/>
+    
+    <!-- Door -->
+    <rect x="45" y="65" width="10" height="25" fill="rgba(60,80,60,0.9)"/>
+    
+    <!-- Windows -->
+    <rect x="35" y="50" width="8" height="8" fill="rgba(200,220,200,0.4)"/>
+    <rect x="57" y="50" width="8" height="8" fill="rgba(200,220,200,0.4)"/>
+    
+    <!-- Chimney -->
+    <rect x="65" y="25" width="8" height="15" fill="rgba(100,80,80,0.8)" stroke="rgba(80,100,80,0.6)" stroke-width="1"/>
+    
+    <!-- Pixel pattern overlay -->
+    <defs>
+      <pattern id="pixelPattern" patternUnits="userSpaceOnUse" width="4" height="4">
+        <rect width="4" height="4" fill="rgba(120,140,120,0.1)"/>
+      </pattern>
+    </defs>
+    <rect x="20" y="40" width="60" height="50" fill="url(#pixelPattern)"/>
+    <polygon points="10,40 50,10 90,40" fill="url(#pixelPattern)"/>
+  </g>
+  
+  <!-- Atmospheric vignette -->
+  <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+    <stop offset="0%" stop-color="transparent"/>
+    <stop offset="40%" stop-color="transparent"/>
+    <stop offset="70%" stop-color="rgba(0,0,0,0.1)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.3)"/>
+  </radialGradient>
+  <rect width="100%" height="100%" fill="url(#vignette)"/>
+  
+  <!-- Magical shimmer effect -->
+  <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="30%" stop-color="transparent"/>
+    <stop offset="50%" stop-color="rgba(150,200,150,0.1)"/>
+    <stop offset="70%" stop-color="transparent"/>
+  </linearGradient>
+  <rect width="100%" height="100%" fill="url(#shimmer)" opacity="0.3"/>
+</svg>
