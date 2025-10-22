@@ -19,6 +19,10 @@
   --icon-secondary: 196 181 253; /* violet-200ish */
   --icon-success: 187 247 208;   /* green-200ish */
   --icon-warning: 253 230 138;   /* amber-200ish */
+  
+  /* Duotone icon ink tokens */
+  --icon-ink: 236 253 245;            /* soft mint ink */
+  --icon-secondary-ink: 196 181 253;  /* soft violet ink */
 }
 
 html, body { 
@@ -45,6 +49,10 @@ html, body {
 .icon-secondary { color: rgb(var(--icon-secondary)); }
 .icon-success   { color: rgb(var(--icon-success)); }
 .icon-warning   { color: rgb(var(--icon-warning)); }
+
+/* Duotone icon ink utilities */
+.icon-ink { color: rgb(var(--icon-ink)); }
+.icon-secondary-ink { color: rgb(var(--icon-secondary-ink)); }
 
 .icon-glow {
   filter: drop-shadow(0 2px 8px rgba(255,255,255,.08))

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
+import { BuildTools, GameController } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 
 export default function RegisterPage() {
@@ -75,7 +76,7 @@ export default function RegisterPage() {
                     aria-hidden
                     data-testid="developer-icon"
                   >
-                    <div className="text-5xl">🛠️</div>
+                    <BuildTools className="w-2/3 h-2/3" title="Build Tools" />
                   </GameIcon>
                 </div>
                 <h2 
@@ -120,7 +121,7 @@ export default function RegisterPage() {
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <div className="text-5xl">🎮</div>
+                    <GameController className="w-2/3 h-2/3" title="Game Controller" />
                   </GameIcon>
                 </div>
                 <h2 

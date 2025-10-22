@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
-import PixelHouseIcon from "@/components/fx/PixelHouseIcon";
+import { GameHouse } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 
 // Timing constants - easy to adjust for different pacing
@@ -187,7 +187,7 @@ export default function Page() {
                   aria-hidden
                   data-testid="home-icon"
                 >
-                  <div className="text-6xl">🏠</div>
+                  <GameHouse className="w-2/3 h-2/3" title="Shader House" />
                 </GameIcon>
               </motion.div>
 

@@ -25,8 +25,8 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
     ...props 
   }, ref) => {
     const toneClasses = {
-      primary: "icon-primary",
-      secondary: "icon-secondary", 
+      primary: "icon-ink",
+      secondary: "icon-secondary-ink", 
       warning: "icon-warning",
       success: "icon-success"
     };
