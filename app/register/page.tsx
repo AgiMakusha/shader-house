@@ -71,13 +71,13 @@ export default function RegisterPage() {
                 <div className="mb-4">
                   <GameIcon 
                     tone="primary" 
-                    size={72} 
+                    size={96} 
                     glow 
                     rounded={false}
                     aria-hidden
                     data-testid="developer-icon"
                   >
-                    <div className="text-4xl">🛠️</div>
+                    <div className="text-5xl">🛠️</div>
                   </GameIcon>
                 </div>
                 <h2 
@@ -116,13 +116,13 @@ export default function RegisterPage() {
                 <div className="mb-4">
                   <GameIcon 
                     tone="secondary" 
-                    size={72} 
+                    size={96} 
                     glow 
                     rounded={false}
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <div className="text-4xl">🎮</div>
+                    <div className="text-5xl">🎮</div>
                   </GameIcon>
                 </div>
                 <h2 

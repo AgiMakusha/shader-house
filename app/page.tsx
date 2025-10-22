@@ -183,7 +183,7 @@ export default function Page() {
               >
                 <GameIcon 
                   tone="primary" 
-                  size={80} 
+                  size={120} 
                   glow 
                   rounded={false}
                   aria-hidden

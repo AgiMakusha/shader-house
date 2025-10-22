@@ -13,6 +13,13 @@ export default function PixelHouseIcon({ className, size = 64 }: PixelHouseIconP
       viewBox="0 0 64 64"
       className={cn("pixelized w-full h-full", className)}
       aria-hidden="true"
+      style={{
+        filter: `
+          drop-shadow(0 0 4px rgba(100, 200, 100, 0.6))
+          drop-shadow(0 0 8px rgba(147, 197, 253, 0.4))
+          drop-shadow(0 0 12px rgba(255, 255, 255, 0.2))
+        `,
+      }}
     >
       {/* House base - chunky squares */}
       <rect x="8" y="32" width="48" height="24" fill="currentColor" />

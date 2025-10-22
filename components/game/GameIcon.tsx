@@ -40,7 +40,17 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
           style={{ 
             width: `${size}px`, 
             height: `${size}px`,
-            filter: glow ? "drop-shadow(0 2px 8px rgba(255,255,255,.08)) drop-shadow(0 6px 18px rgba(147, 197, 253, .18))" : "none"
+            filter: glow ? `
+              drop-shadow(0 0 8px rgba(255,255,255,.15))
+              drop-shadow(0 0 16px rgba(147, 197, 253, .25))
+              drop-shadow(0 0 24px rgba(100, 200, 100, .2))
+              drop-shadow(0 4px 12px rgba(0, 0, 0, .3))
+            ` : "none",
+            textShadow: glow ? `
+              0 0 10px rgba(255, 255, 255, 0.3),
+              0 0 20px rgba(147, 197, 253, 0.4),
+              0 0 30px rgba(100, 200, 100, 0.3)
+            ` : "none"
           }}
           aria-hidden={ariaHidden}
           data-testid={testId}
