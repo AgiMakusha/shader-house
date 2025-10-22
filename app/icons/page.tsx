@@ -32,7 +32,6 @@ const iconData = [
   { name: "GearSettings", component: GearSettings, description: "Settings and configuration" },
 ];
 
-const tones = ["primary", "secondary"] as const;
 const sizes = [24, 48, 88] as const;
 
 export default function IconsPage() {
@@ -86,7 +85,7 @@ export default function IconsPage() {
                 color: 'rgba(180, 220, 180, 0.9)',
               }}
             >
-              Professional indie icon set with duotone design
+              Professional outline icons with crisp geometry
             </p>
           </motion.div>
 
@@ -129,35 +128,34 @@ export default function IconsPage() {
                 }}
                 className="space-y-4"
               >
-                {/* Icon with different tones */}
-                <div className="flex justify-center space-x-4">
-                  {tones.map((tone) => (
-                    <div key={tone} className="text-center">
-                      <GameIcon 
-                        tone={tone} 
-                        size={selectedSize} 
-                        glow 
-                        rounded={false}
-                        aria-hidden
-                        className="mb-2"
-                      >
-                        <icon.component 
-                          className="w-2/3 h-2/3" 
-                          title={`${icon.name} - ${tone}`}
-                          tone={tone}
-                        />
-                      </GameIcon>
-                      <p 
-                        className="text-xs font-semibold tracking-wide uppercase pixelized"
-                        style={{
-                          textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
-                          color: 'rgba(200, 240, 200, 0.8)',
-                        }}
-                      >
-                        {tone}
-                      </p>
-                    </div>
-                  ))}
+                {/* Icon with grid background for crispness testing */}
+                <div className="flex justify-center">
+                  <div 
+                    className="relative flex items-center justify-center"
+                    style={{
+                      width: `${selectedSize + 16}px`,
+                      height: `${selectedSize + 16}px`,
+                      backgroundImage: `
+                        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                      `,
+                      backgroundSize: '4px 4px',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                  >
+                    <GameIcon 
+                      size={selectedSize} 
+                      glow={false}
+                      rounded={false}
+                      aria-hidden
+                    >
+                      <icon.component 
+                        className="w-2/3 h-2/3 icon-ink" 
+                        title={`${icon.name}`}
+                      />
+                    </GameIcon>
+                  </div>
                 </div>
                 
                 {/* Icon info */}
@@ -240,7 +238,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • Duotone design with primary and secondary inks
+                • Clean outline icons with no fills or neon effects
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"
@@ -249,7 +247,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • Soft mint ink (primary) and violet ink (secondary)
+                • Half-pixel aligned coordinates for crisp rendering
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"
@@ -258,7 +256,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • Crisp at all sizes with aligned half-pixel coordinates
+                • 18×18 safe bounds within 24×24 canvas
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"

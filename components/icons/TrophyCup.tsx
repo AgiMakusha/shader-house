@@ -3,13 +3,11 @@ import React from 'react';
 interface TrophyCupProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const TrophyCup: React.FC<TrophyCupProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,6 +17,7 @@ const TrophyCup: React.FC<TrophyCupProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
@@ -32,14 +31,6 @@ const TrophyCup: React.FC<TrophyCupProps> = ({
       
       {/* Trophy handles */}
       <path d="M6 9v6a6 6 0 0 0 6 6h0a6 6 0 0 0 6-6V9" />
-      
-      {/* Secondary accent - laurel leaves */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
-        <path d="M8 6l1-1" strokeWidth={1} />
-        <path d="M16 6l-1-1" strokeWidth={1} />
-        <path d="M9 5l1-1" strokeWidth={1} />
-        <path d="M15 5l-1-1" strokeWidth={1} />
-      </g>
     </svg>
   );
 };

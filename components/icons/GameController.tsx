@@ -3,13 +3,11 @@ import React from 'react';
 interface GameControllerProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const GameController: React.FC<GameControllerProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,6 +17,7 @@ const GameController: React.FC<GameControllerProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
@@ -33,22 +32,16 @@ const GameController: React.FC<GameControllerProps> = ({
       {/* Right grip */}
       <path d="M16 12.5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1.5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1.5z" />
       
-      {/* D-pad */}
-      <rect x="7.5" y="11" width="2" height="2" rx="1" fill="currentColor" />
+      {/* D-pad cross */}
+      <rect x="7.5" y="11" width="2" height="2" rx="0.5" fill="none" />
+      <line x1="8.5" y1="10" x2="8.5" y2="14" />
+      <line x1="7" y1="12" x2="10" y2="12" />
       
       {/* Action buttons */}
-      <circle cx="16" cy="10" r="1" fill="currentColor" />
-      <circle cx="18" cy="12" r="1" fill="currentColor" />
-      <circle cx="16" cy="14" r="1" fill="currentColor" />
-      <circle cx="18" cy="16" r="1" fill="currentColor" />
-      
-      {/* Secondary accent - connection lines */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
-        <path d="M8.5 10h1" strokeWidth={1} />
-        <path d="M8.5 14h1" strokeWidth={1} />
-        <path d="M7.5 12h1" strokeWidth={1} />
-        <path d="M9.5 12h1" strokeWidth={1} />
-      </g>
+      <circle cx="16" cy="10" r="1" fill="none" />
+      <circle cx="18" cy="12" r="1" fill="none" />
+      <circle cx="16" cy="14" r="1" fill="none" />
+      <circle cx="18" cy="16" r="1" fill="none" />
     </svg>
   );
 };

@@ -3,13 +3,11 @@ import React from 'react';
 interface RocketLaunchProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const RocketLaunch: React.FC<RocketLaunchProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,6 +17,7 @@ const RocketLaunch: React.FC<RocketLaunchProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
@@ -31,8 +30,8 @@ const RocketLaunch: React.FC<RocketLaunchProps> = ({
       {/* Rocket nose */}
       <path d="M9 12H4s.5-3 3-3" />
       
-      {/* Secondary accent - flame */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
+      {/* Exhaust flames */}
+      <g style={{ opacity: 0.65 }}>
         <path d="M15 9v6a3 3 0 0 1-6 0V9" />
         <path d="M12 9l-1-2" />
         <path d="M12 9l1-2" />

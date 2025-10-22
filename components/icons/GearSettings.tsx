@@ -3,13 +3,11 @@ import React from 'react';
 interface GearSettingsProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const GearSettings: React.FC<GearSettingsProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,22 +17,21 @@ const GearSettings: React.FC<GearSettingsProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
       {title && <title>{title}</title>}
       
       {/* Main gear */}
-      <circle cx="12" cy="12" r="3" />
+      <circle cx="12" cy="12" r="3" fill="none" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
       
-      {/* Secondary accent - gear teeth */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
-        <rect x="11" y="2" width="2" height="2" rx="0.5" fill="currentColor" />
-        <rect x="11" y="20" width="2" height="2" rx="0.5" fill="currentColor" />
-        <rect x="2" y="11" width="2" height="2" rx="0.5" fill="currentColor" />
-        <rect x="20" y="11" width="2" height="2" rx="0.5" fill="currentColor" />
-      </g>
+      {/* Gear teeth */}
+      <rect x="11" y="2" width="2" height="2" rx="0.5" fill="none" />
+      <rect x="11" y="20" width="2" height="2" rx="0.5" fill="none" />
+      <rect x="2" y="11" width="2" height="2" rx="0.5" fill="none" />
+      <rect x="20" y="11" width="2" height="2" rx="0.5" fill="none" />
     </svg>
   );
 };

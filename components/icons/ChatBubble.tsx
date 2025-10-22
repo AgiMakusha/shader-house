@@ -3,13 +3,11 @@ import React from 'react';
 interface ChatBubbleProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const ChatBubble: React.FC<ChatBubbleProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,6 +17,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
@@ -30,17 +29,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       {/* Speech bubble tail */}
       <path d="M7 17l-2 2v-2" />
       
-      {/* Secondary accent - message dots */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
-        <circle cx="8.5" cy="9" r="0.5" fill="currentColor" />
-        <circle cx="11.5" cy="9" r="0.5" fill="currentColor" />
-        <circle cx="14.5" cy="9" r="0.5" fill="currentColor" />
-        <circle cx="8.5" cy="13" r="0.5" fill="currentColor" />
-        <circle cx="11.5" cy="13" r="0.5" fill="currentColor" />
-      </g>
-      
-      {/* Notification dot */}
-      <circle cx="18" cy="6" r="1.5" fill="currentColor" />
+      {/* Message dots */}
+      <circle cx="8.5" cy="9" r="0.5" fill="none" />
+      <circle cx="11.5" cy="9" r="0.5" fill="none" />
+      <circle cx="14.5" cy="9" r="0.5" fill="none" />
+      <circle cx="8.5" cy="13" r="0.5" fill="none" />
+      <circle cx="11.5" cy="13" r="0.5" fill="none" />
     </svg>
   );
 };

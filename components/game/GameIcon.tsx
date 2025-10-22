@@ -46,9 +46,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
           data-testid={testId}
           {...props}
         >
-          <div className={tone === "secondary" ? "icon-secondary-ink" : "icon-ink"}>
-            {children}
-          </div>
+          {children}
         </div>
       );
     }
@@ -94,7 +92,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
         {...props}
       >
         <div 
-          className={tone === "secondary" ? "icon-secondary-ink" : "icon-ink"}
+          className={cn("flex items-center justify-center")}
           style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
         >
           {children}

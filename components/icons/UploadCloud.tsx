@@ -3,13 +3,11 @@ import React from 'react';
 interface UploadCloudProps {
   className?: string;
   title?: string;
-  tone?: "primary" | "secondary";
 }
 
 const UploadCloud: React.FC<UploadCloudProps> = ({ 
   className = "", 
-  title,
-  tone = "primary" 
+  title
 }) => {
   return (
     <svg
@@ -19,6 +17,7 @@ const UploadCloud: React.FC<UploadCloudProps> = ({
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
@@ -30,13 +29,6 @@ const UploadCloud: React.FC<UploadCloudProps> = ({
       {/* Upload arrow */}
       <path d="M12 6v8" />
       <path d="M8 10l4-4 4 4" />
-      
-      {/* Secondary accent - cloud details */}
-      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
-        <circle cx="8" cy="12" r="0.5" fill="currentColor" />
-        <circle cx="16" cy="12" r="0.5" fill="currentColor" />
-        <circle cx="12" cy="8" r="0.3" fill="currentColor" />
-      </g>
     </svg>
   );
 };
