@@ -17,22 +17,21 @@ const GameController: React.FC<GameControllerProps> = ({
       strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeMiterlimit={1}
       className={className}
       aria-hidden={!title}
     >
       {title && <title>{title}</title>}
       
-      {/* Rounded pill body */}
-      <path d="M6 9.5a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-5z" />
+      {/* Body: rounded rectangle 16×10 centered on canvas */}
+      <rect x="4" y="7" width="16" height="10" rx="3" ry="3" />
       
-      {/* Left d-pad (simple plus) */}
+      {/* D-pad (left): centered at 8.5, 12 */}
       <line x1="8.5" y1="10" x2="8.5" y2="14" />
-      <line x1="7" y1="12" x2="10" y2="12" />
+      <line x1="6.5" y1="12" x2="10.5" y2="12" />
       
-      {/* Right two small circles */}
-      <circle cx="16" cy="10" r="1" fill="none" />
-      <circle cx="18" cy="12" r="1" fill="none" />
+      {/* Face buttons (right): two circles radius 1.25 */}
+      <circle cx="15.5" cy="11" r="1.25" />
+      <circle cx="17.5" cy="13" r="1.25" />
     </svg>
   );
 };
