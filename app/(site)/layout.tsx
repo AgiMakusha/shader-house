@@ -1,6 +1,6 @@
-import "./globals.css";
+import "../globals.css";
 import GradientBg from "@/components/layout/GradientBg";
-import { AudioProvider } from "@/components/audio/AudioProvider";
+import { AudioProvider, MuteButton } from "@/components/audio/AudioProvider";
 
 export const metadata = {
   title: "Shader House",
@@ -12,7 +12,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-dvh bg-black text-white antialiased">
         <GradientBg />
-        <AudioProvider>{children}</AudioProvider>
+        <AudioProvider>
+          <MuteButton />
+          {children}
+        </AudioProvider>
       </body>
     </html>
   );

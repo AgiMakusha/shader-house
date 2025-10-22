@@ -124,9 +124,18 @@
 :root {
   --glow: 255 255 255;
   --accent: 167 139 250; /* violet-ish */
+  /* soft background shimmer colors */
+  --glow-start: 120 119 198 / 0.18;
+  --glow-end: 120 119 198 / 0;
 }
 
 @keyframes scroll-bg {
   from { background-position: 0 0, 0 0, 0 0; }
   to   { background-position: 200px 200px, 260px 260px, 180px 180px; }
+}
+
+@keyframes bg-shimmer {
+  0% { opacity: 0.6; filter: blur(24px); }
+  50% { opacity: 0.8; filter: blur(28px); }
+  100% { opacity: 0.6; filter: blur(24px); }
 }
