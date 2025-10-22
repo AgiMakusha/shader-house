@@ -25,26 +25,31 @@ const GameControllerNeo: React.FC<GameControllerNeoProps> = ({
       {title ? <title>{title}</title> : null}
       
       <g transform="translate(0,-0.25)">
-        {/* Outer body: rounded rectangle for clean proportion & symmetry */}
-        <rect 
-          x="2.5" 
-          y="6" 
-          width="19" 
-          height="12" 
-          rx="4" 
-          ry="4" 
+        {/* Smooth ergonomic controller body with grips and center dip */}
+        <path 
+          d="
+            M 5.5 16.5
+            C 4.5 14.5, 4.5 11.5, 6.5 10.5
+            C 8.5 9.5, 10.5 9.5, 12 9.5
+            C 13.5 9.5, 15.5 9.5, 17.5 10.5
+            C 19.5 11.5, 19.5 14.5, 18.5 16.5
+            C 17.5 18.5, 15.5 18.5, 12 17.5
+            C 8.5 18.5, 6.5 18.5, 5.5 16.5
+          " 
           strokeWidth={strokeWidth} 
         />
         
-        {/* D-pad (left): plus sized to read at card scale */}
-        <line x1="8" y1="10" x2="8" y2="14" strokeWidth={strokeWidth} />
-        <line x1="6" y1="12" x2="10" y2="12" strokeWidth={strokeWidth} />
+        {/* Rounded D-pad (left): pill-shaped segments */}
+        <rect x="6.5" y="10.5" width="1.5" height="3" rx="0.75" strokeWidth={strokeWidth} />
+        <rect x="7.5" y="9.5" width="1.5" height="5" rx="0.75" strokeWidth={strokeWidth} />
+        <rect x="8.5" y="10.5" width="1.5" height="3" rx="0.75" strokeWidth={strokeWidth} />
+        <rect x="7.5" y="11.5" width="1.5" height="1" rx="0.5" strokeWidth={strokeWidth} />
         
-        {/* Face buttons (right): diamond of four circles */}
-        <circle cx="16" cy="10.5" r="1.6" strokeWidth={strokeWidth} />
-        <circle cx="18" cy="12.0" r="1.6" strokeWidth={strokeWidth} />
-        <circle cx="16" cy="13.5" r="1.6" strokeWidth={strokeWidth} />
-        <circle cx="14.5" cy="12.0" r="1.6" strokeWidth={strokeWidth} />
+        {/* Face buttons (right): four hollow circles in diamond */}
+        <circle cx="15.5" cy="10.5" r="1.4" strokeWidth={strokeWidth} />
+        <circle cx="17.5" cy="12" r="1.4" strokeWidth={strokeWidth} />
+        <circle cx="15.5" cy="13.5" r="1.4" strokeWidth={strokeWidth} />
+        <circle cx="13.5" cy="12" r="1.4" strokeWidth={strokeWidth} />
       </g>
     </svg>
   );
