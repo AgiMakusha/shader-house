@@ -16,7 +16,7 @@ const AnalyticsEye: React.FC<AnalyticsEyeProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -31,18 +31,12 @@ const AnalyticsEye: React.FC<AnalyticsEyeProps> = ({
       <circle cx="12" cy="12" r="3" />
       
       {/* Secondary accent - data lines */}
-      <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
+      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
         <path d="M4 8l2 2" strokeWidth={1} />
         <path d="M20 8l-2 2" strokeWidth={1} />
         <path d="M4 16l2-2" strokeWidth={1} />
         <path d="M20 16l-2-2" strokeWidth={1} />
       </g>
-      
-      {/* Analytics chart */}
-      <path d="M8 20h8" strokeWidth={1.5} />
-      <circle cx="8" cy="18" r="1" fill="currentColor" />
-      <circle cx="12" cy="16" r="1" fill="currentColor" />
-      <circle cx="16" cy="14" r="1" fill="currentColor" />
     </svg>
   );
 };

@@ -8,6 +8,7 @@ type GameIconProps = {
   className?: string;
   glow?: boolean; // default true
   rounded?: boolean; // default true (rounded container)
+  interactive?: boolean; // default false
   "aria-hidden"?: boolean;
   "data-testid"?: string;
 };
@@ -20,51 +21,43 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
     className, 
     glow = true, 
     rounded = true,
+    interactive = false,
     "aria-hidden": ariaHidden = true,
     "data-testid": testId,
     ...props 
   }, ref) => {
-    const toneClasses = {
-      primary: "icon-ink",
-      secondary: "icon-secondary-ink", 
-      warning: "icon-warning",
-      success: "icon-success"
-    };
-
     // If no frame is needed, just return the icon directly
     if (!rounded) {
       return (
         <div
           ref={ref}
-          className={cn("flex items-center justify-center", toneClasses[tone], className)}
+          className={cn("flex items-center justify-center", className)}
           style={{ 
             width: `${size}px`, 
             height: `${size}px`,
             filter: glow ? `
-              drop-shadow(0 0 8px rgba(255,255,255,.15))
-              drop-shadow(0 0 16px rgba(147, 197, 253, .25))
-              drop-shadow(0 0 24px rgba(100, 200, 100, .2))
-              drop-shadow(0 4px 12px rgba(0, 0, 0, .3))
+              drop-shadow(0 2px 8px rgba(0,0,0,.35))
+              drop-shadow(0 6px 24px rgba(0,0,0,.35))
             ` : "none",
-            textShadow: glow ? `
-              0 0 10px rgba(255, 255, 255, 0.3),
-              0 0 20px rgba(147, 197, 253, 0.4),
-              0 0 30px rgba(100, 200, 100, 0.3)
-            ` : "none"
+            transform: interactive ? "scale(1.02)" : "scale(1)",
+            transition: "transform 0.2s ease-out, filter 0.2s ease-out"
           }}
           aria-hidden={ariaHidden}
           data-testid={testId}
           {...props}
         >
-          {children}
+          <div className={tone === "secondary" ? "icon-secondary-ink" : "icon-ink"}>
+            {children}
+          </div>
         </div>
       );
     }
 
-    // With frame (original behavior)
+    // With frame (refined styling)
     const containerClasses = cn(
-      "relative flex items-center justify-center",
+      "relative flex items-center justify-center transition-all duration-200 ease-out",
       rounded ? "rounded-2xl" : "",
+      interactive ? "hover:scale-102" : "",
       className
     );
 
@@ -73,9 +66,9 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
       height: `${size}px`,
       background: `
         linear-gradient(135deg, 
-          rgba(40, 60, 40, 0.9) 0%, 
-          rgba(50, 70, 50, 0.8) 50%, 
-          rgba(35, 55, 35, 0.9) 100%
+          rgba(40, 60, 40, 0.63) 0%, 
+          rgba(50, 70, 50, 0.56) 50%, 
+          rgba(35, 55, 35, 0.63) 100%
         )
       `,
       border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -83,10 +76,13 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         0 1px 3px rgba(0, 0, 0, 0.3)
       `,
-      filter: glow ? "drop-shadow(0 2px 8px rgba(255,255,255,.08)) drop-shadow(0 6px 18px rgba(147, 197, 253, .18))" : "none"
+      filter: glow ? `
+        drop-shadow(0 2px 8px rgba(0,0,0,.35))
+        drop-shadow(0 6px 24px rgba(0,0,0,.35))
+      ` : "none"
     };
 
-    const iconSize = size * 0.66; // Scale icon to 66% of container
+    const iconSize = size * 0.75; // Scale icon to 75% of container (18px in 24px)
 
     return (
       <div
@@ -98,7 +94,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
         {...props}
       >
         <div 
-          className={cn("flex items-center justify-center", toneClasses[tone])}
+          className={tone === "secondary" ? "icon-secondary-ink" : "icon-ink"}
           style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
         >
           {children}

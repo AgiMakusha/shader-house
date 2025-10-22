@@ -70,13 +70,13 @@ export default function RegisterPage() {
                 <div className="mb-2">
                   <GameIcon 
                     tone="primary" 
-                    size={96} 
+                    size={88} 
                     glow 
                     rounded={false}
                     aria-hidden
                     data-testid="developer-icon"
                   >
-                    <BuildTools className="w-2/3 h-2/3" title="Build Tools" />
+                    <BuildTools className="w-2/3 h-2/3 icon-ink" title="Developer tools" />
                   </GameIcon>
                 </div>
                 <h2 
@@ -115,13 +115,13 @@ export default function RegisterPage() {
                 <div className="mb-2">
                   <GameIcon 
                     tone="secondary" 
-                    size={96} 
+                    size={88} 
                     glow 
                     rounded={false}
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <GameController className="w-2/3 h-2/3" title="Game Controller" />
+                    <GameController className="w-2/3 h-2/3 icon-secondary-ink" title="Gamer" />
                   </GameIcon>
                 </div>
                 <h2 

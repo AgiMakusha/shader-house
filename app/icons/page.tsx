@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { GameIcon } from "@/components/game/GameIcon";
 import { 
@@ -32,8 +33,11 @@ const iconData = [
 ];
 
 const tones = ["primary", "secondary"] as const;
+const sizes = [24, 48, 88] as const;
 
 export default function IconsPage() {
+  const [selectedSize, setSelectedSize] = useState<number>(88);
+
   return (
     <div className="min-h-dvh relative overflow-hidden">
       <Particles />
@@ -86,6 +90,31 @@ export default function IconsPage() {
             </p>
           </motion.div>
 
+          {/* Size Toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            className="flex justify-center space-x-4"
+          >
+            {sizes.map((size) => (
+              <button
+                key={size}
+                onClick={() => setSelectedSize(size)}
+                className={`px-4 py-2 rounded-lg font-semibold tracking-wide uppercase pixelized transition-all duration-200 ${
+                  selectedSize === size 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+                style={{
+                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+                }}
+              >
+                {size}px
+              </button>
+            ))}
+          </motion.div>
+
           {/* Icon Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {iconData.map((icon, index) => (
@@ -106,7 +135,7 @@ export default function IconsPage() {
                     <div key={tone} className="text-center">
                       <GameIcon 
                         tone={tone} 
-                        size={80} 
+                        size={selectedSize} 
                         glow 
                         rounded={false}
                         aria-hidden
@@ -202,7 +231,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • 24px base grid with rounded terminals
+                • 24px base grid with 1.75px stroke weight
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"
@@ -221,6 +250,15 @@ export default function IconsPage() {
                 }}
               >
                 • Soft mint ink (primary) and violet ink (secondary)
+              </p>
+              <p 
+                className="font-semibold tracking-wide uppercase pixelized"
+                style={{
+                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+                  color: 'rgba(200, 240, 200, 0.8)',
+                }}
+              >
+                • Crisp at all sizes with aligned half-pixel coordinates
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"

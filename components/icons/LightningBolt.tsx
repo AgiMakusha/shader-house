@@ -16,7 +16,7 @@ const LightningBolt: React.FC<LightningBoltProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -28,7 +28,7 @@ const LightningBolt: React.FC<LightningBoltProps> = ({
       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       
       {/* Secondary accent - energy sparks */}
-      <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
+      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
         <circle cx="6" cy="8" r="0.5" fill="currentColor" />
         <circle cx="18" cy="16" r="0.5" fill="currentColor" />
         <circle cx="10" cy="4" r="0.3" fill="currentColor" />

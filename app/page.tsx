@@ -181,13 +181,13 @@ export default function Page() {
               >
                 <GameIcon 
                   tone="primary" 
-                  size={120} 
+                  size={88} 
                   glow 
                   rounded={false}
                   aria-hidden
                   data-testid="home-icon"
                 >
-                  <GameHouse className="w-2/3 h-2/3" title="Shader House" />
+                  <GameHouse className="w-2/3 h-2/3 icon-ink" title="Shader House" />
                 </GameIcon>
               </motion.div>
 

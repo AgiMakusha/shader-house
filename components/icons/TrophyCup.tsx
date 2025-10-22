@@ -16,7 +16,7 @@ const TrophyCup: React.FC<TrophyCupProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -34,7 +34,7 @@ const TrophyCup: React.FC<TrophyCupProps> = ({
       <path d="M6 9v6a6 6 0 0 0 6 6h0a6 6 0 0 0 6-6V9" />
       
       {/* Secondary accent - laurel leaves */}
-      <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
+      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
         <path d="M8 6l1-1" strokeWidth={1} />
         <path d="M16 6l-1-1" strokeWidth={1} />
         <path d="M9 5l1-1" strokeWidth={1} />

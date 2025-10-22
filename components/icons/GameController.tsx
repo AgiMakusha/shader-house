@@ -16,7 +16,7 @@ const GameController: React.FC<GameControllerProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -25,16 +25,16 @@ const GameController: React.FC<GameControllerProps> = ({
       {title && <title>{title}</title>}
       
       {/* Controller body */}
-      <path d="M6 9a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V9z" />
+      <path d="M6 9.5a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-5z" />
       
       {/* Left grip */}
-      <path d="M3 12a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2z" />
+      <path d="M3 12.5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.5z" />
       
       {/* Right grip */}
-      <path d="M16 12a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-2z" />
+      <path d="M16 12.5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1.5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1.5z" />
       
       {/* D-pad */}
-      <rect x="7" y="11" width="2" height="2" rx="0.5" fill="currentColor" />
+      <rect x="7.5" y="11" width="2" height="2" rx="1" fill="currentColor" />
       
       {/* Action buttons */}
       <circle cx="16" cy="10" r="1" fill="currentColor" />
@@ -43,11 +43,11 @@ const GameController: React.FC<GameControllerProps> = ({
       <circle cx="18" cy="16" r="1" fill="currentColor" />
       
       {/* Secondary accent - connection lines */}
-      <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <path d="M8 10h1" strokeWidth={1} />
-        <path d="M8 14h1" strokeWidth={1} />
-        <path d="M7 12h1" strokeWidth={1} />
-        <path d="M9 12h1" strokeWidth={1} />
+      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
+        <path d="M8.5 10h1" strokeWidth={1} />
+        <path d="M8.5 14h1" strokeWidth={1} />
+        <path d="M7.5 12h1" strokeWidth={1} />
+        <path d="M9.5 12h1" strokeWidth={1} />
       </g>
     </svg>
   );

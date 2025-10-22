@@ -16,7 +16,7 @@ const RocketLaunch: React.FC<RocketLaunchProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.5}
+      strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -31,13 +31,11 @@ const RocketLaunch: React.FC<RocketLaunchProps> = ({
       {/* Rocket nose */}
       <path d="M9 12H4s.5-3 3-3" />
       
-      {/* Secondary accent - stars */}
-      <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <path d="M2 2l2 2" strokeWidth={1} />
-        <path d="M20 2l-2 2" strokeWidth={1} />
-        <path d="M11 2l1 1" strokeWidth={1} />
-        <circle cx="8" cy="6" r="0.5" fill="currentColor" />
-        <circle cx="16" cy="4" r="0.5" fill="currentColor" />
+      {/* Secondary accent - flame */}
+      <g className="icon-secondary-ink" style={{ opacity: 0.65 }}>
+        <path d="M15 9v6a3 3 0 0 1-6 0V9" />
+        <path d="M12 9l-1-2" />
+        <path d="M12 9l1-2" />
       </g>
     </svg>
   );
