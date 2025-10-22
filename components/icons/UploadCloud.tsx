@@ -16,7 +16,7 @@ const UploadCloud: React.FC<UploadCloudProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -32,9 +32,9 @@ const UploadCloud: React.FC<UploadCloudProps> = ({
       
       {/* Secondary accent - cloud details */}
       <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <circle cx="8" cy="12" r="1" fill="currentColor" />
-        <circle cx="16" cy="12" r="1" fill="currentColor" />
-        <circle cx="12" cy="8" r="0.5" fill="currentColor" />
+        <circle cx="8" cy="12" r="0.5" fill="currentColor" />
+        <circle cx="16" cy="12" r="0.5" fill="currentColor" />
+        <circle cx="12" cy="8" r="0.3" fill="currentColor" />
       </g>
     </svg>
   );

@@ -16,7 +16,7 @@ const GameHouse: React.FC<GameHouseProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -37,9 +37,12 @@ const GameHouse: React.FC<GameHouseProps> = ({
       <rect x="6" y="12" width="2" height="2" rx="0.5" fill="currentColor" />
       <rect x="16" y="12" width="2" height="2" rx="0.5" fill="currentColor" />
       
-      {/* Secondary accent - chimney */}
+      {/* Secondary accent - magical sparkles */}
       <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <rect x="17" y="6" width="2" height="4" rx="0.5" fill="currentColor" />
+        <circle cx="8" cy="6" r="0.5" fill="currentColor" />
+        <circle cx="16" cy="4" r="0.5" fill="currentColor" />
+        <circle cx="20" cy="8" r="0.5" fill="currentColor" />
+        <circle cx="4" cy="8" r="0.5" fill="currentColor" />
       </g>
     </svg>
   );

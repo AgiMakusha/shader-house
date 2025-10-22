@@ -16,7 +16,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -32,12 +32,12 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       
       {/* Secondary accent - message lines */}
       <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <line x1="8" y1="9" x2="16" y2="9" strokeWidth={1.5} />
-        <line x1="8" y1="13" x2="14" y2="13" strokeWidth={1.5} />
+        <line x1="8" y1="9" x2="16" y2="9" strokeWidth={1} />
+        <line x1="8" y1="13" x2="14" y2="13" strokeWidth={1} />
       </g>
       
       {/* Notification dot */}
-      <circle cx="18" cy="6" r="2" fill="currentColor" />
+      <circle cx="18" cy="6" r="1.5" fill="currentColor" />
     </svg>
   );
 };

@@ -16,7 +16,7 @@ const LibraryStack: React.FC<LibraryStackProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -30,10 +30,10 @@ const LibraryStack: React.FC<LibraryStackProps> = ({
       
       {/* Secondary accent - book pages */}
       <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <line x1="8" y1="6" x2="18" y2="6" strokeWidth={1.5} />
-        <line x1="8" y1="10" x2="16" y2="10" strokeWidth={1.5} />
-        <line x1="8" y1="14" x2="18" y2="14" strokeWidth={1.5} />
-        <line x1="8" y1="18" x2="14" y2="18" strokeWidth={1.5} />
+        <line x1="8" y1="6" x2="18" y2="6" strokeWidth={1} />
+        <line x1="8" y1="10" x2="16" y2="10" strokeWidth={1} />
+        <line x1="8" y1="14" x2="18" y2="14" strokeWidth={1} />
+        <line x1="8" y1="18" x2="14" y2="18" strokeWidth={1} />
       </g>
       
       {/* Bookmark */}

@@ -16,7 +16,7 @@ const AnalyticsEye: React.FC<AnalyticsEyeProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -32,10 +32,10 @@ const AnalyticsEye: React.FC<AnalyticsEyeProps> = ({
       
       {/* Secondary accent - data lines */}
       <g className={tone === "secondary" ? "opacity-70 icon-secondary-ink" : "opacity-70"}>
-        <path d="M4 8l2 2" strokeWidth={1.5} />
-        <path d="M20 8l-2 2" strokeWidth={1.5} />
-        <path d="M4 16l2-2" strokeWidth={1.5} />
-        <path d="M20 16l-2-2" strokeWidth={1.5} />
+        <path d="M4 8l2 2" strokeWidth={1} />
+        <path d="M20 8l-2 2" strokeWidth={1} />
+        <path d="M4 16l2-2" strokeWidth={1} />
+        <path d="M20 16l-2-2" strokeWidth={1} />
       </g>
       
       {/* Analytics chart */}
