@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 type GameIconProps = {
   children: React.ReactNode;
   size?: number; // px; default 72
-  tone?: "primary" | "secondary" | "warning" | "success"; // default "primary"
+  weight?: "light" | "regular"; // default "light"
   className?: string;
   glow?: boolean; // default true
   rounded?: boolean; // default true (rounded container)
@@ -17,7 +17,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
   ({ 
     children, 
     size = 72, 
-    tone = "primary", 
+    weight = "light", 
     className, 
     glow = true, 
     rounded = true,
@@ -39,7 +39,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
               drop-shadow(0 2px 8px rgba(0,0,0,.35))
               drop-shadow(0 6px 24px rgba(0,0,0,.35))
             ` : "none",
-            transform: interactive ? "scale(1.02)" : "scale(1)",
+            transform: interactive ? "scale(1.01)" : "scale(1)",
             transition: "transform 0.2s ease-out, filter 0.2s ease-out"
           }}
           aria-hidden={ariaHidden}
@@ -62,14 +62,14 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
     const containerStyle = {
       width: `${size}px`,
       height: `${size}px`,
-      background: `
-        linear-gradient(135deg, 
-          rgba(40, 60, 40, 0.63) 0%, 
-          rgba(50, 70, 50, 0.56) 50%, 
-          rgba(35, 55, 35, 0.63) 100%
-        )
-      `,
-      border: "1px solid rgba(255, 255, 255, 0.1)",
+            background: `
+                linear-gradient(135deg, 
+                  rgba(40, 60, 40, 0.38) 0%, 
+                  rgba(50, 70, 50, 0.34) 50%, 
+                  rgba(35, 55, 35, 0.38) 100%
+                )
+              `,
+              border: "1px solid rgba(255, 255, 255, 0.08)",
       boxShadow: `
         inset 0 1px 0 rgba(255, 255, 255, 0.1),
         0 1px 3px rgba(0, 0, 0, 0.3)
@@ -92,7 +92,7 @@ const GameIcon = forwardRef<HTMLDivElement, GameIconProps>(
         {...props}
       >
         <div 
-          className={cn("flex items-center justify-center")}
+          className={cn("flex items-center justify-center p-3")}
           style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
         >
           {children}

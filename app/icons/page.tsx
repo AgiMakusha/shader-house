@@ -36,6 +36,7 @@ const sizes = [24, 48, 88] as const;
 
 export default function IconsPage() {
   const [selectedSize, setSelectedSize] = useState<number>(88);
+  const [showGlow, setShowGlow] = useState<boolean>(false);
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
@@ -72,7 +73,7 @@ export default function IconsPage() {
                 color: 'rgba(150, 250, 150, 0.95)',
               }}
             >
-              Icon Library
+              Minimal Icon Library
             </h1>
             <p 
               className="text-lg font-semibold tracking-wide uppercase pixelized"
@@ -85,33 +86,51 @@ export default function IconsPage() {
                 color: 'rgba(180, 220, 180, 0.9)',
               }}
             >
-              Professional outline icons with crisp geometry
+              Modern, simple, light outline icons
             </p>
           </motion.div>
 
-          {/* Size Toggle */}
+          {/* Controls */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
             className="flex justify-center space-x-4"
           >
-            {sizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => setSelectedSize(size)}
-                className={`px-4 py-2 rounded-lg font-semibold tracking-wide uppercase pixelized transition-all duration-200 ${
-                  selectedSize === size 
-                    ? 'bg-white/20 text-white' 
-                    : 'bg-white/5 text-white/70 hover:bg-white/10'
-                }`}
-                style={{
-                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
-                }}
-              >
-                {size}px
-              </button>
-            ))}
+            {/* Size Toggle */}
+            <div className="flex space-x-2">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setSelectedSize(size)}
+                  className={`px-4 py-2 rounded-lg font-semibold tracking-wide uppercase pixelized transition-all duration-200 ${
+                    selectedSize === size 
+                      ? 'bg-white/20 text-white' 
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                  style={{
+                    textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+                  }}
+                >
+                  {size}px
+                </button>
+              ))}
+            </div>
+            
+            {/* Glow Toggle */}
+            <button
+              onClick={() => setShowGlow(!showGlow)}
+              className={`px-4 py-2 rounded-lg font-semibold tracking-wide uppercase pixelized transition-all duration-200 ${
+                showGlow 
+                  ? 'bg-white/20 text-white' 
+                  : 'bg-white/5 text-white/70 hover:bg-white/10'
+              }`}
+              style={{
+                textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+              }}
+            >
+              {showGlow ? 'Glow On' : 'Glow Off'}
+            </button>
           </motion.div>
 
           {/* Icon Grid */}
@@ -128,7 +147,7 @@ export default function IconsPage() {
                 }}
                 className="space-y-4"
               >
-                {/* Icon with grid background for crispness testing */}
+                {/* Icon with neutral gray checker background */}
                 <div className="flex justify-center">
                   <div 
                     className="relative flex items-center justify-center"
@@ -136,17 +155,20 @@ export default function IconsPage() {
                       width: `${selectedSize + 16}px`,
                       height: `${selectedSize + 16}px`,
                       backgroundImage: `
-                        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                        linear-gradient(45deg, #666 25%, transparent 25%), 
+                        linear-gradient(-45deg, #666 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #666 75%), 
+                        linear-gradient(-45deg, transparent 75%, #666 75%)
                       `,
-                      backgroundSize: '4px 4px',
+                      backgroundSize: '8px 8px',
+                      backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px',
                       borderRadius: '8px',
                       border: '1px solid rgba(255,255,255,0.1)'
                     }}
                   >
                     <GameIcon 
                       size={selectedSize} 
-                      glow={false}
+                      glow={showGlow}
                       rounded={false}
                       aria-hidden
                     >
@@ -219,7 +241,7 @@ export default function IconsPage() {
                 color: 'rgba(180, 220, 180, 0.9)',
               }}
             >
-              Design System
+              Minimal Design System
             </h2>
             <div className="space-y-2 text-sm">
               <p 
@@ -229,7 +251,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • 24px base grid with 1.75px stroke weight
+                • 24px base grid with 1.5px stroke weight (lighter)
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"
@@ -238,7 +260,16 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • Clean outline icons with no fills or neon effects
+                • Minimal outline icons with no fills or decorations
+              </p>
+              <p 
+                className="font-semibold tracking-wide uppercase pixelized"
+                style={{
+                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+                  color: 'rgba(200, 240, 200, 0.8)',
+                }}
+              >
+                • 2-3 paths max per icon for clean simplicity
               </p>
               <p 
                 className="font-semibold tracking-wide uppercase pixelized"
@@ -256,16 +287,7 @@ export default function IconsPage() {
                   color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
-                • 18×18 safe bounds within 24×24 canvas
-              </p>
-              <p 
-                className="font-semibold tracking-wide uppercase pixelized"
-                style={{
-                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
-                  color: 'rgba(200, 240, 200, 0.8)',
-                }}
-              >
-                • Harmonizes with forest/ambient design theme
+                • Calm geometry that doesn't overpower content
               </p>
             </div>
           </motion.div>

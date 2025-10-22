@@ -14,7 +14,7 @@ const GameHouse: React.FC<GameHouseProps> = ({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeMiterlimit={1}
@@ -23,15 +23,11 @@ const GameHouse: React.FC<GameHouseProps> = ({
     >
       {title && <title>{title}</title>}
       
-      {/* House outline */}
+      {/* Triangle roof + square body */}
       <path d="M3 9.5l9-7 9 7v11.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z" />
       
-      {/* Door */}
+      {/* Small centered door */}
       <rect x="10.5" y="16" width="3" height="6" rx="0.5" fill="none" />
-      
-      {/* Window */}
-      <rect x="6.5" y="12" width="2" height="2" rx="0.5" fill="none" />
-      <rect x="15.5" y="12" width="2" height="2" rx="0.5" fill="none" />
     </svg>
   );
 };
