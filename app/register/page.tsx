@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
 import Particles from "@/components/fx/Particles";
-import ForestBg from "@/components/layout/ForestBg";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,7 +22,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
-      <ForestBg />
       <Particles />
       
       <motion.main 

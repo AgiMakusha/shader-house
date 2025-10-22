@@ -7,7 +7,6 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
 import PixelHouseIcon from "@/components/fx/PixelHouseIcon";
 import Particles from "@/components/fx/Particles";
-import ForestBg from "@/components/layout/ForestBg";
 
 // Timing constants - easy to adjust for different pacing
 const CARD_IN_MS = 500;        // Card fade/scale in duration
@@ -138,7 +137,6 @@ export default function Page() {
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
-      <ForestBg />
       <Particles />
       
       {/* Fade-out curtain overlay */}

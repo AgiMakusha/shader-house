@@ -2,7 +2,7 @@ export default function ForestBg() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-20"
+      className="pointer-events-none fixed inset-0 -z-10"
     >
       {/* Layer 1: Magical forest clearing gradient */}
       <div
