@@ -1,15 +1,9 @@
 import * as React from "react";
-import { ICON_STROKE, ICON_CAP, ICON_JOIN, ICON_MITER } from './spec';
+import { ICON_STROKE, ICON_CAP, ICON_JOIN, ICON_MITER } from "./spec";
 
-type Props = {
-  className?: string;
-  title?: string;
-};
+type Props = { className?: string; title?: string };
 
-export default function GameController({
-  className,
-  title,
-}: Props) {
+export default function GameController({ className, title }: Props) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -22,66 +16,33 @@ export default function GameController({
       aria-hidden={title ? undefined : true}
     >
       {title ? <title>{title}</title> : null}
+
+      {/* Lift the glyph slightly for optical vertical centering */}
       <g transform="translate(0,-0.25)">
-        {/* Outer body: larger, more balanced controller body.
-            SIZE: 21x14 at (1.5,5); CORNERS: 3.5; increased optical mass and better proportions.
-            All strokes non-scaling for crispness at any size. */}
-        <rect
-          x="1.5"
-          y="5"
-          width="21"
-          height="14"
-          rx="3.5"
-          ry="3.5"
+        {/* OUTER SILHOUETTE — smooth ergonomic shape (open path, outline only) */}
+        <path
+          d="
+            M 4.5 15.5
+            C 3.8 14.0, 3.9 11.0, 6.6 10.1
+            C 9.3 9.2, 12.0 10.0, 12.0 10.0
+            C 12.0 10.0, 14.7 9.2, 17.4 10.1
+            C 20.1 11.0, 20.2 14.0, 19.5 15.5
+            C 18.2 18.0, 15.2 18.0, 12.0 16.6
+            C 8.8 18.0, 5.8 18.0, 4.5 15.5
+          "
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
-        {/* D-pad (left): simple plus, centered at (8,12) - slightly larger */}
-        <line
-          x1="8"
-          y1="9.5"
-          x2="8"
-          y2="14.5"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
-        <line
-          x1="5.5"
-          y1="12"
-          x2="10.5"
-          y2="12"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
-        {/* Face buttons (right): four hollow circles in a diamond - larger and better spaced */}
-        <circle
-          cx="16.5"
-          cy="10"
-          r="2"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
-        <circle
-          cx="18.5"
-          cy="12"
-          r="2"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
-        <circle
-          cx="16.5"
-          cy="14"
-          r="2"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
-        <circle
-          cx="14.5"
-          cy="12"
-          r="2"
-          strokeWidth={ICON_STROKE}
-          vectorEffect="non-scaling-stroke"
-        />
+
+        {/* D-PAD — plus shape (stroke only) */}
+        <line x1="8.0" y1="10.5" x2="8.0" y2="13.5" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
+        <line x1="6.5" y1="12.0" x2="9.5" y2="12.0" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
+
+        {/* BUTTONS — four hollow circles in a diamond */}
+        <circle cx="16.3" cy="10.6" r="1.2" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
+        <circle cx="18.0" cy="12.0" r="1.2" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
+        <circle cx="16.3" cy="13.4" r="1.2" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
+        <circle cx="14.7" cy="12.0" r="1.2" strokeWidth={ICON_STROKE} vectorEffect="non-scaling-stroke" />
       </g>
     </svg>
   );
