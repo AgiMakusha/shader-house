@@ -17,21 +17,22 @@ const GameController: React.FC<GameControllerProps> = ({
       strokeWidth={1.5}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeMiterlimit={1}
       className={className}
-      aria-hidden={!title}
+      aria-hidden={title ? undefined : true}
     >
-      {title && <title>{title}</title>}
+      {title ? <title>{title}</title> : null}
       
-      {/* Body: rounded rectangle 16×10 centered on canvas */}
-      <rect x="4" y="7" width="16" height="10" rx="3" ry="3" />
+      {/* Outer body: 18×11 rounded rectangle for optical presence matching wrench */}
+      <rect x="3" y="6.5" width="18" height="11" rx="3.5" ry="3.5" />
       
-      {/* D-pad (left): centered at 8.5, 12 */}
-      <line x1="8.5" y1="10" x2="8.5" y2="14" />
-      <line x1="6.5" y1="12" x2="10.5" y2="12" />
+      {/* D-pad (left): centered at 8, 12 with 4-unit spans */}
+      <line x1="8" y1="10" x2="8" y2="14" />
+      <line x1="6" y1="12" x2="10" y2="12" />
       
-      {/* Face buttons (right): two circles radius 1.25 */}
-      <circle cx="15.5" cy="11" r="1.25" />
-      <circle cx="17.5" cy="13" r="1.25" />
+      {/* Face buttons (right): two circles r=1.5 for balance */}
+      <circle cx="16" cy="11" r="1.5" />
+      <circle cx="18" cy="13" r="1.5" />
     </svg>
   );
 };
