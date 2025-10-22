@@ -120,3 +120,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+:root {
+  --glow: 255 255 255;
+  --accent: 167 139 250; /* violet-ish */
+}
+
+@keyframes scroll-bg {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to   { background-position: 200px 200px, 260px 260px, 180px 180px; }
+}
