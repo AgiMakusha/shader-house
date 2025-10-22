@@ -23,62 +23,62 @@ export default function GameController({
     >
       {title ? <title>{title}</title> : null}
       <g transform="translate(0,-0.25)">
-        {/* Outer body: rounded rectangle (bigger, more mechanical).
-            SIZE: 20x13 at (2,5.5); CORNERS: 3.25; increased optical mass.
+        {/* Outer body: larger, more balanced controller body.
+            SIZE: 21x14 at (1.5,5); CORNERS: 3.5; increased optical mass and better proportions.
             All strokes non-scaling for crispness at any size. */}
         <rect
-          x="2"
-          y="5.5"
-          width="20"
-          height="13"
-          rx="3.25"
-          ry="3.25"
+          x="1.5"
+          y="5"
+          width="21"
+          height="14"
+          rx="3.5"
+          ry="3.5"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
-        {/* D-pad (left): simple plus, centered at (8,12) */}
+        {/* D-pad (left): simple plus, centered at (8,12) - slightly larger */}
         <line
           x1="8"
-          y1="9.8"
+          y1="9.5"
           x2="8"
-          y2="14.2"
+          y2="14.5"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
         <line
-          x1="5.8"
+          x1="5.5"
           y1="12"
-          x2="10.2"
+          x2="10.5"
           y2="12"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
-        {/* Face buttons (right): four hollow circles in a diamond - slightly larger */}
+        {/* Face buttons (right): four hollow circles in a diamond - larger and better spaced */}
         <circle
-          cx="16.2"
-          cy="10.3"
-          r="1.7"
+          cx="16.5"
+          cy="10"
+          r="2"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
         <circle
-          cx="18.2"
+          cx="18.5"
           cy="12"
-          r="1.7"
+          r="2"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
         <circle
-          cx="16.2"
-          cy="13.7"
-          r="1.7"
+          cx="16.5"
+          cy="14"
+          r="2"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
         <circle
-          cx="14.6"
+          cx="14.5"
           cy="12"
-          r="1.7"
+          r="2"
           strokeWidth={ICON_STROKE}
           vectorEffect="non-scaling-stroke"
         />
