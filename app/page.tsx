@@ -180,7 +180,6 @@ export default function Page() {
                 className="mb-2"
               >
                 <GameIcon 
-                  tone="primary" 
                   size={88} 
                   glow 
                   rounded={false}
