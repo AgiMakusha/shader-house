@@ -19,14 +19,7 @@
       <stop offset="100%" stop-color="rgba(15,35,15,0.9)"/>
     </linearGradient>
     
-    <!-- Path gradient -->
-    <linearGradient id="pathGradient" x1="50%" y1="0%" x2="50%" y2="100%">
-      <stop offset="0%" stop-color="transparent"/>
-      <stop offset="30%" stop-color="rgba(60,80,60,0.1)"/>
-      <stop offset="50%" stop-color="rgba(80,100,80,0.15)"/>
-      <stop offset="70%" stop-color="rgba(60,80,60,0.1)"/>
-      <stop offset="100%" stop-color="transparent"/>
-    </linearGradient>
+    
   </defs>
   
   <!-- Background forest -->
@@ -57,36 +50,9 @@
   <!-- Magical clearing -->
   <ellipse cx="600" cy="400" rx="300" ry="200" fill="url(#clearingGradient)"/>
   
-  <!-- Path leading to house -->
-  <ellipse cx="600" cy="500" rx="80" ry="200" fill="url(#pathGradient)"/>
   
-  <!-- Pixelated house -->
-  <g transform="translate(500, 300) scale(1.2)">
-    <!-- House base -->
-    <rect x="20" y="40" width="60" height="50" fill="rgba(120,140,120,0.8)" stroke="rgba(100,120,100,0.6)" stroke-width="1"/>
-    
-    <!-- Roof -->
-    <polygon points="10,40 50,10 90,40" fill="rgba(100,80,80,0.8)" stroke="rgba(80,100,80,0.6)" stroke-width="1"/>
-    
-    <!-- Door -->
-    <rect x="45" y="65" width="10" height="25" fill="rgba(60,80,60,0.9)"/>
-    
-    <!-- Windows -->
-    <rect x="35" y="50" width="8" height="8" fill="rgba(200,220,200,0.4)"/>
-    <rect x="57" y="50" width="8" height="8" fill="rgba(200,220,200,0.4)"/>
-    
-    <!-- Chimney -->
-    <rect x="65" y="25" width="8" height="15" fill="rgba(100,80,80,0.8)" stroke="rgba(80,100,80,0.6)" stroke-width="1"/>
-    
-    <!-- Pixel pattern overlay -->
-    <defs>
-      <pattern id="pixelPattern" patternUnits="userSpaceOnUse" width="4" height="4">
-        <rect width="4" height="4" fill="rgba(120,140,120,0.1)"/>
-      </pattern>
-    </defs>
-    <rect x="20" y="40" width="60" height="50" fill="url(#pixelPattern)"/>
-    <polygon points="10,40 50,10 90,40" fill="url(#pixelPattern)"/>
-  </g>
+  
+  
   
   <!-- Atmospheric vignette -->
   <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
