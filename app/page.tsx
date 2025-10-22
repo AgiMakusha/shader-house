@@ -189,7 +189,7 @@ export default function Page() {
                   aria-hidden
                   data-testid="home-icon"
                 >
-                  <PixelHouseIcon className="w-full h-full" />
+                  <div className="text-6xl">🏠</div>
                 </GameIcon>
               </motion.div>
 
