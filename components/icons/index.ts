@@ -1,7 +1,6 @@
 // Icon library barrel exports
 export { default as GameHouse } from './GameHouse';
 export { default as GameController } from './GameController';
-export { default as GameControllerNeo } from './GameControllerNeo';
 export { default as BuildTools } from './BuildTools';
 export { default as RocketLaunch } from './RocketLaunch';
 export { default as ChatBubble } from './ChatBubble';
