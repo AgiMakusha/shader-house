@@ -69,7 +69,6 @@ export default function RegisterPage() {
               <GameCardContent>
                 <div className="mb-2">
                   <GameIcon 
-                    tone="primary" 
                     size={88} 
                     glow 
                     rounded={false}
@@ -114,14 +113,13 @@ export default function RegisterPage() {
               <GameCardContent>
                 <div className="mb-2">
                   <GameIcon 
-                    tone="primary" 
                     size={88} 
                     glow 
                     rounded={false}
                     aria-hidden
                     data-testid="gamer-icon"
                   >
-                    <GameController className="w-2/3 h-2/3 icon-ink" title="Gamer" weight="match" />
+                    <GameController className="w-2/3 h-2/3 icon-ink" title="Gamer" weight="plus10" />
                   </GameIcon>
                 </div>
                 <h2 
