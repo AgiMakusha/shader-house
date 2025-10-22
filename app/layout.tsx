@@ -1,4 +1,4 @@
-import "../globals.css";
+import "./globals.css";
 import GradientBg from "@/components/layout/GradientBg";
 import { AudioProvider, MuteButton } from "@/components/audio/AudioProvider";
 
@@ -11,8 +11,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-dvh bg-black text-white antialiased">
-        <GradientBg />
         <AudioProvider>
+          <GradientBg />
           <MuteButton />
           {children}
         </AudioProvider>
