@@ -8,23 +8,54 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
 import { GameHouse } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
+import { useAudio } from "@/components/audio/AudioProvider";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { play } = useAudio();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setIsLoading(true);
     
-    // TODO: Add actual authentication logic here
-    // For now, just simulate a delay and redirect
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Redirect to register page (will be replaced with actual dashboard later)
-    router.push('/register');
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, rememberMe }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Login failed");
+        setIsLoading(false);
+        return;
+      }
+
+      // Success! Play sound and redirect
+      play("door");
+      
+      // Redirect based on user role
+      setTimeout(() => {
+        if (data.user.role === "developer") {
+          router.push("/register/developer");
+        } else {
+          router.push("/register/gamer");
+        }
+      }, 300);
+
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -138,8 +169,24 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  {/* Forgot Password Link */}
-                  <div className="text-right">
+                  {/* Remember Me & Forgot Password */}
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/10 text-green-500 focus:ring-2 focus:ring-white/40 focus:ring-offset-0 transition-all cursor-pointer"
+                        disabled={isLoading}
+                      />
+                      <span 
+                        className="text-sm select-none group-hover:text-white/90 transition-colors"
+                        style={{ color: 'rgba(200, 240, 200, 0.7)' }}
+                      >
+                        Remember me
+                      </span>
+                    </label>
+
                     <Link 
                       href="/reset" 
                       className="text-sm hover:underline transition-all"
@@ -148,6 +195,17 @@ export default function LoginPage() {
                       Forgot password?
                     </Link>
                   </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
 
                   {/* Submit Button */}
                   <motion.button

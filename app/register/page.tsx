@@ -10,14 +10,14 @@ import Particles from "@/components/fx/Particles";
 export default function RegisterPage() {
   const router = useRouter();
 
-  const handleCardClick = (path: string) => {
-    router.push(path);
+  const handleCardClick = (role: string) => {
+    router.push(`/signup?role=${role}`);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, path: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent, role: string) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      handleCardClick(path);
+      handleCardClick(role);
     }
   };
 
@@ -62,7 +62,7 @@ export default function RegisterPage() {
             {/* Developer Card */}
             <GameCard
               interactive={true}
-              onClick={() => handleCardClick('/register/developer')}
+              onClick={() => handleCardClick('developer')}
               className="h-64"
               data-testid="developer-card"
             >
@@ -106,7 +106,7 @@ export default function RegisterPage() {
             {/* Gamer Card */}
             <GameCard
               interactive={true}
-              onClick={() => handleCardClick('/register/gamer')}
+              onClick={() => handleCardClick('gamer')}
               className="h-64"
               data-testid="gamer-card"
             >
