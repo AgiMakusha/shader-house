@@ -11,15 +11,16 @@ export default function ForestBg() {
           backgroundImage: "url('/images/magical-forest-bg.svg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          opacity: 0.9, // Make forest more visible
         }}
       />
       
       {/* Subtle overlay for depth */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-10"
         style={{
           background: `
-            radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, transparent 40%, rgba(0, 0, 0, 0.1) 70%, rgba(0, 0, 0, 0.2) 100%)
+            radial-gradient(ellipse 100% 100% at 50% 50%, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.05) 80%, rgba(0, 0, 0, 0.1) 100%)
           `,
         }}
       />
