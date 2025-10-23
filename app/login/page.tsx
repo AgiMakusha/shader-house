@@ -176,7 +176,7 @@ export default function LoginPage() {
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-white/20 bg-white/10 text-green-500 focus:ring-2 focus:ring-white/40 focus:ring-offset-0 transition-all cursor-pointer"
+                        className="w-4 h-4 rounded border-[rgba(180,220,180,0.4)] bg-[rgba(100,180,100,0.15)] checked:bg-[rgba(120,200,120,0.7)] checked:border-[rgba(150,220,150,0.8)] focus:ring-2 focus:ring-[rgba(120,200,120,0.5)] focus:ring-offset-0 transition-all cursor-pointer accent-[rgba(120,200,120,0.9)]"
                         disabled={isLoading}
                       />
                       <span 
