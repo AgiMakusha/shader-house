@@ -26,7 +26,7 @@
 }
 
 html, body { 
-  background: #0a0f0a; /* Deep forest dark fallback */
+  background: linear-gradient(135deg, #1a2f1a 0%, #0f1f0f 100%); /* Softer forest gradient fallback */
   min-height: 100vh;
 }
 

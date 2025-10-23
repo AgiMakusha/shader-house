@@ -72,30 +72,15 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
 
     const cardStyle = {
       background: `
-        repeating-linear-gradient(
-          0deg,
-          rgba(40, 60, 40, 0.9) 0px,
-          rgba(50, 70, 50, 0.8) 2px,
-          rgba(35, 55, 35, 0.9) 4px,
-          rgba(45, 65, 45, 0.8) 6px,
-          rgba(40, 60, 40, 0.9) 8px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          rgba(40, 60, 40, 0.9) 0px,
-          rgba(50, 70, 50, 0.8) 2px,
-          rgba(35, 55, 35, 0.9) 4px,
-          rgba(45, 65, 45, 0.8) 6px,
-          rgba(40, 60, 40, 0.9) 8px
-        )
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+        rgba(255, 255, 255, 0.08)
       `,
-      backgroundSize: '8px 8px',
+      backdropFilter: 'blur(12px) saturate(180%)',
       boxShadow: `
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 4px 12px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.05)
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.1)
       `,
-      filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))'
     };
 
     if (asChild) {
