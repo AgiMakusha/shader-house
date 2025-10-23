@@ -169,7 +169,7 @@ export default function Page() {
             interactive={true}
             onClick={handleCardClick}
             data-testid="home-card"
-            className="h-80"
+            className="h-64"
           >
             <GameCardContent>
               {/* Pixel House Icon */}
@@ -191,38 +191,32 @@ export default function Page() {
               </motion.div>
 
               {/* Title */}
-              <motion.h1
+              <motion.h2
                 variants={titleVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-4xl md:text-5xl font-bold tracking-wider uppercase pixelized"
+                className="text-2xl font-bold tracking-wider uppercase pixelized"
                 style={{
                   textShadow: `
-                    0 0 10px rgba(100, 200, 100, 0.6),
-                    0 0 20px rgba(80, 160, 80, 0.4),
-                    2px 2px 0px rgba(0, 0, 0, 0.8),
-                    4px 4px 0px rgba(0, 0, 0, 0.6)
+                    0 0 8px rgba(120, 200, 120, 0.7),
+                    0 0 16px rgba(100, 180, 100, 0.5),
+                    1px 1px 0px rgba(0, 0, 0, 0.8)
                   `,
-                  color: 'rgba(150, 250, 150, 0.95)',
+                  color: 'rgba(180, 220, 180, 0.9)',
                 }}
               >
                 Shader House
-              </motion.h1>
+              </motion.h2>
 
               {/* Slogan */}
               <motion.p
                 variants={sloganVariants}
                 initial="hidden"
                 animate="visible"
-                className="text-lg md:text-xl font-semibold tracking-wide uppercase pixelized"
+                className="text-sm font-semibold tracking-wide uppercase pixelized"
                 style={{
-                  textShadow: `
-                    0 0 8px rgba(120, 200, 120, 0.7),
-                    0 0 16px rgba(100, 180, 100, 0.5),
-                    1px 1px 0px rgba(0, 0, 0, 0.8),
-                    2px 2px 0px rgba(0, 0, 0, 0.6)
-                  `,
-                  color: 'rgba(180, 220, 180, 0.9)',
+                  textShadow: '1px 1px 0px rgba(0, 0, 0, 0.8)',
+                  color: 'rgba(200, 240, 200, 0.8)',
                 }}
               >
                 Where indie games shine
