@@ -4,36 +4,30 @@ export default function ForestBg() {
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10"
     >
-      {/* Main magical forest scene background - much brighter */}
+      {/* Main magical forest scene background - MAXIMUM BRIGHTNESS */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0"
         style={{
-          backgroundImage: "url('/images/magical-forest-bg.svg')",
+          backgroundImage: `url('/images/magical-forest-bg.svg?v=${Date.now()}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 1, // Full visibility
+          backgroundRepeat: "no-repeat",
+          opacity: 1,
+          filter: "brightness(1.2) contrast(1.1)", // Extra boost
         }}
       />
       
-      {/* Very light overlay for subtle depth only */}
-      <div
-        className="absolute inset-0 opacity-5"
-        style={{
-          background: `
-            radial-gradient(ellipse 120% 120% at 50% 50%, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.03) 90%, rgba(0, 0, 0, 0.05) 100%)
-          `,
-        }}
-      />
+      {/* NO DARK OVERLAY - completely removed for maximum brightness */}
       
       {/* Magical shimmer animation - more visible */}
       <div
-        className="absolute inset-0 opacity-15"
+        className="absolute inset-0 opacity-20"
         style={{
           background: `
             linear-gradient(
               45deg,
               transparent 20%,
-              rgba(150, 250, 150, 0.15) 50%,
+              rgba(180, 255, 180, 0.2) 50%,
               transparent 80%
             )
           `,
