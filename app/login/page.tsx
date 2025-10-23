@@ -172,13 +172,33 @@ export default function LoginPage() {
                   {/* Remember Me & Forgot Password */}
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 cursor-pointer group">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-[rgba(180,220,180,0.4)] bg-[rgba(100,180,100,0.15)] checked:bg-[rgba(120,200,120,0.7)] checked:border-[rgba(150,220,150,0.8)] focus:ring-2 focus:ring-[rgba(120,200,120,0.5)] focus:ring-offset-0 transition-all cursor-pointer accent-[rgba(120,200,120,0.9)]"
-                        disabled={isLoading}
-                      />
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="peer w-4 h-4 rounded cursor-pointer appearance-none transition-all"
+                          style={{
+                            border: '1.5px solid rgba(180, 220, 180, 0.5)',
+                            backgroundColor: rememberMe ? 'rgba(120, 200, 120, 0.8)' : 'rgba(100, 180, 100, 0.2)',
+                          }}
+                          disabled={isLoading}
+                        />
+                        {rememberMe && (
+                          <svg
+                            className="absolute w-3 h-3 pointer-events-none"
+                            style={{ color: 'rgba(230, 255, 230, 0.95)' }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
                       <span 
                         className="text-sm select-none group-hover:text-white/90 transition-colors"
                         style={{ color: 'rgba(200, 240, 200, 0.7)' }}
