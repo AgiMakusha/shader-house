@@ -24,8 +24,8 @@ export default function Page() {
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
-    // Pre-fetch the register page for instant navigation
-    router.prefetch('/register');
+    // Pre-fetch the login page for instant navigation
+    router.prefetch('/login');
   }, [router]);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function Page() {
     setIsVisible(false);
     
     setTimeout(() => {
-      router.push('/register');
+      router.push('/login');
     }, FADE_OUT_MS);
   };
 
