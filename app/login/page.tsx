@@ -170,28 +170,31 @@ export default function LoginPage() {
                   </div>
 
                   {/* Remember Me & Forgot Password */}
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="flex items-center justify-between gap-4 -mt-1">
+                    <label className="flex items-center gap-2.5 cursor-pointer group flex-1">
                       <div className="relative flex items-center justify-center">
                         <input
                           type="checkbox"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
-                          className="peer w-4 h-4 rounded cursor-pointer appearance-none transition-all"
+                          className="peer w-[18px] h-[18px] rounded-md cursor-pointer appearance-none transition-all hover:border-[rgba(150,220,150,0.7)]"
                           style={{
-                            border: '1.5px solid rgba(180, 220, 180, 0.5)',
-                            backgroundColor: rememberMe ? 'rgba(120, 200, 120, 0.8)' : 'rgba(100, 180, 100, 0.2)',
+                            border: '2px solid rgba(180, 220, 180, 0.45)',
+                            backgroundColor: rememberMe ? 'rgba(120, 200, 120, 0.75)' : 'rgba(100, 180, 100, 0.18)',
+                            boxShadow: rememberMe 
+                              ? '0 0 12px rgba(120, 200, 120, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.2)'
+                              : '0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.08)',
                           }}
                           disabled={isLoading}
                         />
                         {rememberMe && (
                           <svg
-                            className="absolute w-3 h-3 pointer-events-none"
-                            style={{ color: 'rgba(230, 255, 230, 0.95)' }}
+                            className="absolute w-3.5 h-3.5 pointer-events-none"
+                            style={{ color: 'rgba(240, 255, 240, 0.98)', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
-                            strokeWidth="3"
+                            strokeWidth="3.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
@@ -200,8 +203,11 @@ export default function LoginPage() {
                         )}
                       </div>
                       <span 
-                        className="text-sm select-none group-hover:text-white/90 transition-colors"
-                        style={{ color: 'rgba(200, 240, 200, 0.7)' }}
+                        className="text-sm select-none transition-all leading-tight"
+                        style={{ 
+                          color: rememberMe ? 'rgba(210, 245, 210, 0.85)' : 'rgba(190, 230, 190, 0.65)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                        }}
                       >
                         Remember me
                       </span>
@@ -209,8 +215,11 @@ export default function LoginPage() {
 
                     <Link 
                       href="/reset" 
-                      className="text-sm hover:underline transition-all"
-                      style={{ color: 'rgba(200, 240, 200, 0.7)' }}
+                      className="text-sm hover:brightness-110 transition-all leading-tight whitespace-nowrap"
+                      style={{ 
+                        color: 'rgba(190, 230, 190, 0.65)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                      }}
                     >
                       Forgot password?
                     </Link>
