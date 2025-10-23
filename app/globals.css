@@ -21,7 +21,7 @@
   --icon-warning: 253 230 138;   /* amber-200ish */
   
   /* Duotone icon ink tokens */
-  --icon-ink: 220 247 230;            /* soft mint */
+  --icon-ink: 200 240 200;            /* matches subtitle text color */
   --icon-secondary-ink: 196 181 253;  /* soft violet */
 }
 
