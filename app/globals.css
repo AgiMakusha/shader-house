@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --glow: 255 255 255;
@@ -26,7 +24,8 @@
 }
 
 html, body { 
-  background: transparent; 
+  background: #0a0f0a; /* Deep forest dark fallback */
+  min-height: 100vh;
 }
 
 /* Pixel/voxel utilities */
