@@ -177,7 +177,7 @@ export default function Page() {
                 variants={iconVariants}
                 initial="hidden"
                 animate="visible"
-                className="mb-2"
+                className="mb-1"
               >
                 <GameIcon 
                   size={88} 

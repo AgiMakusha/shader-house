@@ -67,7 +67,7 @@ export default function RegisterPage() {
               data-testid="developer-card"
             >
               <GameCardContent>
-                <div className="mb-2">
+                <div className="mb-1">
                   <GameIcon 
                     size={88} 
                     glow 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
               data-testid="gamer-card"
             >
               <GameCardContent>
-                <div className="mb-2">
+                <div className="mb-1">
                   <GameIcon 
                     size={88} 
                     glow 
