@@ -151,7 +151,7 @@ export default function LoginPage() {
           >
             <GameCard>
               <GameCardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
                   {/* Email Field */}
                   <div className="space-y-2">
                     <label 
