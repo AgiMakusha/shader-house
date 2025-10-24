@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
                     </Link>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} noValidate className="space-y-6">
                     {/* Email Field */}
                     <div className="space-y-2">
                       <label 
@@ -126,10 +126,10 @@ export default function ResetPasswordPage() {
                       <input
                         id="email"
                         type="email"
-                        required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
+                        style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                         placeholder="your@email.com"
                         disabled={isLoading}
                       />
