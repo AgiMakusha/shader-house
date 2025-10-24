@@ -47,3 +47,5 @@ public/video/*
 public/anim/*
 !public/audio/placeholder-*.mp3
 !public/anim/placeholder-*.json
+
+/src/generated/prisma

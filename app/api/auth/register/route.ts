@@ -1,29 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/auth/validation";
 import { createSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
-
-// TODO: Replace this with your actual database
-// For now, using in-memory storage (data will be lost on server restart)
-// Import the same users Map from login route
-const users = new Map<string, {
-  id: string;
-  email: string;
-  name: string;
-  password: string;
-  role: "developer" | "gamer";
-  createdAt: number;
-}>();
-
-// Seed a test user (should match login route)
-users.set("test@shaderhouse.com", {
-  id: "1",
-  email: "test@shaderhouse.com",
-  name: "Test User",
-  password: "$2a$10$N9qo8uLOickgx2ZMRZoMye6o8lR6mZ/fhfKnbhPqLpDZ8rZoS5nQW", // "Password123!"
-  role: "developer",
-  createdAt: Date.now(),
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +20,12 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password, role } = validation.data;
 
-    // Check if user already exists (TODO: Replace with database query)
-    if (users.has(email.toLowerCase())) {
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (existingUser) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
         { status: 409 }
@@ -52,26 +35,23 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user (TODO: Replace with database insert)
-    const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const newUser = {
-      id: userId,
-      email: email.toLowerCase(),
-      name,
-      password: hashedPassword,
-      role,
-      createdAt: Date.now(),
-    };
-
-    users.set(email.toLowerCase(), newUser);
+    // Create user in database
+    const newUser = await prisma.user.create({
+      data: {
+        email: email.toLowerCase(),
+        name,
+        password: hashedPassword,
+        role: role.toUpperCase() as "DEVELOPER" | "GAMER",
+      },
+    });
 
     // Create session (auto-login after registration)
     await createSession({
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
-      role: newUser.role,
-      createdAt: newUser.createdAt,
+      role: newUser.role.toLowerCase() as "developer" | "gamer",
+      createdAt: newUser.createdAt.getTime(),
     }, true); // Remember me = true by default for new registrations
 
     return NextResponse.json({

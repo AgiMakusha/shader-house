@@ -1,28 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginSchema } from "@/lib/auth/validation";
 import { createSession } from "@/lib/auth/session";
+import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
-
-// TODO: Replace this with your actual database
-// For now, using in-memory storage (data will be lost on server restart)
-const users = new Map<string, {
-  id: string;
-  email: string;
-  name: string;
-  password: string;
-  role: "developer" | "gamer";
-  createdAt: number;
-}>();
-
-// Seed a test user (remove in production)
-users.set("test@shaderhouse.com", {
-  id: "1",
-  email: "test@shaderhouse.com",
-  name: "Test User",
-  password: "$2a$10$N9qo8uLOickgx2ZMRZoMye6o8lR6mZ/fhfKnbhPqLpDZ8rZoS5nQW", // "Password123!"
-  role: "developer",
-  createdAt: Date.now(),
-});
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,8 +20,10 @@ export async function POST(request: NextRequest) {
 
     const { email, password, rememberMe } = validation.data;
 
-    // Find user (TODO: Replace with database query)
-    const user = users.get(email.toLowerCase());
+    // Find user in database
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+    });
 
     if (!user) {
       // Generic error message to prevent email enumeration
@@ -66,8 +48,8 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
-      createdAt: user.createdAt,
+      role: user.role.toLowerCase() as "developer" | "gamer",
+      createdAt: user.createdAt.getTime(),
     }, rememberMe);
 
     return NextResponse.json({
