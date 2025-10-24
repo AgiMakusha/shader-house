@@ -24,13 +24,13 @@ export default function LoginPage() {
     const errors: { email?: string; password?: string } = {};
     
     if (!email.trim()) {
-      errors.email = "🌲 Your email is required to enter";
+      errors.email = "Your email is required to enter";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "🌲 Please enter a valid email address";
+      errors.email = "Please enter a valid email address";
     }
     
     if (!password) {
-      errors.password = "🌲 Your password is needed to proceed";
+      errors.password = "Your password is needed to proceed";
     }
     
     setFieldErrors(errors);
@@ -303,7 +303,7 @@ export default function LoginPage() {
                         textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
                       }}
                     >
-                      🌲 {error}
+                      {error}
                     </motion.div>
                   )}
 

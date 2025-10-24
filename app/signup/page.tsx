@@ -31,27 +31,27 @@ export default function SignupPage() {
     const newErrors: Record<string, string> = {};
     
     if (!name.trim()) {
-      newErrors.name = "🌲 Your name helps us know you better";
+      newErrors.name = "Your name helps us know you better";
     } else if (name.trim().length < 2) {
-      newErrors.name = "🌲 Name should be at least 2 characters";
+      newErrors.name = "Name should be at least 2 characters";
     }
     
     if (!email.trim()) {
-      newErrors.email = "🌲 Your email is needed to create an account";
+      newErrors.email = "Your email is needed to create an account";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "🌲 Please enter a valid email address";
+      newErrors.email = "Please enter a valid email address";
     }
     
     if (!password) {
-      newErrors.password = "🌲 A password is required to secure your account";
+      newErrors.password = "A password is required to secure your account";
     } else if (password.length < 8) {
-      newErrors.password = "🌲 Password should be at least 8 characters long";
+      newErrors.password = "Password should be at least 8 characters long";
     }
     
     if (!confirmPassword) {
-      newErrors.confirmPassword = "🌲 Please confirm your password";
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = "🌲 Passwords don't match - please try again";
+      newErrors.confirmPassword = "Passwords don't match - please try again";
     }
     
     setErrors(newErrors);
@@ -394,7 +394,7 @@ export default function SignupPage() {
                         textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
                       }}
                     >
-                      🌲 {errors.general}
+                      {errors.general}
                     </motion.div>
                   )}
 
