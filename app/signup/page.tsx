@@ -27,9 +27,46 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const validateFields = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!name.trim()) {
+      newErrors.name = "🌲 Your name helps us know you better";
+    } else if (name.trim().length < 2) {
+      newErrors.name = "🌲 Name should be at least 2 characters";
+    }
+    
+    if (!email.trim()) {
+      newErrors.email = "🌲 Your email is needed to create an account";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "🌲 Please enter a valid email address";
+    }
+    
+    if (!password) {
+      newErrors.password = "🌲 A password is required to secure your account";
+    } else if (password.length < 8) {
+      newErrors.password = "🌲 Password should be at least 8 characters long";
+    }
+    
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "🌲 Please confirm your password";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "🌲 Passwords don't match - please try again";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    
+    // Validate fields first
+    if (!validateFields()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -164,17 +201,30 @@ export default function SignupPage() {
                     <input
                       id="name"
                       type="text"
-                      required
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                         errors.name ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
                       }`}
+                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="Your name"
                       disabled={isLoading}
                     />
                     {errors.name && (
-                      <p className="text-xs text-red-400">{errors.name}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {errors.name}
+                      </motion.p>
                     )}
                   </div>
 
@@ -190,17 +240,30 @@ export default function SignupPage() {
                     <input
                       id="email"
                       type="email"
-                      required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                         errors.email ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
                       }`}
+                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="your@email.com"
                       disabled={isLoading}
                     />
                     {errors.email && (
-                      <p className="text-xs text-red-400">{errors.email}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {errors.email}
+                      </motion.p>
                     )}
                   </div>
 
@@ -216,17 +279,30 @@ export default function SignupPage() {
                     <input
                       id="password"
                       type="password"
-                      required
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                         errors.password ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
                       }`}
+                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="••••••••"
                       disabled={isLoading}
                     />
                     {errors.password && (
-                      <p className="text-xs text-red-400">{errors.password}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {errors.password}
+                      </motion.p>
                     )}
                     
                     {/* Password Strength Indicator */}
@@ -245,17 +321,30 @@ export default function SignupPage() {
                     <input
                       id="confirmPassword"
                       type="password"
-                      required
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                         errors.confirmPassword ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
                       }`}
+                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="••••••••"
                       disabled={isLoading}
                     />
                     {errors.confirmPassword && (
-                      <p className="text-xs text-red-400">{errors.confirmPassword}</p>
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {errors.confirmPassword}
+                      </motion.p>
                     )}
                   </div>
 
@@ -297,9 +386,15 @@ export default function SignupPage() {
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+                      className="p-3 rounded-lg text-sm text-center"
+                      style={{
+                        background: 'rgba(180, 60, 60, 0.15)',
+                        border: '1px solid rgba(255, 120, 120, 0.3)',
+                        color: 'rgba(255, 180, 180, 0.95)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
+                      }}
                     >
-                      {errors.general}
+                      🌲 {errors.general}
                     </motion.div>
                   )}
 

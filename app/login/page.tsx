@@ -17,11 +17,36 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const validateFields = () => {
+    const errors: { email?: string; password?: string } = {};
+    
+    if (!email.trim()) {
+      errors.email = "🌲 Your email is required to enter";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "🌲 Please enter a valid email address";
+    }
+    
+    if (!password) {
+      errors.password = "🌲 Your password is needed to proceed";
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
+    
+    // Validate fields
+    if (!validateFields()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -139,14 +164,33 @@ export default function LoginPage() {
                     <input
                       id="email"
                       type="email"
-                      required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                        fieldErrors.email 
+                          ? 'border-red-500/50 focus:ring-red-500/40' 
+                          : 'border-white/20 focus:ring-white/40'
+                      }`}
                       style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="your@email.com"
                       disabled={isLoading}
                     />
+                    {fieldErrors.email && (
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {fieldErrors.email}
+                      </motion.p>
+                    )}
                   </div>
 
                   {/* Password Field */}
@@ -161,14 +205,33 @@ export default function LoginPage() {
                     <input
                       id="password"
                       type="password"
-                      required
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (fieldErrors.password) setFieldErrors(prev => ({ ...prev, password: undefined }));
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                        fieldErrors.password 
+                          ? 'border-red-500/50 focus:ring-red-500/40' 
+                          : 'border-white/20 focus:ring-white/40'
+                      }`}
                       style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                       placeholder="••••••••"
                       disabled={isLoading}
                     />
+                    {fieldErrors.password && (
+                      <motion.p 
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs mt-1.5 px-1"
+                        style={{ 
+                          color: 'rgba(255, 180, 180, 0.9)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                        }}
+                      >
+                        {fieldErrors.password}
+                      </motion.p>
+                    )}
                   </div>
 
                   {/* Remember Me & Forgot Password */}
@@ -232,9 +295,15 @@ export default function LoginPage() {
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"
+                      className="p-3 rounded-lg text-sm text-center"
+                      style={{
+                        background: 'rgba(180, 60, 60, 0.15)',
+                        border: '1px solid rgba(255, 120, 120, 0.3)',
+                        color: 'rgba(255, 180, 180, 0.95)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
+                      }}
                     >
-                      {error}
+                      🌲 {error}
                     </motion.div>
                   )}
 
