@@ -12,9 +12,29 @@ export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  const validateEmail = () => {
+    if (!email.trim()) {
+      setError("Your email is required to reset your password");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    
+    // Validate email
+    if (!validateEmail()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     // TODO: Add actual password reset logic here
@@ -127,12 +147,32 @@ export default function ResetPasswordPage() {
                         id="email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (error) setError("");
+                        }}
+                        className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                          error 
+                            ? 'border-red-500/50 focus:ring-red-500/40' 
+                            : 'border-white/20 focus:ring-white/40'
+                        }`}
                         style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                         placeholder="your@email.com"
                         disabled={isLoading}
                       />
+                      {error && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-xs mt-1.5 px-1"
+                          style={{ 
+                            color: 'rgba(255, 180, 180, 0.9)',
+                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
+                          }}
+                        >
+                          {error}
+                        </motion.p>
+                      )}
                     </div>
 
                     {/* Submit Button */}
