@@ -234,7 +234,7 @@ export default function SignupPage() {
           transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
         }}
       >
-        <div className="w-full max-w-2xl space-y-6">
+        <div className="w-full max-w-2xl min-w-[672px] space-y-6">
           {/* Logo/Icon */}
           <motion.div
             className="flex justify-center"
