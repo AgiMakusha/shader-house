@@ -3,6 +3,8 @@ import { registerSchema, developerRegistrationSchema } from "@/lib/auth/validati
 import { createSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { checkIndieEligibility } from "@/lib/indie/eligibility";
+import { generateVerificationToken } from "@/lib/auth/tokens";
+import { sendVerificationEmail } from "@/lib/email/service";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
@@ -87,6 +89,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Generate and send email verification token
+    try {
+      const verificationToken = await generateVerificationToken(newUser.id, 'EMAIL_VERIFICATION');
+      await sendVerificationEmail(newUser.email, verificationToken.token, newUser.name);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Continue with registration even if email fails
+    }
+
     // Create session (auto-login after registration)
     await createSession({
       id: newUser.id,
@@ -103,11 +114,13 @@ export async function POST(request: NextRequest) {
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
+        emailVerified: newUser.emailVerified,
       },
       ...(developerProfile && {
         verificationStatus: "PENDING",
         isIndieEligible,
       }),
+      message: "Registration successful! Please check your email to verify your account.",
     });
 
   } catch (error) {

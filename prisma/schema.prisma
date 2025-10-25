@@ -15,16 +15,66 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
-  password  String   // Hashed with bcrypt
+  password  String?  // Hashed with bcrypt (nullable for OAuth users)
   role      Role     @default(GAMER)
+  
+  // Email verification
+  emailVerified DateTime?
+  image         String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Developer-specific fields (nullable for gamers)
-  developerProfile DeveloperProfile?
+  // Relations
+  developerProfile     DeveloperProfile?
+  accounts             Account[]
+  verificationTokens   VerificationToken[]
 
   @@index([email])
   @@map("users")
+}
+
+// OAuth accounts (Google, GitHub, Discord, etc.)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String  // oauth, email, credentials
+  provider          String  // google, github, discord, credentials
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// Email verification tokens
+model VerificationToken {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  type       TokenType @default(EMAIL_VERIFICATION)
+  expires    DateTime
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("verification_tokens")
+}
+
+// Token types
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
 
 // Developer verification profile
