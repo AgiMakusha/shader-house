@@ -924,43 +924,54 @@ export default function SignupPage() {
 
                   {/* Terms of Service Checkbox */}
                   <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      id="acceptTerms"
-                      checked={acceptTerms}
-                      onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="mt-1 cursor-pointer appearance-none w-5 h-5 rounded flex-shrink-0 transition-all"
-                      style={{
-                        backgroundColor: acceptTerms 
-                          ? 'rgba(100, 200, 100, 0.3)' 
-                          : 'rgba(100, 200, 100, 0.1)',
-                        backgroundImage: acceptTerms 
-                          ? `linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M7 10l2 2 4-4' stroke='%23c8f0c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
-                          : 'none',
-                        backgroundSize: acceptTerms ? 'auto, contain' : 'auto',
-                        backgroundPosition: acceptTerms ? '0 0, center' : 'center',
-                        backgroundRepeat: 'no-repeat',
-                        border: '1px solid rgba(100, 200, 100, 0.4)',
-                        boxShadow: acceptTerms 
-                          ? '0 0 8px rgba(100, 200, 100, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.3)' 
-                          : 'inset 0 1px 3px rgba(0, 0, 0, 0.3)',
-                      }}
-                    />
-                    <label 
-                      htmlFor="acceptTerms" 
-                      className="text-sm cursor-pointer leading-tight"
-                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
-                    >
-                      I accept the{' '}
-                      <Link 
-                        href="/terms" 
-                        target="_blank"
-                        className="font-semibold hover:underline transition-all"
-                        style={{ color: 'rgba(200, 240, 200, 0.95)' }}
-                        onClick={(e) => e.stopPropagation()}
+                    <label className="flex items-center gap-2.5 cursor-pointer group">
+                      <div className="relative flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={acceptTerms}
+                          onChange={(e) => setAcceptTerms(e.target.checked)}
+                          className="peer w-[18px] h-[18px] rounded-md cursor-pointer appearance-none transition-all hover:border-[rgba(150,220,150,0.7)]"
+                          style={{
+                            border: '2px solid rgba(180, 220, 180, 0.45)',
+                            backgroundColor: acceptTerms ? 'rgba(120, 200, 120, 0.75)' : 'rgba(100, 180, 100, 0.18)',
+                            boxShadow: acceptTerms 
+                              ? '0 0 12px rgba(120, 200, 120, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.2)'
+                              : '0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.08)',
+                          }}
+                        />
+                        {acceptTerms && (
+                          <svg
+                            className="absolute w-3.5 h-3.5 pointer-events-none"
+                            style={{ color: 'rgba(240, 255, 240, 0.98)', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                      <span 
+                        className="text-sm select-none transition-all leading-tight"
+                        style={{ 
+                          color: acceptTerms ? 'rgba(210, 245, 210, 0.85)' : 'rgba(190, 230, 190, 0.65)',
+                          textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                        }}
                       >
-                        Terms of Service
-                      </Link>
+                        I accept the{' '}
+                        <Link 
+                          href="/terms" 
+                          target="_blank"
+                          className="font-semibold hover:underline transition-all"
+                          style={{ color: acceptTerms ? 'rgba(210, 245, 210, 0.95)' : 'rgba(200, 240, 200, 0.85)' }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Terms of Service
+                        </Link>
+                      </span>
                     </label>
                   </div>
 
