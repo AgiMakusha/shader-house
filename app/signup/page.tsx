@@ -931,19 +931,19 @@ export default function SignupPage() {
                       onChange={(e) => setAcceptTerms(e.target.checked)}
                       className="mt-1 cursor-pointer appearance-none w-5 h-5 rounded flex-shrink-0 transition-all"
                       style={{
-                        background: acceptTerms 
-                          ? 'linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2))' 
+                        backgroundColor: acceptTerms 
+                          ? 'rgba(100, 200, 100, 0.3)' 
                           : 'rgba(100, 200, 100, 0.1)',
+                        backgroundImage: acceptTerms 
+                          ? `linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='rgba(200, 240, 200, 0.95)' d='M7 10l2 2 4-4' stroke='rgba(200, 240, 200, 0.95)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
+                          : 'none',
+                        backgroundSize: acceptTerms ? 'auto, contain' : 'auto',
+                        backgroundPosition: acceptTerms ? '0 0, center' : 'center',
+                        backgroundRepeat: 'no-repeat',
                         border: '1px solid rgba(100, 200, 100, 0.4)',
                         boxShadow: acceptTerms 
                           ? '0 0 8px rgba(100, 200, 100, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.3)' 
                           : 'inset 0 1px 3px rgba(0, 0, 0, 0.3)',
-                        backgroundImage: acceptTerms 
-                          ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='rgba(200, 240, 200, 0.95)' d='M7 10l2 2 4-4' stroke='rgba(200, 240, 200, 0.95)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
-                          : 'none',
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
                       }}
                     />
                     <label 
