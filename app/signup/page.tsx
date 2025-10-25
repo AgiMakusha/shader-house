@@ -837,9 +837,11 @@ export default function SignupPage() {
                             if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: undefined }));
                           }}
                           disabled={isLoading}
-                          className="mt-1 w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-2 focus:ring-white/40 cursor-pointer"
+                          className="mt-1 w-4 h-4 rounded focus:ring-2 focus:ring-white/40 cursor-pointer"
                           style={{
                             accentColor: 'rgba(100, 200, 100, 0.8)',
+                            borderColor: 'rgba(100, 200, 100, 0.4)',
+                            backgroundColor: 'rgba(100, 200, 100, 0.1)',
                           }}
                         />
                         <span className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
