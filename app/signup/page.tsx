@@ -935,7 +935,7 @@ export default function SignupPage() {
                           ? 'rgba(100, 200, 100, 0.3)' 
                           : 'rgba(100, 200, 100, 0.1)',
                         backgroundImage: acceptTerms 
-                          ? `linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='rgba(200, 240, 200, 0.95)' d='M7 10l2 2 4-4' stroke='rgba(200, 240, 200, 0.95)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
+                          ? `linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M7 10l2 2 4-4' stroke='%23c8f0c8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
                           : 'none',
                         backgroundSize: acceptTerms ? 'auto, contain' : 'auto',
                         backgroundPosition: acceptTerms ? '0 0, center' : 'center',
