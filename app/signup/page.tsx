@@ -351,8 +351,8 @@ export default function SignupPage() {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <GameCard>
-              <GameCardContent className="p-8">
-                <form onSubmit={handleSubmit} noValidate className="space-y-6">
+              <GameCardContent className="p-8 w-full items-stretch text-left">
+                <form onSubmit={handleSubmit} noValidate className="space-y-6 w-full">
                   {/* Basic Information Section */}
                   <div className="space-y-4">
                     <h2 
