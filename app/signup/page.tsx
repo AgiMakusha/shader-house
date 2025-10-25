@@ -13,6 +13,8 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { checkIndieEligibility, INDIE_POLICY, FIELD_TOOLTIPS } from "@/lib/indie/eligibility";
 import OAuthButtons from "@/components/auth/OAuthButtons";
+import TurnstileWidget from "@/components/security/TurnstileWidget";
+import { useBehavioralTracking } from "@/hooks/useBehavioralTracking";
 
 type DeveloperType = "INDIE" | "STUDIO";
 type CompanyType = "NONE" | "SOLE_PROP" | "LLC" | "CORP";
@@ -43,11 +45,15 @@ export default function SignupPage() {
   const [evidenceLinks, setEvidenceLinks] = useState<string[]>([""]);
   const [attestIndie, setAttestIndie] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showIndiePolicy, setShowIndiePolicy] = useState(false);
+  
+  // Track behavioral signals for bot detection
+  const behavioralSignals = useBehavioralTracking();
 
   // Check indie eligibility whenever relevant fields change
   useEffect(() => {
@@ -156,6 +162,12 @@ export default function SignupPage() {
       return;
     }
     
+    // Check if Turnstile token is required and present
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setErrors({ general: "Please complete the security verification." });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
@@ -165,6 +177,8 @@ export default function SignupPage() {
         password,
         confirmPassword,
         role,
+        turnstileToken, // Include Turnstile token
+        behavioralSignals, // Include behavioral signals for bot detection
       };
       
       // Only include developer profile if role is developer
@@ -974,6 +988,13 @@ export default function SignupPage() {
                       </span>
                     </label>
                   </div>
+
+                  {/* Cloudflare Turnstile */}
+                  <TurnstileWidget 
+                    onSuccess={(token) => setTurnstileToken(token)}
+                    onError={() => setTurnstileToken("")}
+                    onExpire={() => setTurnstileToken("")}
+                  />
 
                   {/* Submit Button */}
                   <motion.button

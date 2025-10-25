@@ -5,11 +5,64 @@ import { prisma } from "@/lib/db/prisma";
 import { checkIndieEligibility } from "@/lib/indie/eligibility";
 import { generateVerificationToken } from "@/lib/auth/tokens";
 import { sendVerificationEmail } from "@/lib/email/service";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
+import { validateEmail } from "@/lib/security/email-validation";
+import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
+import { isLikelyBot, calculateBotScore } from "@/lib/security/behavioral-signals";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Get client info for security checks
+    const clientIP = request.headers.get("x-forwarded-for") || 
+                     request.headers.get("x-real-ip") || 
+                     "unknown";
+    const userAgent = request.headers.get("user-agent");
+    
+    // 1. Rate limiting check
+    const clientId = getClientIdentifier(clientIP, userAgent, body.email);
+    const rateLimit = checkRateLimit(clientId, { maxRequests: 3, windowMs: 15 * 60 * 1000 });
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { 
+          error: "Too many registration attempts. Please try again later.",
+          retryAfter: new Date(rateLimit.resetAt).toISOString()
+        },
+        { status: 429 }
+      );
+    }
+    
+    // 2. Turnstile verification
+    if (body.turnstileToken) {
+      const turnstileValid = await verifyTurnstileToken(body.turnstileToken);
+      if (!turnstileValid) {
+        return NextResponse.json(
+          { error: "Security verification failed. Please try again." },
+          { status: 400 }
+        );
+      }
+    } else if (process.env.TURNSTILE_SECRET_KEY) {
+      // Turnstile is configured but no token provided
+      return NextResponse.json(
+        { error: "Security verification required." },
+        { status: 400 }
+      );
+    }
+    
+    // 3. Behavioral signals check
+    if (body.behavioralSignals) {
+      const botScore = calculateBotScore(body.behavioralSignals);
+      if (isLikelyBot(body.behavioralSignals)) {
+        console.warn(`Potential bot detected: score=${botScore}, ip=${clientIP}`);
+        return NextResponse.json(
+          { error: "Automated registration detected. Please try again." },
+          { status: 403 }
+        );
+      }
+    }
     
     // Check if this is a developer registration with profile
     const isDeveloperWithProfile = body.role === "developer" && body.developerProfile;
@@ -28,6 +81,15 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password, role } = validation.data;
     const developerProfile = isDeveloperWithProfile ? body.developerProfile : null;
+    
+    // 4. Email validation (disposable email check)
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      return NextResponse.json(
+        { error: emailValidation.reason },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -43,11 +105,6 @@ export async function POST(request: NextRequest) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Get client IP for attestation
-    const clientIP = request.headers.get("x-forwarded-for") || 
-                     request.headers.get("x-real-ip") || 
-                     "unknown";
 
     // Check indie eligibility if developer profile provided
     let isIndieEligible = false;
