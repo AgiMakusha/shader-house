@@ -5,9 +5,10 @@ import { oauthProviders } from "@/lib/auth/oauth";
 
 interface OAuthButtonsProps {
   className?: string;
+  disabled?: boolean;
 }
 
-export default function OAuthButtons({ className = "" }: OAuthButtonsProps) {
+export default function OAuthButtons({ className = "", disabled = false }: OAuthButtonsProps) {
   // Check if any OAuth providers are configured
   const configuredProviders = Object.values(oauthProviders).filter(
     (provider) => provider.clientId && provider.clientSecret
@@ -19,6 +20,10 @@ export default function OAuthButtons({ className = "" }: OAuthButtonsProps) {
     : Object.values(oauthProviders); // Show all for UI preview
 
   const handleOAuthLogin = (provider: string) => {
+    if (disabled) {
+      return; // Don't allow OAuth login if disabled
+    }
+    
     // Check if provider is configured
     const providerConfig = oauthProviders[provider];
     if (!providerConfig.clientId || !providerConfig.clientSecret) {
@@ -78,14 +83,16 @@ export default function OAuthButtons({ className = "" }: OAuthButtonsProps) {
             key={provider.id}
             type="button"
             onClick={() => handleOAuthLogin(provider.id)}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all"
+            disabled={disabled}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all disabled:cursor-not-allowed"
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(200, 240, 200, 0.2)',
-              color: 'rgba(200, 240, 200, 0.9)',
+              background: disabled ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)',
+              border: `1px solid ${disabled ? 'rgba(200, 240, 200, 0.1)' : 'rgba(200, 240, 200, 0.2)'}`,
+              color: disabled ? 'rgba(200, 240, 200, 0.4)' : 'rgba(200, 240, 200, 0.9)',
+              opacity: disabled ? 0.5 : 1,
             }}
-            whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!disabled ? { scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.08)' } : {}}
+            whileTap={!disabled ? { scale: 0.98 } : {}}
           >
             {getProviderIcon(provider.id)}
             <span>Continue with {provider.name}</span>

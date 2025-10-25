@@ -1014,7 +1014,21 @@ export default function SignupPage() {
                   </motion.button>
 
                   {/* OAuth Buttons */}
-                  <OAuthButtons />
+                  {!acceptTerms && (
+                    <motion.p
+                      className="text-xs text-center"
+                      style={{ 
+                        color: 'rgba(200, 240, 200, 0.5)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                      }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      Please accept the Terms of Service to continue with OAuth
+                    </motion.p>
+                  )}
+                  <OAuthButtons disabled={!acceptTerms} />
                 </form>
               </GameCardContent>
             </GameCard>
