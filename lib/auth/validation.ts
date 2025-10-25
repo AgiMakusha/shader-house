@@ -19,14 +19,17 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-// Registration form validation
-export const registerSchema = z.object({
+// Base registration fields (without refinement)
+const baseRegisterFields = {
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: emailSchema,
   password: passwordSchema,
   confirmPassword: z.string(),
   role: z.enum(["developer", "gamer"]),
-}).refine((data) => data.password === data.confirmPassword, {
+};
+
+// Registration form validation
+export const registerSchema = z.object(baseRegisterFields).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
@@ -60,9 +63,13 @@ export const developerProfileSchema = z.object({
     }),
 });
 
-// Combined registration with developer profile
-export const developerRegistrationSchema = registerSchema.extend({
+// Combined registration with developer profile (create new schema instead of extending)
+export const developerRegistrationSchema = z.object({
+  ...baseRegisterFields,
   developerProfile: developerProfileSchema.optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 // Password reset request validation
