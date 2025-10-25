@@ -42,6 +42,7 @@ export default function SignupPage() {
   const [companyType, setCompanyType] = useState<CompanyType | "">("");
   const [evidenceLinks, setEvidenceLinks] = useState<string[]>([""]);
   const [attestIndie, setAttestIndie] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -921,10 +922,52 @@ export default function SignupPage() {
                     </motion.div>
                   )}
 
+                  {/* Terms of Service Checkbox */}
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="acceptTerms"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
+                      className="mt-1 cursor-pointer appearance-none w-5 h-5 rounded flex-shrink-0 transition-all"
+                      style={{
+                        background: acceptTerms 
+                          ? 'linear-gradient(135deg, rgba(100, 200, 100, 0.3), rgba(80, 180, 80, 0.2))' 
+                          : 'rgba(100, 200, 100, 0.1)',
+                        border: '1px solid rgba(100, 200, 100, 0.4)',
+                        boxShadow: acceptTerms 
+                          ? '0 0 8px rgba(100, 200, 100, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.3)' 
+                          : 'inset 0 1px 3px rgba(0, 0, 0, 0.3)',
+                        backgroundImage: acceptTerms 
+                          ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='rgba(200, 240, 200, 0.95)' d='M7 10l2 2 4-4' stroke='rgba(200, 240, 200, 0.95)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")` 
+                          : 'none',
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                      }}
+                    />
+                    <label 
+                      htmlFor="acceptTerms" 
+                      className="text-sm cursor-pointer leading-tight"
+                      style={{ color: 'rgba(200, 240, 200, 0.8)' }}
+                    >
+                      I accept the{' '}
+                      <Link 
+                        href="/terms" 
+                        target="_blank"
+                        className="font-semibold hover:underline transition-all"
+                        style={{ color: 'rgba(200, 240, 200, 0.95)' }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Terms of Service
+                      </Link>
+                    </label>
+                  </div>
+
                   {/* Submit Button */}
                   <motion.button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !acceptTerms}
                     className="w-full py-3 rounded-lg font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       background: 'linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)',
@@ -932,8 +975,8 @@ export default function SignupPage() {
                       color: 'rgba(200, 240, 200, 0.95)',
                       boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                     }}
-                    whileHover={!isLoading ? { scale: 1.02 } : {}}
-                    whileTap={!isLoading ? { scale: 0.98 } : {}}
+                    whileHover={!isLoading && acceptTerms ? { scale: 1.02 } : {}}
+                    whileTap={!isLoading && acceptTerms ? { scale: 0.98 } : {}}
                   >
                     {isLoading ? 'Creating Account...' : isDeveloper ? 'Create Developer Account' : 'Create Gamer Account'}
                   </motion.button>
