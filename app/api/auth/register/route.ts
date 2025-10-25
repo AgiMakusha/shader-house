@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { registerSchema } from "@/lib/auth/validation";
+import { registerSchema, developerRegistrationSchema } from "@/lib/auth/validation";
 import { createSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
+import { checkIndieEligibility } from "@/lib/indie/eligibility";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    // Check if this is a developer registration with profile
+    const isDeveloperWithProfile = body.role === "developer" && body.developerProfile;
+    
     // Validate input
-    const validation = registerSchema.safeParse(body);
+    const validation = isDeveloperWithProfile 
+      ? developerRegistrationSchema.safeParse(body)
+      : registerSchema.safeParse(body);
     
     if (!validation.success) {
       return NextResponse.json(
@@ -19,6 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { name, email, password, role } = validation.data;
+    const developerProfile = isDeveloperWithProfile ? body.developerProfile : null;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -35,13 +42,48 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user in database
+    // Get client IP for attestation
+    const clientIP = request.headers.get("x-forwarded-for") || 
+                     request.headers.get("x-real-ip") || 
+                     "unknown";
+
+    // Check indie eligibility if developer profile provided
+    let isIndieEligible = false;
+    if (developerProfile) {
+      const eligibility = checkIndieEligibility({
+        teamSize: developerProfile.teamSize,
+        hasPublisher: developerProfile.hasPublisher,
+        ownsIP: developerProfile.ownsIP,
+        companyType: developerProfile.companyType,
+        fundingSources: developerProfile.fundingSources,
+      });
+      isIndieEligible = eligibility.isEligible;
+    }
+
+    // Create user in database with developer profile if provided
     const newUser = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
         name,
         password: hashedPassword,
         role: role.toUpperCase() as "DEVELOPER" | "GAMER",
+        ...(developerProfile && {
+          developerProfile: {
+            create: {
+              developerType: developerProfile.developerType,
+              teamSize: developerProfile.teamSize,
+              hasPublisher: developerProfile.hasPublisher,
+              ownsIP: developerProfile.ownsIP,
+              fundingSources: developerProfile.fundingSources,
+              companyType: developerProfile.companyType,
+              evidenceLinks: developerProfile.evidenceLinks,
+              attestIndie: developerProfile.attestIndie,
+              attestedIP: clientIP,
+              isIndieEligible,
+              verificationStatus: "PENDING",
+            },
+          },
+        }),
       },
     });
 
@@ -62,6 +104,10 @@ export async function POST(request: NextRequest) {
         name: newUser.name,
         role: newUser.role,
       },
+      ...(developerProfile && {
+        verificationStatus: "PENDING",
+        isIndieEligible,
+      }),
     });
 
   } catch (error) {

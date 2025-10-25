@@ -20,12 +20,81 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Developer-specific fields (nullable for gamers)
+  developerProfile DeveloperProfile?
+
   @@index([email])
   @@map("users")
+}
+
+// Developer verification profile
+model DeveloperProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Core verification fields
+  developerType   DeveloperType
+  teamSize        Int
+  hasPublisher    Boolean
+  ownsIP          Boolean
+  fundingSources  FundingSource[]
+  companyType     CompanyType
+  evidenceLinks   String[]        // Array of URLs
+  
+  // Attestation
+  attestIndie     Boolean
+  attestedAt      DateTime        @default(now())
+  attestedIP      String?         // IP address at time of attestation
+  
+  // Moderation
+  verificationStatus VerificationStatus @default(PENDING)
+  reviewedAt         DateTime?
+  reviewedBy         String?          // Admin user ID
+  rejectionReason    String?
+  
+  // Indie eligibility (auto-calculated)
+  isIndieEligible    Boolean          @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("developer_profiles")
 }
 
 // User roles
 enum Role {
   DEVELOPER
   GAMER
+}
+
+// Developer type
+enum DeveloperType {
+  INDIE
+  STUDIO
+}
+
+// Company type
+enum CompanyType {
+  NONE
+  SOLE_PROP
+  LLC
+  CORP
+}
+
+// Funding sources
+enum FundingSource {
+  SELF
+  CROWDFUND
+  ANGEL
+  VC
+  MAJOR_PUBLISHER
+}
+
+// Verification status
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  APPEALING
 }
