@@ -837,7 +837,10 @@ export default function SignupPage() {
                             if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: undefined }));
                           }}
                           disabled={isLoading}
-                          className="mt-1 w-4 h-4 rounded border-white/20 bg-white/10 text-green-500 focus:ring-2 focus:ring-white/40"
+                          className="mt-1 w-4 h-4 rounded border-white/20 bg-white/10 focus:ring-2 focus:ring-white/40 cursor-pointer"
+                          style={{
+                            accentColor: 'rgba(100, 200, 100, 0.8)',
+                          }}
                         />
                         <span className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                           I certify that I meet the indie criteria and understand that providing false information may result in account suspension.
