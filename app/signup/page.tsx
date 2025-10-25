@@ -828,22 +828,40 @@ export default function SignupPage() {
 
                     {/* Attestation */}
                     <div className="space-y-2">
-                      <label className="flex items-start space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={attestIndie}
-                          onChange={(e) => {
-                            setAttestIndie(e.target.checked);
-                            if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: undefined }));
-                          }}
-                          disabled={isLoading}
-                          className="mt-1 w-4 h-4 rounded focus:ring-2 focus:ring-white/40 cursor-pointer"
-                          style={{
-                            accentColor: 'rgba(100, 200, 100, 0.8)',
-                            borderColor: 'rgba(100, 200, 100, 0.4)',
-                            backgroundColor: 'rgba(100, 200, 100, 0.1)',
-                          }}
-                        />
+                      <label className="flex items-start gap-2.5 cursor-pointer group">
+                        <div className="relative flex items-center justify-center mt-0.5">
+                          <input
+                            type="checkbox"
+                            checked={attestIndie}
+                            onChange={(e) => {
+                              setAttestIndie(e.target.checked);
+                              if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: undefined }));
+                            }}
+                            className="peer w-[18px] h-[18px] rounded-md cursor-pointer appearance-none transition-all hover:border-[rgba(150,220,150,0.7)]"
+                            style={{
+                              border: '2px solid rgba(180, 220, 180, 0.45)',
+                              backgroundColor: attestIndie ? 'rgba(120, 200, 120, 0.75)' : 'rgba(100, 180, 100, 0.18)',
+                              boxShadow: attestIndie 
+                                ? '0 0 12px rgba(120, 200, 120, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.2)'
+                                : '0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.08)',
+                            }}
+                            disabled={isLoading}
+                          />
+                          {attestIndie && (
+                            <svg
+                              className="absolute w-3.5 h-3.5 pointer-events-none"
+                              style={{ color: 'rgba(240, 255, 240, 0.98)', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              strokeWidth="3.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </div>
                         <span className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                           I certify that I meet the indie criteria and understand that providing false information may result in account suspension.
                           <InfoTooltip content={FIELD_TOOLTIPS.attestIndie} />
