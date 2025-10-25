@@ -9,6 +9,7 @@ import { GameIcon } from "@/components/game/GameIcon";
 import { GameHouse } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
+import OAuthButtons from "@/components/auth/OAuthButtons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -323,6 +324,9 @@ export default function LoginPage() {
                   >
                     {isLoading ? 'Signing in...' : 'Sign In'}
                   </motion.button>
+
+                  {/* OAuth Buttons */}
+                  <OAuthButtons />
                 </form>
               </GameCardContent>
             </GameCard>

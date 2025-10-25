@@ -12,6 +12,7 @@ import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { checkIndieEligibility, INDIE_POLICY, FIELD_TOOLTIPS } from "@/lib/indie/eligibility";
+import OAuthButtons from "@/components/auth/OAuthButtons";
 
 type DeveloperType = "INDIE" | "STUDIO";
 type CompanyType = "NONE" | "SOLE_PROP" | "LLC" | "CORP";
@@ -936,6 +937,9 @@ export default function SignupPage() {
                   >
                     {isLoading ? 'Creating Account...' : isDeveloper ? 'Create Developer Account' : 'Create Gamer Account'}
                   </motion.button>
+
+                  {/* OAuth Buttons */}
+                  <OAuthButtons />
                 </form>
               </GameCardContent>
             </GameCard>
