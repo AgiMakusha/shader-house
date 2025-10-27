@@ -1013,29 +1013,31 @@ export default function SignupPage() {
                     {isLoading ? 'Creating Account...' : isDeveloper ? 'Create Developer Account' : 'Create Gamer Account'}
                   </motion.button>
 
-                  {/* OAuth Buttons */}
-                  <div className="space-y-3">
-                    <AnimatePresence>
-                      {!acceptTerms && (
-                        <motion.p
-                          className="text-xs text-center px-4 py-2 rounded-lg"
-                          style={{ 
-                            color: 'rgba(200, 240, 200, 0.6)',
-                            backgroundColor: 'rgba(200, 100, 100, 0.1)',
-                            border: '1px solid rgba(200, 100, 100, 0.2)',
-                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
-                          }}
-                          initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                          animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
-                          exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          ⚠️ Please accept the Terms of Service to continue with OAuth
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                    <OAuthButtons disabled={!acceptTerms} />
-                  </div>
+                  {/* OAuth Buttons - Only for Gamers */}
+                  {!isDeveloper && (
+                    <div className="space-y-3">
+                      <AnimatePresence>
+                        {!acceptTerms && (
+                          <motion.p
+                            className="text-xs text-center px-4 py-2 rounded-lg"
+                            style={{ 
+                              color: 'rgba(200, 240, 200, 0.6)',
+                              backgroundColor: 'rgba(200, 100, 100, 0.1)',
+                              border: '1px solid rgba(200, 100, 100, 0.2)',
+                              textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                            }}
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            ⚠️ Please accept the Terms of Service to continue with OAuth
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                      <OAuthButtons disabled={!acceptTerms} />
+                    </div>
+                  )}
                 </form>
               </GameCardContent>
             </GameCard>
