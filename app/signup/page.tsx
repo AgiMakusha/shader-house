@@ -224,9 +224,9 @@ export default function SignupPage() {
       play("door");
       setTimeout(() => {
         if (role === "developer") {
-          router.push("/register/developer");
+          router.push("/profile/developer");
         } else {
-          router.push("/register/gamer");
+          router.push("/profile/gamer");
         }
       }, 300);
 

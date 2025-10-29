@@ -4,10 +4,9 @@ import { getSessionFromRequest } from "@/lib/auth/session";
 
 // Define which routes require authentication
 const protectedRoutes = [
-  "/register/developer",
-  "/register/gamer",
+  "/profile/developer",
+  "/profile/gamer",
   "/dashboard",
-  "/profile",
   "/settings",
 ];
 
@@ -24,8 +23,8 @@ export async function middleware(request: NextRequest) {
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && authRoutes.includes(pathname)) {
     const redirectUrl = session.user.role === "developer" 
-      ? "/register/developer" 
-      : "/register/gamer";
+      ? "/profile/developer" 
+      : "/profile/gamer";
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 

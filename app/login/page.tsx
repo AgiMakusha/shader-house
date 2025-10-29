@@ -70,10 +70,10 @@ export default function LoginPage() {
       
       // Redirect based on user role
       setTimeout(() => {
-        if (data.user.role === "developer") {
-          router.push("/register/developer");
+        if (data.user.role === "DEVELOPER") {
+          router.push("/profile/developer");
         } else {
-          router.push("/register/gamer");
+          router.push("/profile/gamer");
         }
       }, 300);
 
