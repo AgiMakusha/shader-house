@@ -29,10 +29,27 @@ const SUSPICIOUS_PATTERNS = [
   /\+.*@/, // Plus addressing (can be legitimate but often used for abuse)
   /^\d+@/, // Starts with only numbers
   /^[a-z]{1,2}@/, // Very short username (1-2 chars)
-  /test|temp|fake|spam|trash|junk/i, // Suspicious keywords
+  /temp|fake|spam|trash|junk/i, // Suspicious keywords (removed 'test' for development)
+];
+
+/**
+ * Whitelist for development/testing domains
+ */
+const ALLOWED_TEST_DOMAINS = [
+  'test.com',
+  'example.com',
+  'localhost',
 ];
 
 export function hasSuspiciousEmailPattern(email: string): boolean {
+  // Allow whitelisted test domains in development
+  if (process.env.NODE_ENV === 'development') {
+    const domain = email.toLowerCase().split('@')[1];
+    if (domain && ALLOWED_TEST_DOMAINS.includes(domain)) {
+      return false;
+    }
+  }
+  
   return SUSPICIOUS_PATTERNS.some(pattern => pattern.test(email));
 }
 
