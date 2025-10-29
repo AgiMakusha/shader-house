@@ -73,7 +73,7 @@ export default function LoginPage() {
         if (data.user.role === "DEVELOPER") {
           router.push("/profile/developer");
         } else {
-          router.push("/profile/gamer");
+          router.push("/membership"); // Gamers go to membership selection first
         }
       }, 300);
 

@@ -6,6 +6,7 @@ import { getSessionFromRequest } from "@/lib/auth/session";
 const protectedRoutes = [
   "/profile/developer",
   "/profile/gamer",
+  "/membership",
   "/dashboard",
   "/settings",
 ];
@@ -24,7 +25,7 @@ export async function middleware(request: NextRequest) {
   if (isAuthenticated && authRoutes.includes(pathname)) {
     const redirectUrl = session.user.role === "developer" 
       ? "/profile/developer" 
-      : "/profile/gamer";
+      : "/membership"; // Gamers go to membership selection
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 

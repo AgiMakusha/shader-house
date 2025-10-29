@@ -110,8 +110,11 @@ export async function GET(
       createdAt: user.createdAt.getTime(),
     }, true);
 
-    // Clear OAuth state cookie
-    const response = NextResponse.redirect(new URL('/register', request.url));
+    // Clear OAuth state cookie and redirect based on role
+    const redirectUrl = user.role === 'DEVELOPER' 
+      ? '/profile/developer' 
+      : '/membership'; // Gamers go to membership selection
+    const response = NextResponse.redirect(new URL(redirectUrl, request.url));
     response.cookies.delete('oauth_state');
     
     return response;
