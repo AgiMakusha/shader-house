@@ -1,15 +1,34 @@
 import nodemailer from 'nodemailer';
+import type { Transporter } from 'nodemailer';
 
-// Email configuration
-const transporter = nodemailer.createTransporter({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Check if email is configured
+const isEmailConfigured = !!(
+  process.env.EMAIL_HOST &&
+  process.env.EMAIL_USER &&
+  process.env.EMAIL_PASSWORD
+);
+
+// Email configuration (only create if configured)
+let transporter: Transporter | null = null;
+
+if (isEmailConfigured) {
+  try {
+    transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: parseInt(process.env.EMAIL_PORT || '587'),
+      secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+  } catch (error) {
+    console.warn('Email transporter could not be created:', error);
+    transporter = null;
+  }
+} else {
+  console.warn('Email service not configured. Email verification will be skipped.');
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -19,6 +38,12 @@ export interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
+  // If email is not configured, skip sending
+  if (!transporter) {
+    console.warn('Email not configured. Skipping email to:', to);
+    return { success: false, error: 'Email service not configured' };
+  }
+
   try {
     const info = await transporter.sendMail({
       from: `"${process.env.EMAIL_FROM_NAME || 'Shader House'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
