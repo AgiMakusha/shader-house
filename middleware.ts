@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
   if (isAuthenticated && authRoutes.includes(pathname)) {
     const redirectUrl = session.user.role === "developer" 
       ? "/profile/developer" 
-      : "/membership"; // Gamers go to membership selection
+      : "/profile/gamer"; // Existing gamers go to their profile
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 

@@ -226,7 +226,7 @@ export default function SignupPage() {
         if (role === "developer") {
           router.push("/profile/developer");
         } else {
-          router.push("/membership"); // Gamers go to membership selection first
+          router.push("/membership"); // Gamers go to membership payment first
         }
       }, 300);
 

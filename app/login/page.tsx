@@ -73,7 +73,8 @@ export default function LoginPage() {
         if (data.user.role === "DEVELOPER") {
           router.push("/profile/developer");
         } else {
-          router.push("/membership"); // Gamers go to membership selection first
+          // Existing gamers go to their profile (login flow)
+          router.push("/profile/gamer");
         }
       }, 300);
 

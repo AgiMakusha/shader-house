@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
-import { GameIcon } from "@/components/game/GameIcon";
-import { GameController, TrophyCup } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 
@@ -123,88 +121,53 @@ export default function MembershipPage() {
             <GameCardContent className="p-8">
               {/* Basic Membership */}
               <div className="space-y-6">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="flex-shrink-0">
-                    <GameIcon size="lg">
-                      <TrophyCup className="w-full h-full" />
-                    </GameIcon>
-                  </div>
-                  <div className="flex-1">
-                    <h2 
-                      className="text-2xl font-bold mb-2 pixelized"
+                <div className="mb-6 text-center">
+                  <h2 
+                    className="text-3xl font-bold mb-4 pixelized"
+                    style={{
+                      textShadow: '0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)',
+                      color: 'rgba(180, 220, 180, 0.95)',
+                    }}
+                  >
+                    Basic Membership
+                  </h2>
+                  <div className="flex items-baseline justify-center gap-2 mb-2">
+                    <span 
+                      className="text-5xl font-bold pixelized"
                       style={{
-                        textShadow: '0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)',
-                        color: 'rgba(180, 220, 180, 0.95)',
+                        textShadow: '0 0 8px rgba(150, 250, 150, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)',
+                        color: 'rgba(150, 250, 150, 0.95)',
                       }}
                     >
-                      Basic Membership
-                    </h2>
-                    <div className="flex items-baseline gap-2 mb-4">
-                      <span 
-                        className="text-4xl font-bold pixelized"
-                        style={{
-                          textShadow: '0 0 8px rgba(150, 250, 150, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)',
-                          color: 'rgba(150, 250, 150, 0.95)',
-                        }}
-                      >
-                        5€
-                      </span>
-                      <span 
-                        className="text-base font-medium"
-                        style={{ color: 'rgba(200, 240, 200, 0.6)' }}
-                      >
-                        per month
-                      </span>
-                    </div>
+                      5€
+                    </span>
+                    <span 
+                      className="text-lg font-medium"
+                      style={{ color: 'rgba(200, 240, 200, 0.6)' }}
+                    >
+                      per month
+                    </span>
                   </div>
                 </div>
 
                 {/* Features */}
                 <div className="space-y-3 mb-6">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-2 h-2 rounded-full"
-                      style={{ 
-                        backgroundColor: 'rgba(100, 200, 100, 0.8)',
-                        boxShadow: '0 0 6px rgba(100, 200, 100, 0.6)'
-                      }}
-                    />
+                  <div>
                     <span style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                       Full access to game library
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-2 h-2 rounded-full"
-                      style={{ 
-                        backgroundColor: 'rgba(100, 200, 100, 0.8)',
-                        boxShadow: '0 0 6px rgba(100, 200, 100, 0.6)'
-                      }}
-                    />
+                  <div>
                     <span style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                       Community features
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-2 h-2 rounded-full"
-                      style={{ 
-                        backgroundColor: 'rgba(100, 200, 100, 0.8)',
-                        boxShadow: '0 0 6px rgba(100, 200, 100, 0.6)'
-                      }}
-                    />
+                  <div>
                     <span style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                       Achievement tracking
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-2 h-2 rounded-full"
-                      style={{ 
-                        backgroundColor: 'rgba(100, 200, 100, 0.8)',
-                        boxShadow: '0 0 6px rgba(100, 200, 100, 0.6)'
-                      }}
-                    />
+                  <div>
                     <span style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
                       Priority support
                     </span>
@@ -236,54 +199,34 @@ export default function MembershipPage() {
                 </div>
 
                 {/* Payment Section */}
-                <div className="space-y-4">
-                  <h3 
-                    className="text-lg font-bold pixelized mb-4"
-                    style={{
-                      textShadow: '0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)',
-                      color: 'rgba(180, 220, 180, 0.95)',
-                    }}
-                  >
-                    Payment Method
-                  </h3>
-                  
-                  <div className="bg-white/5 rounded-lg p-4 border" style={{ borderColor: 'rgba(200, 240, 200, 0.2)' }}>
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-8 h-8 rounded flex items-center justify-center"
-                        style={{ 
-                          backgroundColor: 'rgba(100, 200, 100, 0.2)',
-                          border: '1px solid rgba(200, 240, 200, 0.3)'
-                        }}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                          style={{ color: 'rgba(150, 250, 150, 0.9)' }}
-                        >
-                          <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p 
-                          className="font-semibold"
-                          style={{ color: 'rgba(200, 240, 200, 0.9)' }}
-                        >
-                          Credit or Debit Card
-                        </p>
-                        <p 
-                          className="text-sm"
-                          style={{ color: 'rgba(200, 240, 200, 0.6)' }}
-                        >
-                          Secure payment processing
-                        </p>
-                      </div>
-                    </div>
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 
+                      className="text-xl font-bold pixelized mb-2"
+                      style={{
+                        textShadow: '0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)',
+                        color: 'rgba(180, 220, 180, 0.95)',
+                      }}
+                    >
+                      Payment Method
+                    </h3>
+                    <p 
+                      className="text-sm"
+                      style={{ color: 'rgba(200, 240, 200, 0.6)' }}
+                    >
+                      Secure payment processing
+                    </p>
                   </div>
 
-                  {/* Payment Form Placeholder */}
-                  <div className="space-y-4 pt-4">
+                  {/* Payment Form - Card Style */}
+                  <div 
+                    className="p-6 rounded-xl space-y-4"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(100, 200, 100, 0.08) 0%, rgba(80, 180, 80, 0.05) 100%)',
+                      border: '2px solid rgba(200, 240, 200, 0.25)',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                    }}
+                  >
                     <div>
                       <label 
                         className="block text-sm font-medium mb-2"

@@ -42,6 +42,8 @@ export async function GET(
       include: { accounts: true },
     });
 
+    let isNewUser = false;
+
     if (user) {
       // Check if this OAuth account is already linked
       const existingAccount = user.accounts.find(
@@ -78,6 +80,7 @@ export async function GET(
       }
     } else {
       // Create new user with OAuth account
+      isNewUser = true;
       user = await prisma.user.create({
         data: {
           email: userInfo.email,
@@ -110,10 +113,14 @@ export async function GET(
       createdAt: user.createdAt.getTime(),
     }, true);
 
-    // Clear OAuth state cookie and redirect based on role
-    const redirectUrl = user.role === 'DEVELOPER' 
-      ? '/profile/developer' 
-      : '/membership'; // Gamers go to membership selection
+    // Clear OAuth state cookie and redirect based on role and signup status
+    let redirectUrl: string;
+    if (user.role === 'DEVELOPER') {
+      redirectUrl = '/profile/developer';
+    } else {
+      // Gamers: new users go to membership, existing users go to profile
+      redirectUrl = isNewUser ? '/membership' : '/profile/gamer';
+    }
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
     response.cookies.delete('oauth_state');
     
