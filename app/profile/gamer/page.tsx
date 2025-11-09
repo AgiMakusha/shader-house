@@ -9,9 +9,9 @@ import { useAudio } from "@/components/audio/AudioProvider";
 import { useRouter } from "next/navigation";
 
 const QUICK_ACTIONS = [
-  { title: "My Library", description: "Browse your games", href: "#" },
+  { title: "Browse Games", description: "Discover new games", href: "/games" },
   { title: "Achievements", description: "View your trophies", href: "/profile/gamer/achievements" },
-  { title: "Community", description: "Chat with friends", href: "#" },
+  { title: "Community", description: "Chat with friends", href: "/community" },
 ];
 
 export default function GamerProfilePage() {

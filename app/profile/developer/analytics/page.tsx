@@ -9,43 +9,65 @@ import Particles from "@/components/fx/Particles";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { useAudio } from "@/components/audio/AudioProvider";
 
-const ANALYTICS_STATS = [
-  { label: "Total Views", value: "0", change: "+0%" },
-  { label: "Active Projects", value: "0", change: "0" },
-  { label: "Total Downloads", value: "0", change: "+0%" },
-  { label: "Revenue", value: "€0", change: "+0%" },
-];
-
-const RECENT_ACTIVITY = [
-  // Placeholder for recent activity data
-];
-
 export default function AnalyticsPage() {
   const router = useRouter();
   const { play } = useAudio();
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
+  const [games, setGames] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalGames: 0,
+    totalRatings: 0,
+    totalFavorites: 0,
+    totalRevenue: 0,
+    avgRating: 0,
+  });
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/auth/me");
-        if (!response.ok) {
+        const [userResponse, gamesResponse] = await Promise.all([
+          fetch("/api/auth/me"),
+          fetch("/api/games?developer=me"),
+        ]);
+
+        if (!userResponse.ok) {
           router.push("/login");
           return;
         }
-        const data = await response.json();
-        setUser(data.user);
+
+        const userData = await userResponse.json();
+        setUser(userData.user);
+
+        if (gamesResponse.ok) {
+          const gamesData = await gamesResponse.json();
+          setGames(gamesData.items || []);
+
+          // Calculate stats from games
+          const totalGames = gamesData.items?.length || 0;
+          const totalRatings = gamesData.items?.reduce((sum: number, game: any) => sum + (game._count?.ratings || 0), 0) || 0;
+          const totalFavorites = gamesData.items?.reduce((sum: number, game: any) => sum + (game._count?.favorites || 0), 0) || 0;
+          const totalRevenue = gamesData.items?.reduce((sum: number, game: any) => sum + ((game._count?.purchases || 0) * (game.priceCents || 0)), 0) || 0;
+          const avgRating = gamesData.items?.reduce((sum: number, game: any) => sum + (game.avgRating || 0), 0) / (totalGames || 1);
+
+          setStats({
+            totalGames,
+            totalRatings,
+            totalFavorites,
+            totalRevenue: totalRevenue / 100, // Convert cents to euros
+            avgRating: Math.round(avgRating * 10) / 10,
+          });
+        }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error fetching data:", error);
         router.push("/login");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchUser();
+    fetchData();
   }, [router]);
 
   if (isLoading) {
@@ -157,8 +179,14 @@ export default function AnalyticsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {ANALYTICS_STATS.map((stat, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {[
+              { label: "Published Games", value: stats.totalGames.toString(), type: "number" },
+              { label: "Total Ratings", value: stats.totalRatings.toString(), type: "number" },
+              { label: "Total Favorites", value: stats.totalFavorites.toString(), type: "number" },
+              { label: "Avg Rating", value: stats.avgRating, type: "rating" },
+              { label: "Revenue", value: `€${stats.totalRevenue.toFixed(2)}`, type: "number" },
+            ].map((stat, index) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
@@ -170,18 +198,59 @@ export default function AnalyticsPage() {
                     <p className="text-sm font-medium mb-2" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
                       {stat.label}
                     </p>
-                    <p
-                      className="text-3xl font-bold mb-1 pixelized"
-                      style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(150, 250, 150, 0.95)" }}
-                    >
-                      {stat.value}
-                    </p>
-                    <p
-                      className="text-xs font-semibold"
-                      style={{ color: stat.change.startsWith("+") ? "rgba(150, 250, 150, 0.8)" : "rgba(250, 200, 150, 0.8)" }}
-                    >
-                      {stat.change} vs last period
-                    </p>
+                    {stat.type === "rating" ? (
+                      <div>
+                        <p
+                          className="text-3xl font-bold mb-2 pixelized"
+                          style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(150, 250, 150, 0.95)" }}
+                        >
+                          {typeof stat.value === 'number' && stat.value > 0 ? stat.value.toFixed(1) : "N/A"}
+                        </p>
+                        {typeof stat.value === 'number' && stat.value > 0 && (
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => {
+                              const fillPercentage = Math.min(Math.max((stat.value as number) - (star - 1), 0), 1) * 100;
+                              return (
+                                <div key={star} className="relative w-5 h-5">
+                                  {/* Empty star (transparent) */}
+                                  <svg
+                                    className="absolute inset-0 w-5 h-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="rgba(200, 240, 200, 0.3)"
+                                    strokeWidth="1.5"
+                                  >
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                  </svg>
+                                  {/* Filled star (gradient based on rating) */}
+                                  <svg
+                                    className="absolute inset-0 w-5 h-5"
+                                    viewBox="0 0 24 24"
+                                    style={{
+                                      clipPath: `inset(0 ${100 - fillPercentage}% 0 0)`,
+                                    }}
+                                  >
+                                    <path
+                                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                      fill="rgba(250, 220, 100, 0.9)"
+                                      stroke="rgba(250, 220, 100, 0.9)"
+                                      strokeWidth="1.5"
+                                    />
+                                  </svg>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p
+                        className="text-3xl font-bold mb-1 pixelized"
+                        style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(150, 250, 150, 0.95)" }}
+                      >
+                        {stat.value}
+                      </p>
+                    )}
                   </GameCardContent>
                 </GameCard>
               </motion.div>
@@ -189,79 +258,8 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
 
-        {/* Performance Chart Placeholder */}
-        <motion.div
-          className="w-full max-w-5xl mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <GameCard>
-            <GameCardContent className="p-8">
-              <h2
-                className="text-2xl font-bold mb-6 pixelized"
-                style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-              >
-                Performance Overview
-              </h2>
-              <div
-                className="rounded-lg p-12 text-center"
-                style={{
-                  background: "linear-gradient(135deg, rgba(100, 200, 100, 0.05) 0%, rgba(80, 180, 80, 0.02) 100%)",
-                  border: "2px dashed rgba(200, 240, 200, 0.2)",
-                }}
-              >
-                <p
-                  className="text-lg pixelized mb-2"
-                  style={{ color: "rgba(200, 240, 200, 0.7)" }}
-                >
-                  Chart Visualization
-                </p>
-                <p
-                  className="text-sm"
-                  style={{ color: "rgba(200, 240, 200, 0.5)" }}
-                >
-                  Performance charts will be displayed here once you have active projects
-                </p>
-              </div>
-            </GameCardContent>
-          </GameCard>
-        </motion.div>
 
-        {/* Recent Activity */}
-        <motion.div
-          className="w-full max-w-5xl mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-        >
-          <GameCard>
-            <GameCardContent className="p-8">
-              <h2
-                className="text-2xl font-bold mb-6 pixelized"
-                style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-              >
-                Recent Activity
-              </h2>
-              {RECENT_ACTIVITY.length === 0 ? (
-                <div className="text-center py-8">
-                  <p
-                    className="text-base pixelized"
-                    style={{ color: "rgba(200, 240, 200, 0.6)" }}
-                  >
-                    No recent activity to display
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Activity items will be mapped here */}
-                </div>
-              )}
-            </GameCardContent>
-          </GameCard>
-        </motion.div>
-
-        {/* Top Projects */}
+        {/* Top Games */}
         <motion.div
           className="w-full max-w-5xl"
           initial={{ opacity: 0, y: 20 }}
@@ -270,20 +268,92 @@ export default function AnalyticsPage() {
         >
           <GameCard>
             <GameCardContent className="p-8">
-              <h2
-                className="text-2xl font-bold mb-6 pixelized"
-                style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-              >
-                Top Performing Projects
-              </h2>
-              <div className="text-center py-8">
-                <p
-                  className="text-base pixelized"
-                  style={{ color: "rgba(200, 240, 200, 0.6)" }}
+              <div className="flex items-center justify-between mb-6">
+                <h2
+                  className="text-2xl font-bold pixelized"
+                  style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
                 >
-                  Create projects to see performance metrics
-                </p>
+                  Your Published Games
+                </h2>
+                <Link
+                  href="/games?developer=me"
+                  className="text-sm font-semibold uppercase tracking-wider hover:underline transition-all"
+                  style={{ color: "rgba(200, 240, 200, 0.75)" }}
+                >
+                  View All →
+                </Link>
               </div>
+              {games.length === 0 ? (
+                <div className="text-center py-8">
+                  <p
+                    className="text-base pixelized mb-4"
+                    style={{ color: "rgba(200, 240, 200, 0.6)" }}
+                  >
+                    No games published yet
+                  </p>
+                  <Link
+                    href="/dashboard/games/new"
+                    className="inline-block px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all hover:scale-105"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)",
+                      border: "1px solid rgba(200, 240, 200, 0.4)",
+                      color: "rgba(200, 240, 200, 0.9)",
+                    }}
+                  >
+                    Publish Your First Game
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {games.slice(0, 5).map((game: any) => (
+                    <Link
+                      key={game.id}
+                      href={`/games/${game.slug}`}
+                      className="block p-4 rounded-lg transition-all hover:scale-[1.02]"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(100, 200, 100, 0.1) 0%, rgba(80, 180, 80, 0.05) 100%)",
+                        border: "1px solid rgba(200, 240, 200, 0.2)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3
+                            className="text-lg font-bold mb-1"
+                            style={{ color: "rgba(200, 240, 200, 0.9)" }}
+                          >
+                            {game.title}
+                          </h3>
+                          <p
+                            className="text-sm mb-2"
+                            style={{ color: "rgba(200, 240, 200, 0.6)" }}
+                          >
+                            {game.tagline}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                              ⭐ {game.avgRating?.toFixed(1) || "N/A"} ({game._count?.ratings || 0} ratings)
+                            </span>
+                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                              ❤️ {game._count?.favorites || 0} favorites
+                            </span>
+                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                              💰 {game._count?.purchases || 0} purchases
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p
+                            className="text-xl font-bold pixelized"
+                            style={{ color: "rgba(150, 250, 150, 0.9)" }}
+                          >
+                            {game.priceCents === 0 ? "Free" : `€${(game.priceCents / 100).toFixed(2)}`}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </GameCardContent>
           </GameCard>
         </motion.div>

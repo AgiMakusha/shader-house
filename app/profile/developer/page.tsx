@@ -9,8 +9,9 @@ import { useAudio } from "@/components/audio/AudioProvider";
 import { useRouter } from "next/navigation";
 
 const QUICK_ACTIONS = [
-  { title: "My Projects", description: "Manage your game projects", href: "/profile/developer/projects" },
+  { title: "My Games", description: "View all your published games", href: "/games?developer=me" },
   { title: "Analytics", description: "View your game stats", href: "/profile/developer/analytics" },
+  { title: "Community", description: "Connect with gamers", href: "/community" },
 ];
 
 export default function DeveloperProfilePage() {
@@ -121,7 +122,39 @@ export default function DeveloperProfilePage() {
           </motion.button>
         </motion.div>
 
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Create New Game CTA */}
+        <motion.div
+          className="w-full max-w-5xl mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Link href="/dashboard/games/new">
+            <GameCard interactive>
+              <GameCardContent className="p-8 cursor-pointer">
+                <div>
+                  <h2
+                    className="text-2xl font-bold mb-2 pixelized"
+                    style={{
+                      textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                      color: "rgba(180, 220, 180, 0.95)",
+                    }}
+                  >
+                    Publish a New Game
+                  </h2>
+                  <p
+                    className="text-sm"
+                    style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                  >
+                    Share your latest creation with the Shader House community
+                  </p>
+                </div>
+              </GameCardContent>
+            </GameCard>
+          </Link>
+        </motion.div>
+
+        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {QUICK_ACTIONS.map((action, index) => (
             <motion.div
               key={action.title}

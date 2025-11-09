@@ -37,6 +37,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Dashboard routes are developer-only
+  if (isAuthenticated && pathname.startsWith("/dashboard")) {
+    if (session.user.role !== "developer") {
+      return NextResponse.redirect(new URL("/profile/gamer", request.url));
+    }
+  }
+
+  // Profile routes - redirect to correct profile based on role
+  if (isAuthenticated) {
+    if (pathname.startsWith("/profile/developer") && session.user.role !== "developer") {
+      return NextResponse.redirect(new URL("/profile/gamer", request.url));
+    }
+    if (pathname.startsWith("/profile/gamer") && session.user.role !== "gamer") {
+      return NextResponse.redirect(new URL("/profile/developer", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
