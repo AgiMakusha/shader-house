@@ -1,4 +1,4 @@
-# 🌲 Shader House
+# Shader House
 
 **Where indie games shine** ✨
 
