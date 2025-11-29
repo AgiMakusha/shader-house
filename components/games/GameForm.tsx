@@ -7,6 +7,7 @@ import { Platform, ReleaseStatus } from "@prisma/client";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { ImageUpload } from "./ImageUpload";
 import { GameFileUpload } from "./GameFileUpload";
+import { FlaskConical, Rocket, Lightbulb, Sparkles } from "lucide-react";
 
 interface GameFormProps {
   initialData?: {
@@ -351,15 +352,21 @@ export function GameForm({ initialData, mode }: GameFormProps) {
                   : "rgba(150, 180, 255, 0.2)",
               }}
             >
-              <div className="text-left">
-                <div
-                  className="text-sm font-bold mb-1 pixelized"
-                  style={{ color: "rgba(150, 200, 255, 0.95)" }}
-                >
-                  🧪 Beta Testing
-                </div>
-                <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                  Only visible to Pro subscribers for testing
+              <div className="flex items-center gap-3">
+                <FlaskConical 
+                  className="w-6 h-6 flex-shrink-0" 
+                  style={{ color: "rgba(150, 200, 255, 0.95)" }} 
+                />
+                <div className="text-left">
+                  <div
+                    className="text-sm font-bold mb-1 pixelized"
+                    style={{ color: "rgba(150, 200, 255, 0.95)" }}
+                  >
+                    Beta Testing
+                  </div>
+                  <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                    Only visible to Pro subscribers for testing
+                  </div>
                 </div>
               </div>
             </button>
@@ -379,24 +386,42 @@ export function GameForm({ initialData, mode }: GameFormProps) {
                   : "rgba(150, 250, 150, 0.2)",
               }}
             >
-              <div className="text-left">
-                <div
-                  className="text-sm font-bold mb-1 pixelized"
-                  style={{ color: "rgba(150, 250, 150, 0.95)" }}
-                >
-                  ✅ Full Release
-                </div>
-                <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                  Public marketplace, visible to everyone
+              <div className="flex items-center gap-3">
+                <Rocket 
+                  className="w-6 h-6 flex-shrink-0" 
+                  style={{ color: "rgba(150, 250, 150, 0.95)" }} 
+                />
+                <div className="text-left">
+                  <div
+                    className="text-sm font-bold mb-1 pixelized"
+                    style={{ color: "rgba(150, 250, 150, 0.95)" }}
+                  >
+                    Full Release
+                  </div>
+                  <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                    Public marketplace, visible to everyone
+                  </div>
                 </div>
               </div>
             </button>
           </div>
-          <p className="text-xs mt-2" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
-            {formData.releaseStatus === ReleaseStatus.BETA
-              ? "💡 Tip: Start with Beta to test with Pro subscribers, then promote to Full Release when ready"
-              : "🎉 Your game will be visible in the public marketplace"}
-          </p>
+          <div className="flex items-start gap-2 mt-2">
+            {formData.releaseStatus === ReleaseStatus.BETA ? (
+              <>
+                <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "rgba(150, 200, 255, 0.7)" }} />
+                <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                  Tip: Start with Beta to test with Pro subscribers, then promote to Full Release when ready
+                </p>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "rgba(150, 250, 150, 0.7)" }} />
+                <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                  Your game will be visible in the public marketplace
+                </p>
+              </>
+            )}
+          </div>
           {renderFieldError('releaseStatus')}
         </div>
 

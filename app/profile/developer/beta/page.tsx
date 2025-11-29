@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
-import { FlaskConical, Users, Crown, Lock, ChevronLeft } from "lucide-react";
+import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket } from "lucide-react";
 
 interface Game {
   id: string;
@@ -63,7 +63,7 @@ export default function DeveloperBetaPage() {
 
   const promoteToRelease = async (gameId: string, gameTitle: string) => {
     const confirmed = window.confirm(
-      `🚀 Promote "${gameTitle}" to Full Release?\n\n` +
+      `Promote "${gameTitle}" to Full Release?\n\n` +
       `This will:\n` +
       `• Move the game from Beta to Public Marketplace\n` +
       `• Make it visible to all users (not just Pro subscribers)\n` +
@@ -341,7 +341,7 @@ export default function DeveloperBetaPage() {
                             </Link>
                             <motion.button
                               onClick={() => promoteToRelease(game.id, game.title)}
-                              className="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
+                              className="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all flex items-center gap-2"
                               style={{
                                 background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
                                 border: "1px solid rgba(200, 240, 200, 0.4)",
@@ -352,7 +352,8 @@ export default function DeveloperBetaPage() {
                               whileTap={{ scale: 0.95 }}
                               onMouseEnter={() => play("hover")}
                             >
-                              🚀 Promote to Release
+                              <Rocket className="w-4 h-4" />
+                              Promote to Release
                             </motion.button>
                           </div>
                         </div>

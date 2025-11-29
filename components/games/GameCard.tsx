@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Crown } from "lucide-react";
+import { Crown, FlaskConical } from "lucide-react";
 import { SubscriptionTier, FeatureFlag, hasFeatureAccess } from "@/lib/subscriptions/types";
 
 interface GameCardProps {
@@ -68,7 +68,7 @@ export function GameCard({ game, userTier }: GameCardProps) {
           {/* Beta Badge */}
           {isBeta && (
             <div
-              className="absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-bold pixelized"
+              className="absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-bold pixelized flex items-center gap-1.5"
               style={{
                 background: "rgba(100, 150, 255, 0.9)",
                 border: "1px solid rgba(150, 180, 255, 0.6)",
@@ -76,7 +76,8 @@ export function GameCard({ game, userTier }: GameCardProps) {
                 boxShadow: "0 2px 8px rgba(100, 150, 255, 0.5)",
               }}
             >
-              🧪 BETA
+              <FlaskConical className="w-3 h-3" />
+              BETA
             </div>
           )}
           
