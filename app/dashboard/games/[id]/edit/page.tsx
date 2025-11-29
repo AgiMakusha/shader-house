@@ -8,25 +8,28 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameForm } from "@/components/games/GameForm";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function EditGamePage({ params }: PageProps) {
+  const { id } = await params;
   const session = await getSession();
 
   if (!session?.user) {
     redirect("/login");
   }
 
-  if (session.user.role !== "developer") {
+  // Normalize role to uppercase (handles legacy lowercase roles)
+  const userRole = session.user.role?.toUpperCase();
+  if (userRole !== "DEVELOPER") {
     redirect("/profile/gamer");
   }
 
   // Fetch game with tags
   const game = await prisma.game.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       gameTags: {
         include: {
@@ -117,4 +120,6 @@ export default async function EditGamePage({ params }: PageProps) {
     </div>
   );
 }
+
+
 

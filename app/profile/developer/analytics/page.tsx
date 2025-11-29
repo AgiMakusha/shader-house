@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
             totalGames,
             totalRatings,
             totalFavorites,
-            totalRevenue: totalRevenue / 100, // Convert cents to euros
+            totalRevenue: totalRevenue / 100, // Convert cents to dollars
             avgRating: Math.round(avgRating * 10) / 10,
           });
         }
@@ -185,7 +185,7 @@ export default function AnalyticsPage() {
               { label: "Total Ratings", value: stats.totalRatings.toString(), type: "number" },
               { label: "Total Favorites", value: stats.totalFavorites.toString(), type: "number" },
               { label: "Avg Rating", value: stats.avgRating, type: "rating" },
-              { label: "Revenue", value: `€${stats.totalRevenue.toFixed(2)}`, type: "number" },
+              { label: "Revenue", value: `$${stats.totalRevenue.toFixed(2)}`, type: "number" },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -346,7 +346,7 @@ export default function AnalyticsPage() {
                             className="text-xl font-bold pixelized"
                             style={{ color: "rgba(150, 250, 150, 0.9)" }}
                           >
-                            {game.priceCents === 0 ? "Free" : `€${(game.priceCents / 100).toFixed(2)}`}
+                            {game.priceCents === 0 ? "Free" : `$${(game.priceCents / 100).toFixed(2)}`}
                           </p>
                         </div>
                       </div>

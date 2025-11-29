@@ -4,16 +4,17 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSessionFromRequest(request);
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const result = await toggleFavorite(params.id, session.user.id);
+    const result = await toggleFavorite(id, session.user.id);
 
     return NextResponse.json(result);
   } catch (error: any) {
@@ -24,4 +25,6 @@ export async function POST(
     );
   }
 }
+
+
 

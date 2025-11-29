@@ -1,17 +1,43 @@
 import { z } from 'zod';
 import { Platform } from '@prisma/client';
 
+// Helper to validate URL, data URL, or relative path
+const urlOrDataUrl = z.string().refine(
+  (val) => {
+    if (!val || val.trim() === '') return false;
+    // Allow data URLs
+    if (val.startsWith('data:image/')) return true;
+    // Allow relative paths (starting with /)
+    if (val.startsWith('/')) return true;
+    // Allow full URLs
+    try {
+      new URL(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  { message: 'Must be a valid URL, relative path, or data URL' }
+);
+
 export const gameUpsertSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters'),
   tagline: z.string().min(4, 'Tagline must be at least 4 characters').max(120, 'Tagline must be less than 120 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
-  coverUrl: z.string().url('Must be a valid URL'),
-  screenshots: z.array(z.string().url('Must be a valid URL')).max(8, 'Maximum 8 screenshots allowed'),
+  coverUrl: urlOrDataUrl,
+  screenshots: z.array(urlOrDataUrl).max(8, 'Maximum 8 screenshots allowed'),
   priceCents: z.number().int().min(0, 'Price must be 0 or greater'),
   platforms: z.array(z.nativeEnum(Platform)).min(1, 'At least one platform is required'),
-  externalUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  gameFileUrl: z.string().optional().or(z.literal('')), // Uploaded game file
+  externalUrl: z.string().optional().or(z.literal('')), // External link
   tags: z.array(z.string()).max(8, 'Maximum 8 tags allowed'),
-});
+}).refine(
+  (data) => data.gameFileUrl || data.externalUrl,
+  {
+    message: 'Either upload a game file or provide an external link',
+    path: ['gameFileUrl'],
+  }
+);
 
 export const ratingSchema = z.object({
   stars: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating must be at most 5'),

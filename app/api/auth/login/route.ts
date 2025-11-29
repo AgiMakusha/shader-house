@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role.toLowerCase() as "developer" | "gamer",
+      role: user.role as "DEVELOPER" | "GAMER" | "ADMIN",
       createdAt: user.createdAt.getTime(),
     }, rememberMe);
 

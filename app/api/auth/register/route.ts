@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
-      role: newUser.role.toLowerCase() as "developer" | "gamer",
+      role: newUser.role as "DEVELOPER" | "GAMER" | "ADMIN",
       createdAt: newUser.createdAt.getTime(),
     }, true); // Remember me = true by default for new registrations
 

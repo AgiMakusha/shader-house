@@ -1,11 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { GameCard } from "@/components/games/GameCard";
 import { SearchInput } from "@/components/games/SearchInput";
 import { GameFilters } from "@/components/games/GameFilters";
 import { Pagination } from "@/components/games/Pagination";
 import { TagsList } from "@/components/games/TagsList";
 import { GameCard as GameCardComponent, GameCardContent } from "@/components/game/GameCard";
+import { SubscriptionTier } from "@/lib/subscriptions/types";
 
 interface GamesContentClientProps {
   games: any[];
@@ -24,6 +26,24 @@ export function GamesContentClient({
   totalPages,
   activeTags,
 }: GamesContentClientProps) {
+  const [userTier, setUserTier] = useState<SubscriptionTier | null>(null);
+
+  useEffect(() => {
+    const fetchUserTier = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        if (response.ok) {
+          const data = await response.json();
+          setUserTier(data.user?.subscriptionTier || 'FREE');
+        }
+      } catch (error) {
+        console.error("Error fetching user tier:", error);
+      }
+    };
+
+    fetchUserTier();
+  }, []);
+
   return (
     <>
       {/* Search and Filters */}
@@ -47,7 +67,7 @@ export function GamesContentClient({
         <>
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {games.map((game) => (
-              <GameCard key={game.id} game={game} />
+              <GameCard key={game.id} game={game} userTier={userTier} />
             ))}
           </div>
 
@@ -73,4 +93,6 @@ export function GamesContentClient({
     </>
   );
 }
+
+
 

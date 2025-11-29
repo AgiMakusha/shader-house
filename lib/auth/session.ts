@@ -14,7 +14,7 @@ export interface SessionUser {
   id: string;
   email: string;
   name?: string;
-  role: "developer" | "gamer";
+  role: "DEVELOPER" | "GAMER" | "ADMIN";
   createdAt: number;
 }
 

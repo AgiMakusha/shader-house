@@ -109,13 +109,14 @@ export async function GET(
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role.toLowerCase() as 'developer' | 'gamer',
+      role: user.role as 'DEVELOPER' | 'GAMER' | 'ADMIN',
       createdAt: user.createdAt.getTime(),
     }, true);
 
     // Clear OAuth state cookie and redirect based on role and signup status
     let redirectUrl: string;
-    if (user.role === 'DEVELOPER') {
+    const userRole = user.role?.toUpperCase();
+    if (userRole === 'DEVELOPER') {
       redirectUrl = '/profile/developer';
     } else {
       // Gamers: new users go to membership, existing users go to profile

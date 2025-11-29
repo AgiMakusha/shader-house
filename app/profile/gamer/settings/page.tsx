@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import Particles from "@/components/fx/Particles";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
+import { SubscriptionBadge } from "@/components/subscriptions/SubscriptionBadge";
 
 export default function GamerSettingsPage() {
   const router = useRouter();
@@ -18,6 +19,13 @@ export default function GamerSettingsPage() {
   const [wantsNewsletter, setWantsNewsletter] = useState(true);
   const [showOnlineStatus, setShowOnlineStatus] = useState(true);
   const [wantsDigestNewsletter, setWantsDigestNewsletter] = useState(true);
+  
+  // Account Information form fields
+  const [displayName, setDisplayName] = useState('');
+  const [publicEmail, setPublicEmail] = useState('');
+  const [bio, setBio] = useState('');
+  const [accountError, setAccountError] = useState('');
+  const [accountSuccess, setAccountSuccess] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,6 +37,11 @@ export default function GamerSettingsPage() {
         }
         const data = await response.json();
         setUser(data.user);
+        
+        // Load profile data into form fields
+        setDisplayName(data.user.displayName || data.user.name || '');
+        setPublicEmail(data.user.publicEmail || '');
+        setBio(data.user.bio || '');
       } catch (error) {
         console.error("Error fetching user:", error);
         router.push("/login");
@@ -40,17 +53,79 @@ export default function GamerSettingsPage() {
     fetchUser();
   }, [router]);
 
+  const getPlanName = (tier: string) => {
+    switch (tier) {
+      case 'CREATOR_SUPPORT':
+        return 'Creator Support Pass';
+      case 'GAMER_PRO':
+        return 'Gamer Pro Pass';
+      case 'FREE':
+      default:
+        return 'Free Access';
+    }
+  };
+
+  const getPlanPrice = (tier: string) => {
+    switch (tier) {
+      case 'CREATOR_SUPPORT':
+        return '$14.99 / month';
+      case 'GAMER_PRO':
+        return '$14.99 / month';
+      case 'FREE':
+      default:
+        return '$0';
+    }
+  };
+
   const membershipDetails = {
-    plan: "Basic Membership",
-    price: "5€ / month",
-    status: "Active",
-    renews: "Renews monthly",
+    plan: user ? getPlanName(user.subscriptionTier) : "Free Access",
+    price: user ? getPlanPrice(user.subscriptionTier) : "Free",
+    status: user?.subscriptionStatus === 'ACTIVE' ? "Active" : user?.subscriptionTier === 'FREE' ? 'Free' : 'Inactive',
+    renews: user?.subscriptionTier === 'FREE' ? 'No subscription' : "Renews monthly",
     startedAt: "Member since",
   };
 
   const simulateSave = (setter: (value: boolean) => void) => {
     setter(true);
     setTimeout(() => setter(false), 900);
+  };
+
+  const handleAccountSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingAccount(true);
+    setAccountError('');
+    setAccountSuccess('');
+
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displayName: displayName.trim() || undefined,
+          publicEmail: publicEmail.trim() || undefined,
+          bio: bio.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update profile');
+      }
+
+      setUser(data.user);
+      setAccountSuccess('Profile updated successfully!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setAccountSuccess(''), 3000);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      setAccountError(error.message || 'Failed to update profile. Please try again.');
+    } finally {
+      setIsSavingAccount(false);
+    }
   };
 
   if (isLoading) {
@@ -128,18 +203,43 @@ export default function GamerSettingsPage() {
         >
           <GameCard>
             <GameCardContent className="p-8 space-y-6">
+              <h2
+                className="text-2xl font-bold mb-4 pixelized"
+                style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
+              >
+                Membership
+              </h2>
+
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-[0.3em] pixelized" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
-                    Membership
-                  </p>
-                  <h2
+                <div className="space-y-3">
+                  {user?.subscriptionTier && <SubscriptionBadge tier={user.subscriptionTier} size="lg" />}
+                  <h3
                     className="text-2xl font-bold pixelized"
-                    style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
+                    style={{ 
+                      textShadow: user?.subscriptionTier === 'FREE' 
+                        ? "0 0 8px rgba(140, 240, 140, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)" 
+                        : user?.subscriptionTier === 'CREATOR_SUPPORT'
+                        ? "0 0 8px rgba(220, 180, 80, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)"
+                        : "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", 
+                      color: user?.subscriptionTier === 'FREE' 
+                        ? "rgba(180, 240, 180, 0.95)" 
+                        : user?.subscriptionTier === 'CREATOR_SUPPORT'
+                        ? "rgba(240, 220, 140, 0.95)"
+                        : "rgba(180, 220, 180, 0.95)" 
+                    }}
                   >
                     {membershipDetails.plan}
-                  </h2>
-                  <p className="text-lg font-semibold pixelized" style={{ color: "rgba(150, 250, 150, 0.9)" }}>
+                  </h3>
+                  <p 
+                    className="text-lg font-semibold pixelized" 
+                    style={{ 
+                      color: user?.subscriptionTier === 'FREE' 
+                        ? "rgba(180, 255, 180, 0.95)" 
+                        : user?.subscriptionTier === 'CREATOR_SUPPORT'
+                        ? "rgba(255, 240, 180, 0.95)"
+                        : "rgba(150, 250, 150, 0.9)" 
+                    }}
+                  >
                     {membershipDetails.price}
                   </p>
                 </div>
@@ -149,7 +249,16 @@ export default function GamerSettingsPage() {
                     <p className="text-sm font-medium mb-1" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
                       Status
                     </p>
-                    <p className="text-base font-semibold" style={{ color: "rgba(150, 250, 150, 0.95)" }}>
+                    <p 
+                      className="text-base font-semibold" 
+                      style={{ 
+                        color: user?.subscriptionTier === 'FREE' 
+                          ? "rgba(180, 255, 180, 0.95)" 
+                          : user?.subscriptionTier === 'CREATOR_SUPPORT'
+                          ? "rgba(255, 240, 180, 0.95)"
+                          : "rgba(150, 250, 150, 0.95)" 
+                      }}
+                    >
                       ✓ {membershipDetails.status}
                     </p>
                   </div>
@@ -174,11 +283,17 @@ export default function GamerSettingsPage() {
                       Manage Plan
                     </p>
                     <Link
-                      href="/membership"
-                      className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide"
-                      style={{ color: "rgba(150, 250, 150, 0.9)" }}
+                      href="/profile/gamer/subscription"
+                      className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wide hover:underline transition-all"
+                      style={{ 
+                        color: user?.subscriptionTier === 'FREE' 
+                          ? "rgba(180, 255, 180, 0.95)" 
+                          : user?.subscriptionTier === 'CREATOR_SUPPORT'
+                          ? "rgba(255, 240, 180, 0.95)"
+                          : "rgba(150, 250, 150, 0.9)" 
+                      }}
                     >
-                      Update membership →
+                      View subscription →
                     </Link>
                   </div>
                 </div>
@@ -255,7 +370,7 @@ export default function GamerSettingsPage() {
                 Account Information
               </h2>
 
-              <form onSubmit={(event) => { event.preventDefault(); simulateSave(setIsSavingAccount); }} className="space-y-6">
+              <form onSubmit={handleAccountSave} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <label className="space-y-2">
                     <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
@@ -263,7 +378,11 @@ export default function GamerSettingsPage() {
                     </span>
                     <input
                       type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="ShaderGamer"
+                      minLength={2}
+                      maxLength={50}
                       className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
                       style={{ color: "rgba(200, 240, 200, 0.85)" }}
                     />
@@ -271,10 +390,12 @@ export default function GamerSettingsPage() {
 
                   <label className="space-y-2">
                     <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                      Contact Email
+                      Contact Email (Public)
                     </span>
                     <input
                       type="email"
+                      value={publicEmail}
+                      onChange={(e) => setPublicEmail(e.target.value)}
                       placeholder="you@example.com"
                       className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
                       style={{ color: "rgba(200, 240, 200, 0.85)" }}
@@ -288,11 +409,49 @@ export default function GamerSettingsPage() {
                   </span>
                   <textarea
                     rows={4}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                     placeholder="Share your favourite playstyle, current goals, or anything else other gamers should know."
+                    maxLength={500}
                     className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm resize-none"
                     style={{ color: "rgba(200, 240, 200, 0.85)" }}
                   />
+                  <p className="text-xs text-right" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                    {bio.length} / 500
+                  </p>
                 </label>
+
+                {accountError && (
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{
+                      background: "rgba(180, 60, 60, 0.15)",
+                      border: "1px solid rgba(255, 120, 120, 0.3)",
+                      color: "rgba(255, 180, 180, 0.95)",
+                      textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
+                      fontSize: "12px",
+                      fontFamily: '"Press Start 2P", monospace',
+                    }}
+                  >
+                    {accountError}
+                  </div>
+                )}
+
+                {accountSuccess && (
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{
+                      background: "rgba(100, 200, 100, 0.15)",
+                      border: "1px solid rgba(150, 240, 150, 0.3)",
+                      color: "rgba(180, 240, 180, 0.95)",
+                      textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
+                      fontSize: "12px",
+                      fontFamily: '"Press Start 2P", monospace',
+                    }}
+                  >
+                    ✓ {accountSuccess}
+                  </div>
+                )}
 
                 <motion.button
                   type="submit"
@@ -516,7 +675,7 @@ export default function GamerSettingsPage() {
                       className="text-sm leading-relaxed select-none"
                       style={{ color: "rgba(200, 240, 200, 0.75)", textShadow: "0 1px 2px rgba(0, 0, 0, 0.4)" }}
                     >
-                      Sign me up for the bi-monthly Shader House digest newsletter
+                      Sign me up for the Shader House digest newsletter
                     </span>
                   </label>
                 </div>

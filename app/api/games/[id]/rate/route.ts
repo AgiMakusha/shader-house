@@ -5,9 +5,10 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSessionFromRequest(request);
 
     if (!session?.user) {
@@ -17,7 +18,7 @@ export async function POST(
     const body = await request.json();
     const validated = ratingSchema.parse(body);
 
-    const rating = await rateGame(params.id, session.user.id, validated);
+    const rating = await rateGame(id, session.user.id, validated);
 
     return NextResponse.json(rating);
   } catch (error: any) {
@@ -28,4 +29,6 @@ export async function POST(
     );
   }
 }
+
+
 

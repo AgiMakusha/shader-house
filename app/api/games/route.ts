@@ -56,7 +56,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (session.user.role !== 'DEVELOPER' && session.user.role !== 'ADMIN') {
+    // Normalize role to uppercase (handles legacy lowercase roles)
+    const userRole = session.user.role?.toUpperCase();
+    if (userRole !== 'DEVELOPER' && userRole !== 'ADMIN') {
       return NextResponse.json({ error: 'Only developers can create games' }, { status: 403 });
     }
 

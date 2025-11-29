@@ -13,7 +13,9 @@ export default async function NewGamePage() {
     redirect("/login");
   }
 
-  if (session.user.role !== "developer") {
+  // Normalize role to uppercase (handles legacy lowercase roles)
+  const userRole = session.user.role?.toUpperCase();
+  if (userRole !== "DEVELOPER") {
     redirect("/profile/gamer");
   }
 
@@ -76,4 +78,6 @@ export default async function NewGamePage() {
     </div>
   );
 }
+
+
 

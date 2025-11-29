@@ -12,20 +12,32 @@ import { RatingDisplay } from "@/components/games/RatingDisplay";
 import { PurchaseButton } from "@/components/games/PurchaseButton";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function GameDetailPage({ params }: PageProps) {
+  const { slug } = await params;
   const session = await getSession();
-  const game = await getGameBySlug(params.slug, session?.user?.id);
+  const game = await getGameBySlug(slug, session?.user?.id);
 
   if (!game) {
     notFound();
   }
 
-  const price = game.priceCents === 0 ? 'Free' : `€${(game.priceCents / 100).toFixed(2)}`;
+  // Fetch user's subscription tier if logged in
+  let userTier: string | null = null;
+  if (session?.user?.id) {
+    const { prisma } = await import("@/lib/db/prisma");
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { subscriptionTier: true },
+    });
+    userTier = user?.subscriptionTier || 'FREE';
+  }
+
+  const price = game.priceCents === 0 ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
   const isOwner = session?.user?.id === game.developerId;
 
   return (
@@ -203,7 +215,7 @@ export default async function GameDetailPage({ params }: PageProps) {
                             {rating.user.image && (
                               <Image
                                 src={rating.user.image}
-                                alt={rating.user.name || 'User'}
+                                alt={(rating.user as any).displayName || rating.user.name || 'User'}
                                 width={32}
                                 height={32}
                                 className="rounded-full"
@@ -213,7 +225,7 @@ export default async function GameDetailPage({ params }: PageProps) {
                               className="font-semibold"
                               style={{ color: "rgba(200, 240, 200, 0.9)" }}
                             >
-                              {rating.user.name}
+                              {(rating.user as any).displayName || rating.user.name}
                             </span>
                           </div>
                           <div className="flex items-center">
@@ -281,8 +293,10 @@ export default async function GameDetailPage({ params }: PageProps) {
                     <PurchaseButton
                       gameId={game.id}
                       priceCents={game.priceCents}
+                      gameFileUrl={game.gameFileUrl}
                       externalUrl={game.externalUrl}
                       isPurchased={game.isPurchased}
+                      userTier={userTier as any}
                     />
                   )}
                   {!session?.user && (

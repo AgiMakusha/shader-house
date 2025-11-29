@@ -244,7 +244,7 @@ AUTH_SECRET="your-secret-key-min-32-chars"
 
 ## Notes
 
-- All prices are stored in cents (e.g., 999 = €9.99)
+- All prices are stored in cents (e.g., 999 = $9.99)
 - Slugs are auto-generated from titles
 - Views are automatically incremented on game detail page
 - Average ratings are recalculated on each new rating

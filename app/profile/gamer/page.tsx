@@ -10,7 +10,9 @@ import { useRouter } from "next/navigation";
 
 const QUICK_ACTIONS = [
   { title: "Browse Games", description: "Discover new games", href: "/games" },
+  { title: "Beta Access", description: "Test upcoming games", href: "/games/beta" },
   { title: "Achievements", description: "View your trophies", href: "/profile/gamer/achievements" },
+  { title: "Subscription", description: "Manage your plan", href: "/profile/gamer/subscription" },
   { title: "Community", description: "Chat with friends", href: "/community" },
 ];
 
@@ -122,7 +124,7 @@ export default function GamerProfilePage() {
           </motion.button>
         </motion.div>
 
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
           {QUICK_ACTIONS.map((action, index) => (
             <motion.div
               key={action.title}
@@ -155,7 +157,7 @@ export default function GamerProfilePage() {
             key="settings"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            transition={{ duration: 0.6, delay: 0.9 }}
           >
             <Link
               href="/profile/gamer/settings"

@@ -175,3 +175,5 @@ export function RatingForm({ gameId, userRating }: RatingFormProps) {
   );
 }
 
+
+

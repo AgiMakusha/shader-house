@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Crown } from "lucide-react";
+import { SubscriptionTier, FeatureFlag, hasFeatureAccess } from "@/lib/subscriptions/types";
 
 interface GameCardProps {
   game: {
@@ -25,10 +27,14 @@ interface GameCardProps {
       ratings: number;
     };
   };
+  userTier?: SubscriptionTier | null;
 }
 
-export function GameCard({ game }: GameCardProps) {
-  const price = game.priceCents === 0 ? 'Free' : `€${(game.priceCents / 100).toFixed(2)}`;
+export function GameCard({ game, userTier }: GameCardProps) {
+  const price = game.priceCents === 0 ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
+  const isFree = game.priceCents === 0;
+  const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
+  const showCrown = hasUnlimitedAccess && !isFree; // Show crown for premium users on paid games
 
   return (
     <Link href={`/games/${game.slug}`}>
@@ -55,16 +61,33 @@ export function GameCard({ game }: GameCardProps) {
           
           {/* Price Badge */}
           <div
-            className="absolute top-3 right-3 px-3 py-1 rounded-lg font-bold text-sm"
+            className="absolute top-3 right-3 px-3 py-1 rounded-lg font-bold text-sm pixelized flex items-center gap-1.5"
             style={{
-              background: game.priceCents === 0
-                ? "rgba(100, 200, 100, 0.9)"
-                : "rgba(100, 150, 250, 0.9)",
-              color: "rgba(255, 255, 255, 0.95)",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
+              background: showCrown
+                ? "linear-gradient(135deg, rgba(240, 220, 140, 0.95) 0%, rgba(220, 180, 100, 0.95) 100%)"
+                : isFree
+                ? "linear-gradient(135deg, rgba(100, 200, 100, 0.9) 0%, rgba(80, 180, 80, 0.9) 100%)"
+                : "linear-gradient(135deg, rgba(120, 150, 120, 0.9) 0%, rgba(100, 130, 100, 0.9) 100%)",
+              color: showCrown ? "rgba(40, 30, 10, 0.95)" : "rgba(255, 255, 255, 0.95)",
+              boxShadow: showCrown 
+                ? "0 2px 12px rgba(240, 220, 140, 0.5), 0 0 20px rgba(240, 220, 140, 0.3)" 
+                : "0 2px 8px rgba(0, 0, 0, 0.4)",
+              border: showCrown ? "1px solid rgba(240, 220, 140, 0.6)" : "none",
+              fontSize: "9px",
+              textShadow: showCrown ? "none" : "0 1px 2px rgba(0, 0, 0, 0.5)",
             }}
           >
-            {price}
+            {showCrown && (
+              <Crown 
+                size={12} 
+                fill="rgba(40, 30, 10, 0.6)"
+                style={{ 
+                  color: "rgba(40, 30, 10, 0.9)",
+                  filter: "drop-shadow(0 0 2px rgba(255, 240, 180, 0.8))"
+                }} 
+              />
+            )}
+            {showCrown ? 'Included' : price}
           </div>
         </div>
 
@@ -161,4 +184,6 @@ export function GameCard({ game }: GameCardProps) {
     </Link>
   );
 }
+
+
 

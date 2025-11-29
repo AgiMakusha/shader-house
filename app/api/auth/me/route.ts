@@ -40,6 +40,18 @@ export async function GET(request: NextRequest) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         developerProfile: user.developerProfile,
+        // Subscription fields
+        subscriptionTier: user.subscriptionTier,
+        subscriptionStatus: user.subscriptionStatus,
+        subscriptionStart: user.subscriptionStart,
+        subscriptionEnd: user.subscriptionEnd,
+        xp: user.xp,
+        level: user.level,
+        badges: user.badges,
+        // Public profile fields
+        displayName: user.displayName,
+        publicEmail: user.publicEmail,
+        bio: user.bio,
       },
     });
 

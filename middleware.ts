@@ -21,9 +21,14 @@ export async function middleware(request: NextRequest) {
   // Check if user is authenticated
   const isAuthenticated = !!session?.user;
 
+  // Normalize role to uppercase for comparison (handles legacy lowercase roles)
+  const userRole = session?.user?.role?.toUpperCase();
+  const isDeveloper = userRole === "DEVELOPER";
+  const isGamer = userRole === "GAMER";
+
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && authRoutes.includes(pathname)) {
-    const redirectUrl = session.user.role === "developer" 
+    const redirectUrl = isDeveloper
       ? "/profile/developer" 
       : "/profile/gamer"; // Existing gamers go to their profile
     return NextResponse.redirect(new URL(redirectUrl, request.url));
@@ -39,17 +44,17 @@ export async function middleware(request: NextRequest) {
 
   // Dashboard routes are developer-only
   if (isAuthenticated && pathname.startsWith("/dashboard")) {
-    if (session.user.role !== "developer") {
+    if (!isDeveloper) {
       return NextResponse.redirect(new URL("/profile/gamer", request.url));
     }
   }
 
   // Profile routes - redirect to correct profile based on role
   if (isAuthenticated) {
-    if (pathname.startsWith("/profile/developer") && session.user.role !== "developer") {
+    if (pathname.startsWith("/profile/developer") && !isDeveloper) {
       return NextResponse.redirect(new URL("/profile/gamer", request.url));
     }
-    if (pathname.startsWith("/profile/gamer") && session.user.role !== "gamer") {
+    if (pathname.startsWith("/profile/gamer") && !isGamer) {
       return NextResponse.redirect(new URL("/profile/developer", request.url));
     }
   }

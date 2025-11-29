@@ -144,6 +144,7 @@ export async function getGameBySlug(slug: string, userId?: string) {
             select: {
               id: true,
               name: true,
+              displayName: true,
               image: true,
             },
           },
@@ -256,6 +257,7 @@ export async function createGame(data: GameUpsert, developerId: string) {
       ...gameData,
       slug,
       developerId,
+      gameFileUrl: gameData.gameFileUrl || null,
       externalUrl: gameData.externalUrl || null,
     },
   });
@@ -292,7 +294,7 @@ export async function createGame(data: GameUpsert, developerId: string) {
 export async function updateGame(gameId: string, data: GameUpsert, userId: string) {
   const { tags, ...gameData } = data;
 
-  // Verify ownership
+  // Verify ownership (RULE 1: Only game owner can update)
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: { developer: true },
@@ -302,8 +304,17 @@ export async function updateGame(gameId: string, data: GameUpsert, userId: strin
     throw new Error('Game not found');
   }
 
+  // STRICT: Only the developer who created the game can update it
   if (game.developerId !== userId) {
-    throw new Error('Unauthorized');
+    throw new Error('Unauthorized: Only the game owner can update this game');
+  }
+
+  // RULE 2: Handle file replacement - delete old file if replacing
+  const { replaceFile } = await import('@/lib/utils/file-manager');
+  
+  // If uploading a new game file, delete the old one
+  if (gameData.gameFileUrl && game.gameFileUrl && gameData.gameFileUrl !== game.gameFileUrl) {
+    await replaceFile(game.gameFileUrl, gameData.gameFileUrl);
   }
 
   // Update game
@@ -311,6 +322,7 @@ export async function updateGame(gameId: string, data: GameUpsert, userId: strin
     where: { id: gameId },
     data: {
       ...gameData,
+      gameFileUrl: gameData.gameFileUrl || null,
       externalUrl: gameData.externalUrl || null,
     },
   });

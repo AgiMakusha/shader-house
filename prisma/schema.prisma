@@ -12,29 +12,52 @@ datasource db {
 
 // User model for authentication
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String?  // Hashed with bcrypt (nullable for OAuth users)
-  role      Role     @default(GAMER)
-  
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String
+  password String? // Hashed with bcrypt (nullable for OAuth users)
+  role     Role    @default(GAMER)
+
   // Email verification
   emailVerified DateTime?
   image         String?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Subscription
+  subscriptionTier     SubscriptionTier   @default(FREE)
+  subscriptionStatus   SubscriptionStatus @default(INACTIVE)
+  subscriptionStart    DateTime?
+  subscriptionEnd      DateTime?
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+
+  // Gamification
+  xp     Int      @default(0)
+  level  Int      @default(1)
+  badges String[] // Badge IDs
+
+  // Public Profile
+  displayName String? // Public display name (shown on reviews, etc.)
+  publicEmail String? // Optional public contact email
+  bio         String? @db.Text // Profile bio/description
+
   // Relations
-  developerProfile     DeveloperProfile?
-  accounts             Account[]
-  verificationTokens   VerificationToken[]
-  games                Game[]
-  ratings              Rating[]
-  favorites            Favorite[]
-  purchases            Purchase[]
+  developerProfile    DeveloperProfile?
+  accounts            Account[]
+  verificationTokens  VerificationToken[]
+  games               Game[]
+  ratings             Rating[]
+  favorites           Favorite[]
+  purchases           Purchase[]
+  subscriptions       Subscription[]
+  supportedDevelopers DeveloperSupport[]
+  playtime            PlaytimeEntry[]
+  claimedGames        ClaimedGame[]
 
   @@index([email])
+  @@index([subscriptionTier])
   @@map("users")
 }
 
@@ -42,8 +65,8 @@ model User {
 model Account {
   id                String  @id @default(cuid())
   userId            String
-  type              String  // oauth, email, credentials
-  provider          String  // google, github, discord, credentials
+  type              String // oauth, email, credentials
+  provider          String // google, github, discord, credentials
   providerAccountId String
   refresh_token     String?
   access_token      String?
@@ -61,12 +84,12 @@ model Account {
 
 // Email verification tokens
 model VerificationToken {
-  id         String   @id @default(cuid())
-  userId     String
-  token      String   @unique
-  type       TokenType @default(EMAIL_VERIFICATION)
-  expires    DateTime
-  createdAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique
+  type      TokenType @default(EMAIL_VERIFICATION)
+  expires   DateTime
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -83,33 +106,33 @@ enum TokenType {
 
 // Developer verification profile
 model DeveloperProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Core verification fields
-  developerType   DeveloperType
-  teamSize        Int
-  hasPublisher    Boolean
-  ownsIP          Boolean
-  fundingSources  FundingSource[]
-  companyType     CompanyType
-  evidenceLinks   String[]        // Array of URLs
-  
+  developerType  DeveloperType
+  teamSize       Int
+  hasPublisher   Boolean
+  ownsIP         Boolean
+  fundingSources FundingSource[]
+  companyType    CompanyType
+  evidenceLinks  String[] // Array of URLs
+
   // Attestation
-  attestIndie     Boolean
-  attestedAt      DateTime        @default(now())
-  attestedIP      String?         // IP address at time of attestation
-  
+  attestIndie Boolean
+  attestedAt  DateTime @default(now())
+  attestedIP  String? // IP address at time of attestation
+
   // Moderation
   verificationStatus VerificationStatus @default(PENDING)
   reviewedAt         DateTime?
-  reviewedBy         String?          // Admin user ID
+  reviewedBy         String? // Admin user ID
   rejectionReason    String?
-  
+
   // Indie eligibility (auto-calculated)
-  isIndieEligible    Boolean          @default(false)
-  
+  isIndieEligible Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -160,35 +183,40 @@ enum VerificationStatus {
 
 // Game model
 model Game {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  title         String
-  tagline       String
-  description   String   @db.Text
-  coverUrl      String
-  screenshots   String[]
-  priceCents    Int      @default(0)
-  platforms     Platform[]
-  externalUrl   String?  // Play/Demo link
-  
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  tagline     String
+  description String     @db.Text
+  coverUrl    String
+  screenshots String[]
+  priceCents  Int        @default(0)
+  platforms   Platform[]
+  gameFileUrl String? // Uploaded game file (.zip, etc.)
+  externalUrl String? // External Play/Demo link (itch.io, Steam, web game, etc.)
+
   // Relations
-  developerId   String
-  developer     User     @relation(fields: [developerId], references: [id], onDelete: Cascade)
-  
+  developerId String
+  developer   User   @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
   // Stats
-  views         Int      @default(0)
-  avgRating     Float    @default(0)
-  favCount      Int      @default(0)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  views     Int   @default(0)
+  avgRating Float @default(0)
+  favCount  Int   @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  gameTags      GameTag[]
-  ratings       Rating[]
-  favorites     Favorite[]
-  purchases     Purchase[]
-  
+  gameTags     GameTag[]
+  ratings      Rating[]
+  favorites    Favorite[]
+  purchases    Purchase[]
+  proLibrary   ProLibraryGame?
+  playtime     PlaytimeEntry[]
+  claimedGames ClaimedGame[]
+  betaAccess   BetaAccess[]
+
   @@index([slug])
   @@index([developerId])
   @@index([avgRating])
@@ -198,26 +226,26 @@ model Game {
 
 // Tag model
 model Tag {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  slug      String    @unique
-  createdAt DateTime  @default(now())
-  
-  gameTags  GameTag[]
-  
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  gameTags GameTag[]
+
   @@index([slug])
   @@map("tags")
 }
 
 // GameTag join table
 model GameTag {
-  id        String   @id @default(cuid())
-  gameId    String
-  tagId     String
-  
-  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  gameId String
+  tagId  String
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
   @@unique([gameId, tagId])
   @@index([gameId])
   @@index([tagId])
@@ -229,14 +257,14 @@ model Rating {
   id        String   @id @default(cuid())
   gameId    String
   userId    String
-  stars     Int      // 1-5
+  stars     Int // 1-5
   comment   String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([gameId, userId])
   @@index([gameId])
   @@index([userId])
@@ -249,10 +277,10 @@ model Favorite {
   gameId    String
   userId    String
   createdAt DateTime @default(now())
-  
-  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([gameId, userId])
   @@index([gameId])
   @@index([userId])
@@ -271,17 +299,204 @@ enum Platform {
 
 // Purchase model
 model Purchase {
-  id          String   @id @default(cuid())
-  gameId      String
-  userId      String
-  pricePaid   Int      // Price paid in cents at time of purchase
-  createdAt   DateTime @default(now())
-  
-  game        Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  gameId    String
+  userId    String
+  pricePaid Int // Price paid in cents at time of purchase
+  createdAt DateTime @default(now())
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([gameId, userId])
   @@index([gameId])
   @@index([userId])
   @@map("purchases")
+}
+
+// ============================================
+// SUBSCRIPTION MODELS
+// ============================================
+
+// Subscription tier enum
+enum SubscriptionTier {
+  FREE // Free Access
+  CREATOR_SUPPORT // $14.99/mo - Support specific developers
+  GAMER_PRO // $14.99/mo - Game Pass style
+}
+
+// Subscription status
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+  TRIALING
+}
+
+// Subscription history/transactions
+model Subscription {
+  id           String             @id @default(cuid())
+  userId       String
+  tier         SubscriptionTier
+  status       SubscriptionStatus
+  priceInCents Int
+  currency     String             @default("USD")
+
+  // Payment info
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
+  // Dates
+  startDate  DateTime
+  endDate    DateTime?
+  canceledAt DateTime?
+  trialEnd   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([tier])
+  @@map("subscriptions")
+}
+
+// Developer Support (for Creator Support Pass)
+model DeveloperSupport {
+  id          String @id @default(cuid())
+  userId      String // Supporter (user with Creator Support Pass)
+  developerId String // Developer being supported
+
+  // Support details
+  isActive  Boolean   @default(true)
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, developerId])
+  @@index([userId])
+  @@index([developerId])
+  @@index([isActive])
+  @@map("developer_supports")
+}
+
+// Pro Library - Curated games for Gamer Pro subscribers
+model ProLibraryGame {
+  id     String @id @default(cuid())
+  gameId String
+
+  // Library management
+  addedAt  DateTime @default(now())
+  featured Boolean  @default(false)
+  category String? // "New This Month", "Popular", "Hidden Gems"
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId])
+  @@index([featured])
+  @@index([addedAt])
+  @@map("pro_library_games")
+}
+
+// Playtime tracking (for revenue distribution)
+model PlaytimeEntry {
+  id     String @id @default(cuid())
+  userId String
+  gameId String
+
+  // Playtime in seconds
+  duration    Int
+  sessionDate DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([sessionDate])
+  @@map("playtime_entries")
+}
+
+// Monthly game claims (Creator Support & Gamer Pro)
+model ClaimedGame {
+  id     String @id @default(cuid())
+  userId String
+  gameId String
+
+  // Claim details
+  claimMonth DateTime // First day of the month
+  tier       SubscriptionTier // Which subscription tier claimed it
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId, claimMonth])
+  @@index([userId])
+  @@index([gameId])
+  @@index([claimMonth])
+  @@map("claimed_games")
+}
+
+// Beta access tracking
+model BetaAccess {
+  id     String @id @default(cuid())
+  gameId String
+
+  // Beta details
+  title       String
+  description String    @db.Text
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean   @default(true)
+
+  // Access requirements
+  minTier SubscriptionTier @default(CREATOR_SUPPORT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@index([gameId])
+  @@index([isActive])
+  @@map("beta_access")
+}
+
+// Developer revenue analytics
+model DeveloperRevenue {
+  id          String @id @default(cuid())
+  developerId String
+
+  // Revenue breakdown
+  month DateTime // First day of the month
+
+  // Revenue sources (in cents)
+  directSales    Int @default(0)
+  creatorSupport Int @default(0) // From Creator Support Pass
+  proPlaytime    Int @default(0) // From Gamer Pro playtime
+  tips           Int @default(0)
+
+  // Metrics
+  newSubscribers     Int   @default(0) // New Creator Support subscribers
+  totalPlaytimeHours Float @default(0)
+  unitsSold          Int   @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([developerId, month])
+  @@index([developerId])
+  @@index([month])
+  @@map("developer_revenue")
 }

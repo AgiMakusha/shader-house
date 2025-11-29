@@ -4,9 +4,10 @@ import { prisma } from '@/lib/db/prisma';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSessionFromRequest(request);
 
     if (!session?.user) {
@@ -15,7 +16,7 @@ export async function POST(
 
     // Get game
     const game = await prisma.game.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!game) {
@@ -26,7 +27,7 @@ export async function POST(
     const existingPurchase = await prisma.purchase.findUnique({
       where: {
         gameId_userId: {
-          gameId: params.id,
+          gameId: id,
           userId: session.user.id,
         },
       },
@@ -40,7 +41,7 @@ export async function POST(
     if (game.priceCents === 0) {
       const purchase = await prisma.purchase.create({
         data: {
-          gameId: params.id,
+          gameId: id,
           userId: session.user.id,
           pricePaid: 0,
         },
@@ -62,7 +63,7 @@ export async function POST(
     // TODO: Integrate with actual payment provider
     const purchase = await prisma.purchase.create({
       data: {
-        gameId: params.id,
+        gameId: id,
         userId: session.user.id,
         pricePaid: game.priceCents,
       },
@@ -83,4 +84,6 @@ export async function POST(
     );
   }
 }
+
+
 

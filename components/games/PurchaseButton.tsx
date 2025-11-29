@@ -4,22 +4,29 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { SubscriptionTier, FeatureFlag, hasFeatureAccess } from "@/lib/subscriptions/types";
+import { Crown } from "lucide-react";
 
 interface PurchaseButtonProps {
   gameId: string;
   priceCents: number;
+  gameFileUrl?: string | null;
   externalUrl?: string | null;
   isPurchased: boolean;
+  userTier?: SubscriptionTier | null;
 }
 
-export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }: PurchaseButtonProps) {
+export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, isPurchased, userTier }: PurchaseButtonProps) {
   const router = useRouter();
   const { play } = useAudio();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
 
-  const price = priceCents === 0 ? 'Free' : `€${(priceCents / 100).toFixed(2)}`;
+  const price = priceCents === 0 ? 'Free' : `$${(priceCents / 100).toFixed(2)}`;
   const isFree = priceCents === 0;
+  const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
+  const canPlayFree = hasUnlimitedAccess && !isFree; // Premium users can play paid games for free
+  const hasGameAccess = gameFileUrl || externalUrl; // Game is available if either file or link exists
 
   const handlePurchase = async () => {
     if (isProcessing) return;
@@ -42,8 +49,10 @@ export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }:
       play("success");
       router.refresh();
       
-      // If there's an external URL, open it
-      if (externalUrl) {
+      // If there's a game file, download it; otherwise open external URL
+      if (gameFileUrl) {
+        window.location.href = gameFileUrl;
+      } else if (externalUrl) {
         window.open(externalUrl, '_blank');
       }
     } catch (error: any) {
@@ -54,6 +63,73 @@ export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }:
       setIsProcessing(false);
     }
   };
+
+  // If user has unlimited access via Creator Support Pass
+  if (canPlayFree && hasGameAccess) {
+    return (
+      <div className="space-y-3">
+        <div
+          className="w-full px-4 py-2 rounded-lg text-center font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+          style={{
+            background: "linear-gradient(145deg, rgba(60, 50, 30, 0.3) 0%, rgba(50, 40, 20, 0.4) 100%)",
+            border: "1px solid rgba(240, 220, 140, 0.4)",
+            color: "rgba(240, 220, 140, 0.95)",
+            fontSize: "10px",
+            fontFamily: '"Press Start 2P", monospace',
+          }}
+        >
+          <Crown size={14} />
+          Included with Pass
+        </div>
+        {gameFileUrl ? (
+          <a
+            href={gameFileUrl}
+            download
+            onClick={() => play("activate")}
+            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            style={{
+              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
+              border: "1px solid rgba(240, 220, 140, 0.5)",
+              color: "rgba(240, 220, 140, 0.95)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: "11px",
+            }}
+          >
+            Download Free →
+          </a>
+        ) : (
+          <a
+            href={externalUrl!}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => play("activate")}
+            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            style={{
+              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
+              border: "1px solid rgba(240, 220, 140, 0.5)",
+              color: "rgba(240, 220, 140, 0.95)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              fontFamily: '"Press Start 2P", monospace',
+              fontSize: "11px",
+            }}
+          >
+            Play Free →
+          </a>
+        )}
+        <p
+          className="text-xs text-center"
+          style={{ 
+            color: "rgba(230, 210, 150, 0.7)",
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: "8px",
+          }}
+        >
+          Full access with your Creator Support Pass
+        </p>
+      </div>
+    );
+  }
 
   if (isPurchased) {
     return (
@@ -68,7 +144,22 @@ export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }:
         >
           ✓ In Your Library
         </div>
-        {externalUrl && (
+        {gameFileUrl && (
+          <a
+            href={gameFileUrl}
+            download
+            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            style={{
+              background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+              border: "1px solid rgba(200, 240, 200, 0.4)",
+              color: "rgba(200, 240, 200, 0.95)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            Download Now →
+          </a>
+        )}
+        {!gameFileUrl && externalUrl && (
           <a
             href={externalUrl}
             target="_blank"
@@ -88,7 +179,7 @@ export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }:
     );
   }
 
-  if (!externalUrl) {
+  if (!hasGameAccess) {
     return (
       <button
         disabled
@@ -147,4 +238,6 @@ export function PurchaseButton({ gameId, priceCents, externalUrl, isPurchased }:
     </div>
   );
 }
+
+
 

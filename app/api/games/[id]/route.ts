@@ -6,9 +6,10 @@ import { prisma } from '@/lib/db/prisma';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSessionFromRequest(request);
 
     if (!session?.user) {
@@ -18,7 +19,7 @@ export async function PATCH(
     const body = await request.json();
     const validated = gameUpsertSchema.parse(body);
 
-    const game = await updateGame(params.id, validated, session.user.id);
+    const game = await updateGame(id, validated, session.user.id);
 
     return NextResponse.json(game);
   } catch (error: any) {
@@ -37,9 +38,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getSessionFromRequest(request);
 
     if (!session?.user) {
@@ -47,19 +49,29 @@ export async function DELETE(
     }
 
     const game = await prisma.game.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!game) {
       return NextResponse.json({ error: 'Game not found' }, { status: 404 });
     }
 
-    if (game.developerId !== session.user.id && session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    // RULE 1: Only game owner can delete (not even admins for safety)
+    if (game.developerId !== session.user.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Only the game owner can delete this game' },
+        { status: 403 }
+      );
+    }
+
+    // Delete associated uploaded files before deleting game
+    const { deleteUploadedFile } = await import('@/lib/utils/file-manager');
+    if (game.gameFileUrl) {
+      await deleteUploadedFile(game.gameFileUrl);
     }
 
     await prisma.game.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
@@ -71,4 +83,6 @@ export async function DELETE(
     );
   }
 }
+
+
 

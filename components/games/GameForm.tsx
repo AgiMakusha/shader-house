@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Platform } from "@prisma/client";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { ImageUpload } from "./ImageUpload";
+import { GameFileUpload } from "./GameFileUpload";
 
 interface GameFormProps {
   initialData?: {
@@ -17,6 +18,7 @@ interface GameFormProps {
     screenshots: string[];
     priceCents: number;
     platforms: Platform[];
+    gameFileUrl: string;
     externalUrl: string;
     tags: string[];
   };
@@ -44,12 +46,34 @@ export function GameForm({ initialData, mode }: GameFormProps) {
     screenshots: initialData?.screenshots || [''],
     priceCents: initialData?.priceCents || 0,
     platforms: initialData?.platforms || [],
+    gameFileUrl: initialData?.gameFileUrl || '',
     externalUrl: initialData?.externalUrl || '',
     tags: initialData?.tags || [''],
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const renderFieldError = (fieldName: string) => {
+    if (errors[fieldName]) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3 rounded-lg text-sm mt-2 pixelized"
+          style={{
+            background: 'rgba(180, 60, 60, 0.15)',
+            border: '1px solid rgba(255, 120, 120, 0.3)',
+            color: 'rgba(255, 180, 180, 0.95)',
+            textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
+          }}
+        >
+          {errors[fieldName]}
+        </motion.div>
+      );
+    }
+    return null;
+  };
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -104,10 +128,75 @@ export function GameForm({ initialData, mode }: GameFormProps) {
     handleChange('platforms', newPlatforms);
   };
 
+  // RULE 3: Smart handling when switching between file and URL
+  const handleGameFileChange = (url: string) => {
+    handleChange('gameFileUrl', url);
+    
+    // Optional: Clear external URL when uploading a file
+    // Uncomment if you want to enforce single distribution method
+    // if (url && formData.externalUrl) {
+    //   const shouldClear = window.confirm(
+    //     'You uploaded a game file. Do you want to remove the external URL?\n\n' +
+    //     '(You can keep both if you want to offer multiple download options)'
+    //   );
+    //   if (shouldClear) {
+    //     handleChange('externalUrl', '');
+    //   }
+    // }
+  };
+
+  const handleExternalUrlChange = (url: string) => {
+    handleChange('externalUrl', url);
+    
+    // Optional: Clear game file when adding external URL
+    // Uncomment if you want to enforce single distribution method
+    // if (url && formData.gameFileUrl) {
+    //   const shouldClear = window.confirm(
+    //     'You added an external URL. Do you want to remove the uploaded game file?\n\n' +
+    //     '(You can keep both if you want to offer multiple download options)'
+    //   );
+    //   if (shouldClear) {
+    //     handleChange('gameFileUrl', '');
+    //   }
+    // }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrors({});
+
+    // Client-side validation
+    const validationErrors: Record<string, string> = {};
+    
+    if (!formData.title.trim()) {
+      validationErrors.title = 'Game title is required';
+    }
+    
+    if (!formData.tagline.trim()) {
+      validationErrors.tagline = 'Tagline is required';
+    }
+    
+    if (!formData.description.trim()) {
+      validationErrors.description = 'Description is required';
+    } else if (formData.description.trim().length < 20) {
+      validationErrors.description = 'Description must be at least 20 characters';
+    }
+    
+    if (!formData.coverUrl.trim()) {
+      validationErrors.coverUrl = 'Cover image is required';
+    }
+    
+    if (formData.platforms.length === 0) {
+      validationErrors.platforms = 'Please select at least one platform';
+    }
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsSubmitting(false);
+      play("error");
+      return;
+    }
 
     try {
       // Filter out empty values
@@ -134,10 +223,22 @@ export function GameForm({ initialData, mode }: GameFormProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.error) {
+        // Handle validation errors (array format from Zod)
+        if (Array.isArray(data)) {
+          const fieldErrors: Record<string, string> = {};
+          data.forEach((err: any) => {
+            const field = err.path?.[0];
+            if (field) {
+              fieldErrors[field] = err.message;
+            }
+          });
+          setErrors(fieldErrors);
+          throw new Error('Please fix the validation errors');
+        } else if (data.error) {
           setErrors({ general: data.error });
+          throw new Error(data.error);
         }
-        throw new Error(data.error || 'Failed to save game');
+        throw new Error('Failed to save game');
       }
 
       play("success");
@@ -153,19 +254,21 @@ export function GameForm({ initialData, mode }: GameFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="space-y-8">
       {errors.general && (
-        <div
-          className="p-4 rounded-lg"
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-lg text-center pixelized"
           style={{
-            background: "rgba(250, 100, 100, 0.2)",
-            border: "1px solid rgba(250, 100, 100, 0.4)",
+            background: 'rgba(180, 60, 60, 0.15)',
+            border: '1px solid rgba(255, 120, 120, 0.3)',
+            color: 'rgba(255, 180, 180, 0.95)',
+            textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)',
           }}
         >
-          <p style={{ color: "rgba(250, 100, 100, 0.9)" }}>
-            {errors.general}
-          </p>
-        </div>
+          {errors.general}
+        </motion.div>
       )}
 
       {/* Basic Info */}
@@ -195,8 +298,8 @@ export function GameForm({ initialData, mode }: GameFormProps) {
               placeholder="e.g., Pixel Quest"
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
               style={{ color: "rgba(200, 240, 200, 0.85)" }}
-              required
             />
+            {renderFieldError('title')}
           </div>
 
           <div>
@@ -204,7 +307,7 @@ export function GameForm({ initialData, mode }: GameFormProps) {
               className="block text-sm font-medium mb-2"
               style={{ color: "rgba(200, 240, 200, 0.7)" }}
             >
-              Price (€)
+              Price ($)
             </label>
             <input
               type="number"
@@ -237,11 +340,11 @@ export function GameForm({ initialData, mode }: GameFormProps) {
             maxLength={120}
             className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
             style={{ color: "rgba(200, 240, 200, 0.85)" }}
-            required
           />
           <p className="text-xs mt-1 text-right" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
             {formData.tagline.length} / 120
           </p>
+          {renderFieldError('tagline')}
         </div>
 
         <div>
@@ -258,28 +361,72 @@ export function GameForm({ initialData, mode }: GameFormProps) {
             placeholder="Detailed description of your game, gameplay, features, etc."
             className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm resize-none"
             style={{ color: "rgba(200, 240, 200, 0.85)" }}
-            required
           />
+          {renderFieldError('description')}
         </div>
 
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: "rgba(200, 240, 200, 0.7)" }}
+        {/* Game File or External Link */}
+        <div className="space-y-4">
+          <div
+            className="p-4 rounded-lg"
+            style={{
+              background: "rgba(100, 200, 100, 0.05)",
+              border: "1px solid rgba(200, 240, 200, 0.2)",
+            }}
           >
-            External URL (Optional)
-          </label>
-          <input
-            type="url"
-            value={formData.externalUrl}
-            onChange={(e) => handleChange('externalUrl', e.target.value)}
-            placeholder="https://yourgame.com or https://itch.io/your-game"
-            className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
-            style={{ color: "rgba(200, 240, 200, 0.85)" }}
+            <p
+              className="text-sm font-semibold mb-2"
+              style={{ color: "rgba(200, 240, 200, 0.9)" }}
+            >
+              Game Distribution {formData.gameFileUrl || formData.externalUrl ? '✓' : '⚠️'}
+            </p>
+            <p
+              className="text-xs mb-2"
+              style={{ color: "rgba(200, 240, 200, 0.6)" }}
+            >
+              Choose at least one: Upload your game file (.zip) OR provide an external link (itch.io, Steam, web game, etc.)
+            </p>
+            {formData.gameFileUrl && formData.externalUrl && (
+              <p
+                className="text-xs font-semibold"
+                style={{ color: "rgba(150, 250, 150, 0.9)" }}
+              >
+                ℹ️ Both methods active: Users can download the file OR visit the external link
+              </p>
+            )}
+          </div>
+
+          <GameFileUpload
+            value={formData.gameFileUrl}
+            onChange={handleGameFileChange}
+            label="Upload Game File"
           />
-          <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-            Link to where users can play or purchase your game
-          </p>
+          {renderFieldError('gameFileUrl')}
+
+          <div className="text-center" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+            — OR —
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+            >
+              External URL
+            </label>
+            <input
+              type="url"
+              value={formData.externalUrl}
+              onChange={(e) => handleExternalUrlChange(e.target.value)}
+              placeholder="https://yourgame.com or https://itch.io/your-game"
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
+              style={{ color: "rgba(200, 240, 200, 0.85)" }}
+            />
+            <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+              Link to where users can play or download your game (itch.io, Steam, web game, etc.)
+            </p>
+            {renderFieldError('externalUrl')}
+          </div>
         </div>
       </div>
 
@@ -299,8 +446,8 @@ export function GameForm({ initialData, mode }: GameFormProps) {
           value={formData.coverUrl}
           onChange={(url) => handleChange('coverUrl', url)}
           label="Cover Image"
-          required
         />
+        {renderFieldError('coverUrl')}
 
         <div>
           <label
@@ -389,6 +536,7 @@ export function GameForm({ initialData, mode }: GameFormProps) {
             </button>
           ))}
         </div>
+        {renderFieldError('platforms')}
       </div>
 
       {/* Tags */}
@@ -431,6 +579,7 @@ export function GameForm({ initialData, mode }: GameFormProps) {
             </div>
           ))}
         </div>
+        {renderFieldError('tags')}
         {formData.tags.length < 8 && (
           <button
             type="button"

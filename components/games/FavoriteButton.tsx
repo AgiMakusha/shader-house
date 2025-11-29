@@ -77,3 +77,5 @@ export function FavoriteButton({ gameId, initialFavorited, initialCount }: Favor
   );
 }
 
+
+
