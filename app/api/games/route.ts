@@ -24,19 +24,18 @@ export async function GET(request: NextRequest) {
     // Pass userId if developer='me' is requested
     const userId = validated.developer === 'me' ? session?.user?.id : undefined;
     
-    // Check if we should include all statuses (for developer viewing their own games)
+    // Check status filter
     const statusParam = searchParams.get('status');
-    const includeAllStatuses = validated.developer === 'me' || statusParam === 'beta';
     
     console.log('🎮 API /games:', {
       developer: validated.developer,
       sessionUserId: session?.user?.id,
       passedUserId: userId,
-      includeAllStatuses,
+      statusParam,
     });
     
     const [result, tags] = await Promise.all([
-      getGames(validated, userId, includeAllStatuses),
+      getGames(validated, userId, statusParam),
       getTags(),
     ]);
 

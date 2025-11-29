@@ -2,20 +2,28 @@ import { prisma } from '@/lib/db/prisma';
 import { Platform, Prisma, ReleaseStatus } from '@prisma/client';
 import { GameQuery, GameUpsert, RatingInput } from '@/lib/validations/game';
 
-export async function getGames(query: GameQuery, userId?: string, includeAllStatuses = false) {
+export async function getGames(query: GameQuery, userId?: string, statusFilter?: string | null) {
   const { q, tags, platform, priceFilter, sort, page, pageSize, developer } = query;
 
   const where: Prisma.GameWhereInput = {};
 
-  // By default, only show RELEASED games in public marketplace
-  // Unless developer is viewing their own games (developer=me)
-  if (!includeAllStatuses && developer !== 'me') {
+  // Handle release status filtering
+  if (statusFilter === 'beta') {
+    // Explicitly filter for BETA games only
+    where.releaseStatus = ReleaseStatus.BETA;
+  } else if (statusFilter === 'released') {
+    // Explicitly filter for RELEASED games only
+    where.releaseStatus = ReleaseStatus.RELEASED;
+  } else if (developer !== 'me') {
+    // By default, only show RELEASED games in public marketplace
+    // Unless developer is viewing their own games (developer=me shows all)
     where.releaseStatus = ReleaseStatus.RELEASED;
   }
+  // If developer='me' and no statusFilter, show all statuses
 
   // Developer filter
   if (developer) {
-    console.log('🔍 Developer filter:', { developer, userId });
+    console.log('🔍 Developer filter:', { developer, userId, statusFilter });
     // If developer='me', use the provided userId
     if (developer === 'me' && userId) {
       where.developerId = userId;
