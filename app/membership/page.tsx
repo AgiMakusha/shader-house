@@ -641,15 +641,18 @@ export default function MembershipPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <div className="flex items-center justify-between mb-8">
-            <Link
-              href={user ? (user.role === 'DEVELOPER' ? '/profile/developer' : '/profile/gamer') : '/'}
-              className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all pixelized"
-              style={{ color: "rgba(200, 240, 200, 0.75)" }}
-            >
-              ← Back to {user ? 'Profile' : 'Home'}
-            </Link>
-          </div>
+          {/* Only show back link for existing users, not new users */}
+          {!isNewUser && (
+            <div className="flex items-center justify-between mb-8">
+              <Link
+                href={user ? (user.role === 'DEVELOPER' ? '/profile/developer' : '/profile/gamer') : '/'}
+                className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all pixelized"
+                style={{ color: "rgba(200, 240, 200, 0.75)" }}
+              >
+                ← Back to {user ? 'Profile' : 'Home'}
+              </Link>
+            </div>
+          )}
           <div className="text-center">
             <h1
               className="text-4xl md:text-5xl font-bold tracking-wider uppercase pixelized mb-3"
