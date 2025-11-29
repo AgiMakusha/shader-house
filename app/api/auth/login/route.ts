@@ -23,6 +23,15 @@ export async function POST(request: NextRequest) {
     // Find user in database
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        password: true,
+        subscriptionTier: true,
+        createdAt: true,
+      },
     });
 
     if (!user) {
@@ -49,6 +58,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       name: user.name,
       role: user.role as "DEVELOPER" | "GAMER" | "ADMIN",
+      subscriptionTier: user.subscriptionTier as "FREE" | "CREATOR_SUPPORT" | "GAMER_PRO",
       createdAt: user.createdAt.getTime(),
     }, rememberMe);
 

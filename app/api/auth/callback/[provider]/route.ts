@@ -40,6 +40,17 @@ export async function GET(
     let user = await prisma.user.findUnique({
       where: { email: userInfo.email },
       include: { accounts: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        subscriptionTier: true,
+        emailVerified: true,
+        image: true,
+        createdAt: true,
+        accounts: true,
+      },
     });
 
     let isNewUser = false;
@@ -101,6 +112,17 @@ export async function GET(
             },
           },
         },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          subscriptionTier: true,
+          emailVerified: true,
+          image: true,
+          createdAt: true,
+          accounts: true,
+        },
       });
     }
 
@@ -110,6 +132,7 @@ export async function GET(
       email: user.email,
       name: user.name,
       role: user.role as 'DEVELOPER' | 'GAMER' | 'ADMIN',
+      subscriptionTier: user.subscriptionTier as 'FREE' | 'CREATOR_SUPPORT' | 'GAMER_PRO',
       createdAt: user.createdAt.getTime(),
     }, true);
 

@@ -144,6 +144,15 @@ export async function POST(request: NextRequest) {
           },
         }),
       },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        subscriptionTier: true,
+        emailVerified: true,
+        createdAt: true,
+      },
     });
 
     // Generate and send email verification token
@@ -161,6 +170,7 @@ export async function POST(request: NextRequest) {
       email: newUser.email,
       name: newUser.name,
       role: newUser.role as "DEVELOPER" | "GAMER" | "ADMIN",
+      subscriptionTier: newUser.subscriptionTier as "FREE" | "CREATOR_SUPPORT" | "GAMER_PRO",
       createdAt: newUser.createdAt.getTime(),
     }, true); // Remember me = true by default for new registrations
 

@@ -1,4 +1,4 @@
-export type SubscriptionTier = 'FREE' | 'CREATOR_SUPPORT';
+export type SubscriptionTier = 'FREE' | 'CREATOR_SUPPORT' | 'GAMER_PRO';
 
 export interface SubscriptionPlan {
   id: SubscriptionTier;
@@ -83,6 +83,7 @@ export function canAccessFeature(
   const tierHierarchy: Record<SubscriptionTier, number> = {
     FREE: 0,
     CREATOR_SUPPORT: 1,
+    GAMER_PRO: 1, // Same level as CREATOR_SUPPORT
   };
 
   return tierHierarchy[userTier] >= tierHierarchy[requiredTier];
@@ -91,22 +92,22 @@ export function canAccessFeature(
 // Feature access mapping
 const FEATURE_ACCESS: Record<FeatureFlag, SubscriptionTier[]> = {
   // Free Access Features (available to all)
-  [FeatureFlag.BUY_GAMES]: ['FREE', 'CREATOR_SUPPORT'],
-  [FeatureFlag.COMMUNITY_REVIEWS]: ['FREE', 'CREATOR_SUPPORT'],
-  [FeatureFlag.FREE_DEMOS]: ['FREE', 'CREATOR_SUPPORT'],
-  [FeatureFlag.CLOUD_SAVES]: ['FREE', 'CREATOR_SUPPORT'],
-  [FeatureFlag.USER_PROFILES]: ['FREE', 'CREATOR_SUPPORT'],
-  [FeatureFlag.NEWSLETTER]: ['FREE', 'CREATOR_SUPPORT'],
+  [FeatureFlag.BUY_GAMES]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.COMMUNITY_REVIEWS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.FREE_DEMOS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.CLOUD_SAVES]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.USER_PROFILES]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.NEWSLETTER]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
   
-  // Creator Support Pass Exclusive Features
-  [FeatureFlag.UNLIMITED_LIBRARY]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.SUPPORT_DEVELOPERS]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.BETA_ACCESS]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.EXCLUSIVE_COSMETICS]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.GAME_TEST_ACCESS]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.VOTING_POWER]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.DEV_COMMUNITY]: ['CREATOR_SUPPORT'],
-  [FeatureFlag.ACHIEVEMENTS]: ['CREATOR_SUPPORT'],
+  // Pro Features (Creator Support Pass & Gamer Pro)
+  [FeatureFlag.UNLIMITED_LIBRARY]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.SUPPORT_DEVELOPERS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.BETA_ACCESS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.EXCLUSIVE_COSMETICS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.GAME_TEST_ACCESS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.VOTING_POWER]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.DEV_COMMUNITY]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.ACHIEVEMENTS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
 };
 
 export function hasFeatureAccess(

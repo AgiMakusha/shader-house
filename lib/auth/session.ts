@@ -15,6 +15,7 @@ export interface SessionUser {
   email: string;
   name?: string;
   role: "DEVELOPER" | "GAMER" | "ADMIN";
+  subscriptionTier?: "FREE" | "CREATOR_SUPPORT" | "GAMER_PRO";
   createdAt: number;
 }
 
