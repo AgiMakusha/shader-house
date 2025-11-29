@@ -101,6 +101,18 @@ export async function getGames(query: GameQuery, userId?: string) {
             tag: true,
           },
         },
+        betaAccess: {
+          select: {
+            id: true,
+            isActive: true,
+            maxTesters: true,
+            _count: {
+              select: {
+                testers: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             ratings: true,

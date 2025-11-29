@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 const QUICK_ACTIONS = [
   { title: "My Games", description: "View all your published games", href: "/games?developer=me" },
   { title: "Analytics", description: "View your game stats", href: "/profile/developer/analytics" },
+  { title: "Beta Access", description: "Manage demo & beta testers", href: "/profile/developer/beta" },
   { title: "Community", description: "Connect with gamers", href: "/community" },
 ];
 

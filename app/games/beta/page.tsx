@@ -38,45 +38,12 @@ export default function BetaAccessPage() {
         const data = await response.json();
         setUser(data.user);
 
-        // Mock beta games data
-        setBetaGames([
-          {
-            id: '1',
-            title: 'Neon Rogue Beta',
-            developer: 'Pixel Studios',
-            description: 'Testing new procedural generation system and combat mechanics',
-            coverUrl: '/placeholder-game.jpg',
-            testingPhase: 'beta',
-            testersCount: 45,
-            feedbackCount: 127,
-            slug: 'neon-rogue',
-            externalUrl: 'https://example.com/game',
-          },
-          {
-            id: '2',
-            title: 'Space Trader Alpha',
-            developer: 'Cosmic Games',
-            description: 'Early alpha testing - economy balancing and multiplayer features',
-            coverUrl: '/placeholder-game.jpg',
-            testingPhase: 'alpha',
-            testersCount: 12,
-            feedbackCount: 34,
-            slug: 'space-trader',
-            externalUrl: 'https://example.com/game',
-          },
-          {
-            id: '3',
-            title: 'Dungeon Master RC',
-            developer: 'Cave Devs',
-            description: 'Release candidate - final bug testing before launch',
-            coverUrl: '/placeholder-game.jpg',
-            testingPhase: 'release-candidate',
-            testersCount: 89,
-            feedbackCount: 245,
-            slug: 'dungeon-master',
-            externalUrl: 'https://example.com/game',
-          },
-        ]);
+        // Fetch real beta games from API
+        const gamesResponse = await fetch("/api/games/beta");
+        if (gamesResponse.ok) {
+          const gamesData = await gamesResponse.json();
+          setBetaGames(gamesData.games || []);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         router.push("/auth/login");
