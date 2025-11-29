@@ -65,7 +65,7 @@ export function PricingCard({ plan, currentTier, onSelect, isLoading }: PricingC
         </div>
       )}
 
-      {isCurrentPlan && (
+      {isCurrentPlan && !isFree && (
         <div 
           className="absolute -top-3 right-4 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider pixelized"
           style={{

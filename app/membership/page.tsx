@@ -576,7 +576,11 @@ export default function MembershipPage() {
               className="text-base font-semibold tracking-wide uppercase pixelized mb-4"
               style={{ textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(200, 240, 200, 0.7)" }}
             >
-              {user ? `Welcome back, ${user.name}!` : 'Join our community of indie game lovers'}
+              {user && user.subscriptionTier !== 'FREE' 
+                ? `Welcome back, ${user.name}!` 
+                : user 
+                  ? `Welcome, ${user.name}!` 
+                  : 'Join our community of indie game lovers'}
             </p>
             <p
               className="text-sm pixelized"
