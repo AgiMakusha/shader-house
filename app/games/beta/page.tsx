@@ -26,6 +26,8 @@ export default function BetaAccessPage() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [betaGames, setBetaGames] = useState<BetaGame[]>([]);
+  const [joinedTests, setJoinedTests] = useState<Set<string>>(new Set());
+  const [joiningGame, setJoiningGame] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -44,6 +46,14 @@ export default function BetaAccessPage() {
           const gamesData = await gamesResponse.json();
           setBetaGames(gamesData.games || []);
         }
+
+        // Fetch joined tests to show status
+        const testsResponse = await fetch("/api/beta/my-tests");
+        if (testsResponse.ok) {
+          const testsData = await testsResponse.json();
+          const joined = new Set(testsData.tests.map((t: any) => t.gameId));
+          setJoinedTests(joined);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         router.push("/auth/login");
@@ -54,6 +64,32 @@ export default function BetaAccessPage() {
 
     checkAuth();
   }, [router]);
+
+  const handleJoinBeta = async (gameId: string, gameTitle: string) => {
+    setJoiningGame(gameId);
+
+    try {
+      const response = await fetch("/api/beta/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId }),
+      });
+
+      if (response.ok) {
+        // Success! Update joined tests
+        setJoinedTests(prev => new Set([...prev, gameId]));
+        alert(`✅ Successfully joined beta test for "${gameTitle}"!\n\nGo to "My Beta Tests" to start testing.`);
+      } else {
+        const data = await response.json();
+        alert(data.error || "Failed to join beta test");
+      }
+    } catch (error) {
+      console.error("Error joining beta:", error);
+      alert("An error occurred while joining the beta test");
+    } finally {
+      setJoiningGame(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -123,6 +159,24 @@ export default function BetaAccessPage() {
               }}
             >
               ← Back to Profile
+            </Link>
+            <Link
+              href="/profile/gamer/beta"
+              style={{
+                color: "rgba(150, 200, 255, 0.85)",
+                fontSize: "11px",
+                fontFamily: '"Press Start 2P", monospace',
+                textDecoration: "none",
+                display: "inline-block",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "rgba(150, 220, 255, 0.95)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "rgba(150, 200, 255, 0.85)";
+              }}
+            >
+              My Beta Tests →
             </Link>
             <Link
               href="/games"
@@ -331,20 +385,18 @@ export default function BetaAccessPage() {
                         </div>
                       </div>
 
-                      {/* Play Button */}
-                      {game.externalUrl && (
-                        <a
-                          href={game.externalUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                      {/* Join Beta Button */}
+                      {joinedTests.has(game.id) ? (
+                        <Link
+                          href="/profile/gamer/beta"
                           style={{
                             display: "block",
                             width: "100%",
                             padding: "12px",
-                            background: "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)",
-                            border: "1px solid rgba(180, 220, 255, 0.5)",
+                            background: "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.4) 100%)",
+                            border: "1px solid rgba(150, 250, 150, 0.5)",
                             borderRadius: "8px",
-                            color: "rgba(200, 240, 255, 0.95)",
+                            color: "rgba(200, 255, 200, 0.95)",
                             fontSize: "10px",
                             fontFamily: '"Press Start 2P", monospace',
                             textAlign: "center",
@@ -352,16 +404,51 @@ export default function BetaAccessPage() {
                             transition: "all 0.3s ease",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.4) 0%, rgba(100, 150, 200, 0.5) 100%)";
+                            e.currentTarget.style.background = "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.5) 100%)";
                             e.currentTarget.style.transform = "translateY(-2px)";
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)";
+                            e.currentTarget.style.background = "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.4) 100%)";
                             e.currentTarget.style.transform = "translateY(0)";
                           }}
                         >
-                          Join Test →
-                        </a>
+                          ✓ Joined • Go to Dashboard →
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => handleJoinBeta(game.id, game.title)}
+                          disabled={joiningGame === game.id}
+                          style={{
+                            width: "100%",
+                            padding: "12px",
+                            background: joiningGame === game.id
+                              ? "linear-gradient(135deg, rgba(150, 200, 255, 0.2) 0%, rgba(100, 150, 200, 0.3) 100%)"
+                              : "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)",
+                            border: "1px solid rgba(180, 220, 255, 0.5)",
+                            borderRadius: "8px",
+                            color: "rgba(200, 240, 255, 0.95)",
+                            fontSize: "10px",
+                            fontFamily: '"Press Start 2P", monospace',
+                            textAlign: "center",
+                            cursor: joiningGame === game.id ? "not-allowed" : "pointer",
+                            transition: "all 0.3s ease",
+                            opacity: joiningGame === game.id ? 0.6 : 1,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (joiningGame !== game.id) {
+                              e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.4) 0%, rgba(100, 150, 200, 0.5) 100%)";
+                              e.currentTarget.style.transform = "translateY(-2px)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (joiningGame !== game.id) {
+                              e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)";
+                              e.currentTarget.style.transform = "translateY(0)";
+                            }
+                          }}
+                        >
+                          {joiningGame === game.id ? "Joining..." : "Join Beta Test →"}
+                        </button>
                       )}
                     </div>
                   </div>
