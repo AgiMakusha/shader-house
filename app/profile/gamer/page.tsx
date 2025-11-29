@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 
 const QUICK_ACTIONS = [
   { title: "Browse Games", description: "Discover new games", href: "/games" },
-  { title: "Beta Access", description: "Test upcoming games", href: "/games/beta" },
+  { title: "My Beta Tests", description: "Active beta tests & tasks", href: "/profile/gamer/beta" },
+  { title: "Beta Games", description: "Join new beta tests", href: "/games/beta" },
   { title: "Achievements", description: "View your trophies", href: "/profile/gamer/achievements" },
   { title: "Subscription", description: "Manage your plan", href: "/profile/gamer/subscription" },
   { title: "Community", description: "Chat with friends", href: "/community" },

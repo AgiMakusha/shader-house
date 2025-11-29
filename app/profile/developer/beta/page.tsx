@@ -209,6 +209,23 @@ export default function DeveloperBetaPage() {
                       <span>Pro members only</span>
                     </div>
                   </div>
+                  
+                  {/* New: Link to Feedback Page */}
+                  <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(240, 220, 140, 0.2)" }}>
+                    <Link
+                      href="/profile/developer/feedback"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      style={{
+                        background: "rgba(100, 200, 100, 0.2)",
+                        border: "1px solid rgba(150, 250, 150, 0.3)",
+                        color: "rgba(200, 240, 200, 0.95)",
+                      }}
+                      onMouseEnter={() => play("hover")}
+                    >
+                      <Users size={16} />
+                      View Beta Feedback & Bug Reports
+                    </Link>
+                  </div>
                 </div>
               </div>
             </GameCardContent>
