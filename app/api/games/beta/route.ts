@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { hasFeatureAccess, FeatureFlag } from '@/lib/subscriptions/types';
+import { getBetaGames } from '@/lib/queries/games';
 
 /**
  * GET /api/games/beta
@@ -39,59 +40,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch games with active beta access
-    const games = await prisma.game.findMany({
-      where: {
-        betaAccess: {
-          some: {
-            isActive: true,
-          },
-        },
-      },
-      include: {
-        developer: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        betaAccess: {
-          where: {
-            isActive: true,
-          },
-          select: {
-            id: true,
-            maxTesters: true,
-            _count: {
-              select: {
-                testers: true,
-              },
-            },
-          },
-        },
-        _count: {
-          select: {
-            ratings: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    // Fetch games with releaseStatus = BETA
+    const games = await getBetaGames();
 
     // Transform to match the expected format
     const betaGames = games.map((game) => {
-      const betaInfo = game.betaAccess[0];
       return {
         id: game.id,
         title: game.title,
         developer: game.developer.name,
         description: game.description,
         coverUrl: game.coverUrl,
-        testingPhase: 'beta' as const, // You can add this field to the Game model if needed
-        testersCount: betaInfo?._count?.testers || 0,
+        testingPhase: 'beta' as const,
+        testersCount: game._count.purchases, // Count of Pro users who have access
         feedbackCount: game._count.ratings,
         slug: game.slug,
         externalUrl: game.externalUrl,

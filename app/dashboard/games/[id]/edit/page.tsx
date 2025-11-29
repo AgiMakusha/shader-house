@@ -57,7 +57,9 @@ export default async function EditGamePage({ params }: PageProps) {
     screenshots: game.screenshots,
     priceCents: game.priceCents,
     platforms: game.platforms,
+    gameFileUrl: game.gameFileUrl || '',
     externalUrl: game.externalUrl || '',
+    releaseStatus: game.releaseStatus,
     tags: game.gameTags.map(gt => gt.tag.name),
   };
 

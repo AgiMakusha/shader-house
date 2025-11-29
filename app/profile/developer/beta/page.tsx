@@ -45,8 +45,8 @@ export default function DeveloperBetaPage() {
         }
         setUser(userData.user);
 
-        // Fetch developer's games with beta access info
-        const gamesResponse = await fetch("/api/games?developer=me");
+        // Fetch developer's beta games only (releaseStatus = BETA)
+        const gamesResponse = await fetch("/api/games?developer=me&status=beta");
         if (gamesResponse.ok) {
           const gamesData = await gamesResponse.json();
           setGames(gamesData.items || []);
@@ -61,27 +61,39 @@ export default function DeveloperBetaPage() {
     fetchData();
   }, [router]);
 
-  const toggleBetaAccess = async (gameId: string, currentStatus: boolean) => {
+  const promoteToRelease = async (gameId: string, gameTitle: string) => {
+    const confirmed = window.confirm(
+      `🚀 Promote "${gameTitle}" to Full Release?\n\n` +
+      `This will:\n` +
+      `• Move the game from Beta to Public Marketplace\n` +
+      `• Make it visible to all users (not just Pro subscribers)\n` +
+      `• Remove it from the Beta Games list\n\n` +
+      `This action cannot be undone. Are you sure?`
+    );
+
+    if (!confirmed) return;
+
     try {
-      const response = await fetch(`/api/games/${gameId}/beta-access`, {
+      const response = await fetch(`/api/games/${gameId}/promote`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !currentStatus }),
       });
 
       if (response.ok) {
         play("success");
         // Refresh games list
-        const gamesResponse = await fetch("/api/games?developer=me");
+        const gamesResponse = await fetch("/api/games?developer=me&status=beta");
         if (gamesResponse.ok) {
           const gamesData = await gamesResponse.json();
           setGames(gamesData.items || []);
         }
       } else {
+        const data = await response.json();
+        alert(data.error || "Failed to promote game");
         play("error");
       }
     } catch (error) {
-      console.error("Error toggling beta access:", error);
+      console.error("Error promoting game:", error);
+      alert("An error occurred while promoting the game");
       play("error");
     }
   };
@@ -177,11 +189,11 @@ export default function DeveloperBetaPage() {
                     Beta Access for Pro Members
                   </h3>
                   <p className="text-sm mb-3" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                    When you enable beta access for a game, it becomes available to gamers with a{" "}
+                    Games in beta are only visible to{" "}
                     <span className="font-bold" style={{ color: "rgba(240, 220, 140, 0.9)" }}>
                       Creator Support Pass
                     </span>{" "}
-                    subscription. They can test your game early and provide valuable feedback.
+                    subscribers. They can test your game and provide feedback before you release it to the public.
                   </p>
                   <div className="flex flex-wrap gap-4 text-xs" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
                     <div className="flex items-center gap-2">
@@ -223,8 +235,11 @@ export default function DeveloperBetaPage() {
           {games.length === 0 ? (
             <GameCard>
               <GameCardContent className="p-8 text-center">
-                <p className="text-sm mb-4" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                  You haven't published any games yet.
+                <p className="text-sm mb-2" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                  You don't have any games in beta testing.
+                </p>
+                <p className="text-xs mb-4" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                  Create a new game and select "Beta Testing" to start getting feedback from Pro subscribers.
                 </p>
                 <Link
                   href="/dashboard/games/new"
@@ -237,16 +252,13 @@ export default function DeveloperBetaPage() {
                   }}
                   onMouseEnter={() => play("hover")}
                 >
-                  Publish Your First Game
+                  Create Beta Game
                 </Link>
               </GameCardContent>
             </GameCard>
           ) : (
             <div className="space-y-4">
               {games.map((game, index) => {
-                const betaInfo = game.betaAccess?.[0];
-                const isActive = betaInfo?.isActive || false;
-
                 return (
                   <motion.div
                     key={game.id}
@@ -261,8 +273,8 @@ export default function DeveloperBetaPage() {
                           <div
                             className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0"
                             style={{
-                              background: "rgba(100, 200, 100, 0.1)",
-                              border: "1px solid rgba(200, 240, 200, 0.2)",
+                              background: "rgba(100, 150, 255, 0.1)",
+                              border: "1px solid rgba(150, 180, 255, 0.3)",
                             }}
                           >
                             {game.coverUrl ? (
@@ -273,63 +285,76 @@ export default function DeveloperBetaPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <FlaskConical size={32} style={{ color: "rgba(200, 240, 200, 0.3)" }} />
+                                <FlaskConical size={32} style={{ color: "rgba(150, 180, 255, 0.5)" }} />
                               </div>
                             )}
                           </div>
 
                           {/* Game Info */}
                           <div className="flex-1">
-                            <h3
-                              className="text-xl font-bold mb-1 pixelized"
-                              style={{
-                                color: "rgba(180, 220, 180, 0.95)",
-                                textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
-                              }}
-                            >
-                              {game.title}
-                            </h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3
+                                className="text-xl font-bold pixelized"
+                                style={{
+                                  color: "rgba(180, 220, 180, 0.95)",
+                                  textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                                }}
+                              >
+                                {game.title}
+                              </h3>
+                              <span
+                                className="px-2 py-1 rounded text-xs font-bold pixelized"
+                                style={{
+                                  background: "rgba(100, 150, 255, 0.2)",
+                                  border: "1px solid rgba(150, 180, 255, 0.4)",
+                                  color: "rgba(150, 200, 255, 0.95)",
+                                }}
+                              >
+                                BETA
+                              </span>
+                            </div>
                             <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
-                              {isActive ? (
-                                <>
-                                  <span className="flex items-center gap-1">
-                                    <FlaskConical size={14} style={{ color: "rgba(150, 250, 150, 0.9)" }} />
-                                    <span style={{ color: "rgba(150, 250, 150, 0.9)" }}>Beta Active</span>
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Users size={14} />
-                                    {betaInfo?.currentTesters || 0} testers
-                                  </span>
-                                </>
-                              ) : (
-                                <span className="flex items-center gap-1">
-                                  <Lock size={14} />
-                                  Beta Disabled
-                                </span>
-                              )}
+                              <span className="flex items-center gap-1">
+                                <Users size={14} />
+                                {game._count?.purchases || 0} testers
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <FlaskConical size={14} />
+                                {game._count?.ratings || 0} feedback
+                              </span>
                             </div>
                           </div>
 
-                          {/* Toggle Button */}
-                          <motion.button
-                            onClick={() => toggleBetaAccess(game.id, isActive)}
-                            className="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
-                            style={{
-                              background: isActive
-                                ? "linear-gradient(135deg, rgba(200, 100, 100, 0.3) 0%, rgba(180, 80, 80, 0.2) 100%)"
-                                : "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
-                              border: isActive
-                                ? "1px solid rgba(240, 200, 200, 0.3)"
-                                : "1px solid rgba(200, 240, 200, 0.4)",
-                              color: isActive ? "rgba(240, 200, 200, 0.95)" : "rgba(200, 240, 200, 0.95)",
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onMouseEnter={() => play("hover")}
-                          >
-                            {isActive ? "Disable Beta" : "Enable Beta"}
-                          </motion.button>
+                          {/* Action Buttons */}
+                          <div className="flex gap-3">
+                            <Link
+                              href={`/dashboard/games/${game.id}/edit`}
+                              className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all"
+                              style={{
+                                background: "rgba(100, 200, 100, 0.2)",
+                                border: "1px solid rgba(200, 240, 200, 0.3)",
+                                color: "rgba(200, 240, 200, 0.95)",
+                              }}
+                              onMouseEnter={() => play("hover")}
+                            >
+                              Edit
+                            </Link>
+                            <motion.button
+                              onClick={() => promoteToRelease(game.id, game.title)}
+                              className="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
+                              style={{
+                                background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+                                border: "1px solid rgba(200, 240, 200, 0.4)",
+                                color: "rgba(200, 240, 200, 0.95)",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                              }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onMouseEnter={() => play("hover")}
+                            >
+                              🚀 Promote to Release
+                            </motion.button>
+                          </div>
                         </div>
                       </GameCardContent>
                     </GameCard>

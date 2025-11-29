@@ -14,6 +14,7 @@ interface GameCardProps {
     coverUrl: string;
     priceCents: number;
     avgRating: number;
+    releaseStatus?: string;
     developer: {
       name: string;
     };
@@ -35,14 +36,19 @@ export function GameCard({ game, userTier }: GameCardProps) {
   const isFree = game.priceCents === 0;
   const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
   const showCrown = hasUnlimitedAccess && !isFree; // Show crown for premium users on paid games
+  const isBeta = game.releaseStatus === 'BETA';
 
   return (
     <Link href={`/games/${game.slug}`}>
       <motion.div
         className="group relative overflow-hidden rounded-2xl transition-all duration-300"
         style={{
-          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.1) 0%, rgba(80, 180, 80, 0.05) 100%)",
-          border: "1px solid rgba(200, 240, 200, 0.2)",
+          background: isBeta
+            ? "linear-gradient(135deg, rgba(100, 150, 255, 0.15) 0%, rgba(80, 130, 230, 0.08) 100%)"
+            : "linear-gradient(135deg, rgba(100, 200, 100, 0.1) 0%, rgba(80, 180, 80, 0.05) 100%)",
+          border: isBeta
+            ? "1px solid rgba(150, 180, 255, 0.4)"
+            : "1px solid rgba(200, 240, 200, 0.2)",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         }}
         whileHover={{ scale: 1.02, y: -4 }}
@@ -58,6 +64,21 @@ export function GameCard({ game, userTier }: GameCardProps) {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          
+          {/* Beta Badge */}
+          {isBeta && (
+            <div
+              className="absolute top-3 left-3 px-3 py-1 rounded-lg text-xs font-bold pixelized"
+              style={{
+                background: "rgba(100, 150, 255, 0.9)",
+                border: "1px solid rgba(150, 180, 255, 0.6)",
+                color: "rgba(255, 255, 255, 0.95)",
+                boxShadow: "0 2px 8px rgba(100, 150, 255, 0.5)",
+              }}
+            >
+              🧪 BETA
+            </div>
+          )}
           
           {/* Price Badge */}
           <div

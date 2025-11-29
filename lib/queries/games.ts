@@ -1,11 +1,17 @@
 import { prisma } from '@/lib/db/prisma';
-import { Platform, Prisma } from '@prisma/client';
+import { Platform, Prisma, ReleaseStatus } from '@prisma/client';
 import { GameQuery, GameUpsert, RatingInput } from '@/lib/validations/game';
 
-export async function getGames(query: GameQuery, userId?: string) {
+export async function getGames(query: GameQuery, userId?: string, includeAllStatuses = false) {
   const { q, tags, platform, priceFilter, sort, page, pageSize, developer } = query;
 
   const where: Prisma.GameWhereInput = {};
+
+  // By default, only show RELEASED games in public marketplace
+  // Unless developer is viewing their own games (developer=me)
+  if (!includeAllStatuses && developer !== 'me') {
+    where.releaseStatus = ReleaseStatus.RELEASED;
+  }
 
   // Developer filter
   if (developer) {
@@ -248,6 +254,44 @@ export async function getTags() {
   });
 }
 
+/**
+ * Get beta games (only games with releaseStatus = BETA)
+ * Used for /games/beta page (Pro subscribers only)
+ */
+export async function getBetaGames() {
+  const games = await prisma.game.findMany({
+    where: {
+      releaseStatus: ReleaseStatus.BETA,
+    },
+    include: {
+      developer: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+      gameTags: {
+        include: {
+          tag: true,
+        },
+      },
+      _count: {
+        select: {
+          ratings: true,
+          favorites: true,
+          purchases: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return games;
+}
+
 export async function createGame(data: GameUpsert, developerId: string) {
   const { tags, ...gameData } = data;
 
@@ -454,5 +498,44 @@ export async function toggleFavorite(gameId: string, userId: string) {
     favorited,
     favCount: game?.favCount || 0,
   };
+}
+
+/**
+ * Promote a beta game to full release
+ * Only the game owner can promote
+ */
+export async function promoteToRelease(gameId: string, userId: string) {
+  // Verify ownership
+  const game = await prisma.game.findUnique({
+    where: { id: gameId },
+    select: { 
+      id: true, 
+      developerId: true, 
+      releaseStatus: true,
+      title: true,
+    },
+  });
+
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  if (game.developerId !== userId) {
+    throw new Error('Unauthorized: Only the game owner can promote to release');
+  }
+
+  if (game.releaseStatus === ReleaseStatus.RELEASED) {
+    throw new Error('Game is already released');
+  }
+
+  // Promote to full release
+  const updated = await prisma.game.update({
+    where: { id: gameId },
+    data: {
+      releaseStatus: ReleaseStatus.RELEASED,
+    },
+  });
+
+  return updated;
 }
 
