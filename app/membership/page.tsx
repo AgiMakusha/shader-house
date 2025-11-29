@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Gamepad2, Crown, Shield } from "lucide-react";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { PricingCard } from "@/components/subscriptions/PricingCard";
@@ -717,7 +717,7 @@ export default function MembershipPage() {
                       textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)",
                     }}
                   >
-                    🎮 Welcome to Shader House!
+                    Welcome to Shader House!
                   </h3>
                   <p
                     className="text-sm mb-3"
@@ -727,23 +727,47 @@ export default function MembershipPage() {
                   </p>
                   
                   {/* Onboarding Hints */}
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span style={{ color: "rgba(150, 250, 150, 0.9)" }}>👉</span>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="p-2 rounded-lg flex-shrink-0"
+                        style={{
+                          background: "rgba(150, 250, 150, 0.15)",
+                          border: "1px solid rgba(150, 250, 150, 0.3)",
+                        }}
+                      >
+                        <Gamepad2 className="w-4 h-4" style={{ color: "rgba(150, 250, 150, 0.9)" }} />
+                      </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold">Start with FREE</span> to explore our game library and community
+                        <span className="font-bold" style={{ color: "rgba(150, 250, 150, 0.95)" }}>Start with FREE</span> to explore our game library and community
                       </p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span style={{ color: "rgba(240, 220, 140, 0.9)" }}>💎</span>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="p-2 rounded-lg flex-shrink-0"
+                        style={{
+                          background: "rgba(240, 220, 140, 0.15)",
+                          border: "1px solid rgba(240, 220, 140, 0.3)",
+                        }}
+                      >
+                        <Crown className="w-4 h-4" style={{ color: "rgba(240, 220, 140, 0.9)" }} />
+                      </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold">Upgrade to Creator Support Pass</span> for beta access, exclusive games & support indie developers
+                        <span className="font-bold" style={{ color: "rgba(240, 220, 140, 0.95)" }}>Upgrade to Creator Support Pass</span> for beta access, exclusive games & support indie developers
                       </p>
                     </div>
-                    <div className="flex items-start gap-2">
-                      <span style={{ color: "rgba(150, 250, 250, 0.9)" }}>✨</span>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="p-2 rounded-lg flex-shrink-0"
+                        style={{
+                          background: "rgba(150, 200, 250, 0.15)",
+                          border: "1px solid rgba(150, 200, 250, 0.3)",
+                        }}
+                      >
+                        <Shield className="w-4 h-4" style={{ color: "rgba(150, 200, 250, 0.9)" }} />
+                      </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold">Cancel anytime</span> - no long-term commitments, full control over your subscription
+                        <span className="font-bold" style={{ color: "rgba(150, 200, 250, 0.95)" }}>Cancel anytime</span> - no long-term commitments, full control over your subscription
                       </p>
                     </div>
                   </div>
