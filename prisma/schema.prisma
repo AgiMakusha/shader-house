@@ -183,17 +183,20 @@ enum VerificationStatus {
 
 // Game model
 model Game {
-  id          String     @id @default(cuid())
-  slug        String     @unique
+  id          String        @id @default(cuid())
+  slug        String        @unique
   title       String
   tagline     String
-  description String     @db.Text
+  description String        @db.Text
   coverUrl    String
   screenshots String[]
-  priceCents  Int        @default(0)
+  priceCents  Int           @default(0)
   platforms   Platform[]
   gameFileUrl String? // Uploaded game file (.zip, etc.)
   externalUrl String? // External Play/Demo link (itch.io, Steam, web game, etc.)
+
+  // Release status for beta testing workflow
+  releaseStatus ReleaseStatus @default(BETA)
 
   // Relations
   developerId String
@@ -221,6 +224,7 @@ model Game {
   @@index([developerId])
   @@index([avgRating])
   @@index([createdAt])
+  @@index([releaseStatus])
   @@map("games")
 }
 
@@ -295,6 +299,11 @@ enum Platform {
   LINUX
   ANDROID
   IOS
+}
+
+enum ReleaseStatus {
+  BETA      // Game is in beta testing, only visible to Pro subscribers
+  RELEASED  // Game is fully released, visible to everyone
 }
 
 // Purchase model

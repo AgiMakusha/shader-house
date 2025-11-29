@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Platform } from '@prisma/client';
+import { Platform, ReleaseStatus } from '@prisma/client';
 
 // Helper to validate URL, data URL, or relative path
 const urlOrDataUrl = z.string().refine(
@@ -30,6 +30,7 @@ export const gameUpsertSchema = z.object({
   platforms: z.array(z.nativeEnum(Platform)).min(1, 'At least one platform is required'),
   gameFileUrl: z.string().optional().or(z.literal('')), // Uploaded game file
   externalUrl: z.string().optional().or(z.literal('')), // External link
+  releaseStatus: z.nativeEnum(ReleaseStatus).default(ReleaseStatus.BETA), // Beta or Released
   tags: z.array(z.string()).max(8, 'Maximum 8 tags allowed'),
 }).refine(
   (data) => data.gameFileUrl || data.externalUrl,

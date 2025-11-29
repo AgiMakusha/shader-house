@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Platform } from "@prisma/client";
+import { Platform, ReleaseStatus } from "@prisma/client";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { ImageUpload } from "./ImageUpload";
 import { GameFileUpload } from "./GameFileUpload";
@@ -20,6 +20,7 @@ interface GameFormProps {
     platforms: Platform[];
     gameFileUrl: string;
     externalUrl: string;
+    releaseStatus: ReleaseStatus;
     tags: string[];
   };
   mode: 'create' | 'edit';
@@ -48,6 +49,7 @@ export function GameForm({ initialData, mode }: GameFormProps) {
     platforms: initialData?.platforms || [],
     gameFileUrl: initialData?.gameFileUrl || '',
     externalUrl: initialData?.externalUrl || '',
+    releaseStatus: initialData?.releaseStatus || ReleaseStatus.BETA,
     tags: initialData?.tags || [''],
   });
 
@@ -323,6 +325,79 @@ export function GameForm({ initialData, mode }: GameFormProps) {
               Set to 0 for free games
             </p>
           </div>
+        </div>
+
+        {/* Release Status Toggle */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-3"
+            style={{ color: "rgba(200, 240, 200, 0.7)" }}
+          >
+            Release Status <span style={{ color: "rgba(250, 100, 100, 0.9)" }}>*</span>
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => handleChange('releaseStatus', ReleaseStatus.BETA)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                formData.releaseStatus === ReleaseStatus.BETA ? 'scale-[1.02]' : 'opacity-60'
+              }`}
+              style={{
+                background: formData.releaseStatus === ReleaseStatus.BETA
+                  ? "rgba(100, 150, 255, 0.15)"
+                  : "rgba(100, 150, 255, 0.05)",
+                borderColor: formData.releaseStatus === ReleaseStatus.BETA
+                  ? "rgba(150, 180, 255, 0.5)"
+                  : "rgba(150, 180, 255, 0.2)",
+              }}
+            >
+              <div className="text-left">
+                <div
+                  className="text-sm font-bold mb-1 pixelized"
+                  style={{ color: "rgba(150, 200, 255, 0.95)" }}
+                >
+                  🧪 Beta Testing
+                </div>
+                <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                  Only visible to Pro subscribers for testing
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleChange('releaseStatus', ReleaseStatus.RELEASED)}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                formData.releaseStatus === ReleaseStatus.RELEASED ? 'scale-[1.02]' : 'opacity-60'
+              }`}
+              style={{
+                background: formData.releaseStatus === ReleaseStatus.RELEASED
+                  ? "rgba(100, 200, 100, 0.15)"
+                  : "rgba(100, 200, 100, 0.05)",
+                borderColor: formData.releaseStatus === ReleaseStatus.RELEASED
+                  ? "rgba(150, 250, 150, 0.5)"
+                  : "rgba(150, 250, 150, 0.2)",
+              }}
+            >
+              <div className="text-left">
+                <div
+                  className="text-sm font-bold mb-1 pixelized"
+                  style={{ color: "rgba(150, 250, 150, 0.95)" }}
+                >
+                  ✅ Full Release
+                </div>
+                <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                  Public marketplace, visible to everyone
+                </div>
+              </div>
+            </button>
+          </div>
+          <p className="text-xs mt-2" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+            {formData.releaseStatus === ReleaseStatus.BETA
+              ? "💡 Tip: Start with Beta to test with Pro subscribers, then promote to Full Release when ready"
+              : "🎉 Your game will be visible in the public marketplace"}
+          </p>
+          {renderFieldError('releaseStatus')}
         </div>
 
         <div>
