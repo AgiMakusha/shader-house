@@ -27,6 +27,11 @@ export default function MembershipPage() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Detect if user is new (FREE tier and no subscription history)
+  const isNewUser = user?.subscriptionTier === 'FREE' && 
+                    user?.subscriptionStatus === 'INACTIVE' && 
+                    !user?.subscriptionStart;
+
   useEffect(() => {
     // Check for success parameter from Stripe redirect (production mode)
     const success = searchParams.get('success');
@@ -52,6 +57,24 @@ export default function MembershipPage() {
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
+          
+          // Track user journey
+          const isNew = data.user?.subscriptionTier === 'FREE' && 
+                       data.user?.subscriptionStatus === 'INACTIVE' && 
+                       !data.user?.subscriptionStart;
+          
+          if (isNew) {
+            console.log('📊 Analytics: onboarding_view_membership');
+            // TODO: Add your analytics tracking here
+            // trackEvent('onboarding_view_membership', { userId: data.user.id });
+          } else {
+            console.log('📊 Analytics: subscription_management_view');
+            // TODO: Add your analytics tracking here
+            // trackEvent('subscription_management_view', { 
+            //   userId: data.user.id, 
+            //   currentTier: data.user.subscriptionTier 
+            // });
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -107,6 +130,22 @@ export default function MembershipPage() {
     setShowProcessing(true);
     setIsProcessing(true);
 
+    // Track upgrade initiation
+    if (isNewUser) {
+      console.log(`📊 Analytics: onboarding_upgrade_initiated - ${selectedPlanId}`);
+      // TODO: trackEvent('onboarding_upgrade_initiated', { 
+      //   userId: user?.id, 
+      //   planId: selectedPlanId 
+      // });
+    } else {
+      console.log(`📊 Analytics: subscription_upgrade_initiated - ${selectedPlanId}`);
+      // TODO: trackEvent('subscription_upgrade_initiated', { 
+      //   userId: user?.id, 
+      //   fromTier: user?.subscriptionTier,
+      //   toTier: selectedPlanId 
+      // });
+    }
+
     try {
       const response = await fetch('/api/subscriptions/create-checkout', {
         method: 'POST',
@@ -121,6 +160,22 @@ export default function MembershipPage() {
         if (data.success) {
           // Demo mode - show success modal
           play("success");
+          
+          // Track successful upgrade
+          if (isNewUser) {
+            console.log('📊 Analytics: onboarding_completed_paid');
+            // TODO: trackEvent('onboarding_completed_paid', { 
+            //   userId: user?.id, 
+            //   planId: selectedPlanId 
+            // });
+          } else {
+            console.log('📊 Analytics: subscription_upgraded');
+            // TODO: trackEvent('subscription_upgraded', { 
+            //   userId: user?.id, 
+            //   planId: selectedPlanId 
+            // });
+          }
+          
           setTimeout(() => {
             setShowProcessing(false);
             setShowSuccess(true);
@@ -131,6 +186,11 @@ export default function MembershipPage() {
           }, 1000);
         } else if (data.url) {
           // Production Stripe checkout
+          console.log('📊 Analytics: redirecting_to_stripe_checkout');
+          // TODO: trackEvent('stripe_checkout_redirect', { 
+          //   userId: user?.id, 
+          //   planId: selectedPlanId 
+          // });
           play("success");
           setTimeout(() => {
             window.location.href = data.url;
@@ -160,6 +220,25 @@ export default function MembershipPage() {
     setIsProcessing(true);
     play("success");
 
+    // Track user journey
+    if (isNewUser) {
+      console.log(`📊 Analytics: onboarding_plan_selected - ${planId}`);
+      // TODO: Add your analytics tracking here
+      // trackEvent('onboarding_plan_selected', { 
+      //   userId: user?.id, 
+      //   planId,
+      //   isNewUser: true 
+      // });
+    } else {
+      console.log(`📊 Analytics: subscription_plan_changed - ${planId}`);
+      // TODO: Add your analytics tracking here
+      // trackEvent('subscription_plan_changed', { 
+      //   userId: user?.id, 
+      //   fromTier: user?.subscriptionTier,
+      //   toTier: planId 
+      // });
+    }
+
     try {
       if (planId === 'FREE') {
         // Free tier - cancel subscription if user has one
@@ -168,6 +247,11 @@ export default function MembershipPage() {
           setIsProcessing(false);
           return;
         } else if (user) {
+          // Track successful free tier selection
+          if (isNewUser) {
+            console.log('📊 Analytics: onboarding_completed_free');
+            // TODO: trackEvent('onboarding_completed_free', { userId: user.id });
+          }
           const userRole = user.role?.toUpperCase();
           router.push(userRole === 'DEVELOPER' ? '/profile/developer' : '/profile/gamer');
         } else {
@@ -186,6 +270,14 @@ export default function MembershipPage() {
       console.error('Error selecting plan:', error);
       play("error");
       setErrorMessage('An error occurred. Please try again.');
+      
+      // Track error
+      console.log('📊 Analytics: plan_selection_error', error);
+      // TODO: trackEvent('plan_selection_error', { 
+      //   userId: user?.id, 
+      //   planId, 
+      //   error: error.message 
+      // });
     } finally {
       setIsProcessing(false);
     }
@@ -591,12 +683,82 @@ export default function MembershipPage() {
           </div>
         </motion.div>
 
+        {/* Welcome Banner for New Users */}
+        {isNewUser && (
+          <motion.div
+            className="w-full max-w-4xl mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <div
+              className="p-6 rounded-lg border"
+              style={{
+                background: "linear-gradient(145deg, rgba(100, 200, 100, 0.15) 0%, rgba(80, 180, 80, 0.1) 100%)",
+                borderColor: "rgba(150, 250, 150, 0.3)",
+                boxShadow: "0 8px 32px rgba(100, 200, 100, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.05)",
+              }}
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className="p-3 rounded-lg flex-shrink-0"
+                  style={{
+                    background: "rgba(150, 250, 150, 0.2)",
+                    border: "1px solid rgba(150, 250, 150, 0.3)",
+                  }}
+                >
+                  <Sparkles className="w-6 h-6" style={{ color: "rgba(150, 250, 150, 0.9)" }} />
+                </div>
+                <div className="flex-1">
+                  <h3
+                    className="text-xl font-bold mb-2 pixelized"
+                    style={{
+                      color: "rgba(150, 250, 150, 0.95)",
+                      textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                    }}
+                  >
+                    🎮 Welcome to Shader House!
+                  </h3>
+                  <p
+                    className="text-sm mb-3"
+                    style={{ color: "rgba(200, 240, 200, 0.85)" }}
+                  >
+                    Choose your plan to get started. You can always upgrade later!
+                  </p>
+                  
+                  {/* Onboarding Hints */}
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <span style={{ color: "rgba(150, 250, 150, 0.9)" }}>👉</span>
+                      <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
+                        <span className="font-bold">Start with FREE</span> to explore our game library and community
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span style={{ color: "rgba(240, 220, 140, 0.9)" }}>💎</span>
+                      <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
+                        <span className="font-bold">Upgrade to Creator Support Pass</span> for beta access, exclusive games & support indie developers
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span style={{ color: "rgba(150, 250, 250, 0.9)" }}>✨</span>
+                      <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
+                        <span className="font-bold">Cancel anytime</span> - no long-term commitments, full control over your subscription
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Pricing Cards */}
         <motion.div 
           className="grid md:grid-cols-2 gap-8 max-w-4xl w-full mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
+          transition={{ duration: 0.6, delay: isNewUser ? 0.5 : 0.4 }}
         >
           {SUBSCRIPTION_PLANS.map((plan) => (
             <PricingCard
