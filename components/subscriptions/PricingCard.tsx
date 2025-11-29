@@ -17,6 +17,9 @@ export function PricingCard({ plan, currentTier, onSelect, isLoading }: PricingC
   const hasSubscription = currentTier && currentTier !== 'FREE';
   const isDowngrade = hasSubscription && isFree;
   const isChangingPlan = hasSubscription && !isFree && !isCurrentPlan;
+  
+  // FREE tier should never be disabled - users should always be able to continue/start
+  const shouldDisableButton = isFree ? false : (isCurrentPlan || isLoading);
 
   return (
     <motion.div
@@ -128,14 +131,14 @@ export function PricingCard({ plan, currentTier, onSelect, isLoading }: PricingC
 
       <button
         onClick={() => onSelect(plan.id)}
-        disabled={isCurrentPlan || isLoading}
+        disabled={shouldDisableButton}
         className={`
           w-full py-3 px-6 rounded-lg font-bold uppercase tracking-wider pixelized text-sm transition-all duration-200
           ${isLoading ? 'opacity-50 cursor-wait' : ''}
-          ${!isCurrentPlan && !isDowngrade ? 'hover:scale-[1.02]' : ''}
+          ${!shouldDisableButton ? 'hover:scale-[1.02]' : ''}
         `}
         style={
-          isCurrentPlan
+          isCurrentPlan && !isFree
             ? {
                 background: 'rgba(100, 100, 100, 0.2)',
                 color: 'rgba(200, 200, 200, 0.4)',
@@ -164,15 +167,17 @@ export function PricingCard({ plan, currentTier, onSelect, isLoading }: PricingC
               }
         }
       >
-        {isCurrentPlan 
-          ? 'Current Plan' 
-          : isDowngrade 
-          ? 'Downgrade to Free' 
-          : isChangingPlan
-          ? 'Change Plan'
-          : isFree 
-          ? 'Get Started' 
-          : 'Subscribe Now'
+        {isFree
+          ? (isCurrentPlan 
+              ? 'Continue with Free' 
+              : isDowngrade 
+              ? 'Downgrade to Free' 
+              : 'Get Started')
+          : (isCurrentPlan 
+              ? 'Current Plan' 
+              : isChangingPlan
+              ? 'Change Plan'
+              : 'Subscribe Now')
         }
       </button>
 
