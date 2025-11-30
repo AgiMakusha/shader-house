@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get user's XP and points directly from User model
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        xp: true,
+        points: true,
+      },
+    });
+
     // Get all beta tester records for this user
     const betaTesters = await prisma.betaTester.findMany({
       where: {
@@ -27,36 +36,33 @@ export async function GET(request: NextRequest) {
             coverUrl: true,
           },
         },
-        taskCompletions: {
-          include: {
-            task: {
-              select: {
-                xpReward: true,
-                rewardPoints: true,
-              },
-            },
-          },
+      },
+    });
+
+    // Count verified task completions
+    const verifiedCompletions = await prisma.betaTaskCompletion.count({
+      where: {
+        userId: session.user.id,
+        status: 'VERIFIED',
+      },
+    });
+
+    // Count bugs reported (feedback with type BUG)
+    const bugsReported = await prisma.betaFeedback.count({
+      where: {
+        tester: {
+          userId: session.user.id,
         },
+        type: 'BUG',
       },
     });
 
     // Calculate totals
-    let totalXP = 0;
-    let totalPoints = 0;
-    let totalTasksCompleted = 0;
-    let totalBugsReported = 0;
-    let totalGamesTested = betaTesters.length;
-
-    betaTesters.forEach((tester) => {
-      totalTasksCompleted += tester.tasksCompleted;
-      totalBugsReported += tester.bugsReported;
-
-      // Sum up XP and points from completed tasks
-      tester.taskCompletions.forEach((completion) => {
-        totalXP += completion.task.xpReward;
-        totalPoints += completion.task.rewardPoints;
-      });
-    });
+    const totalXP = user?.xp || 0;
+    const totalPoints = user?.points || 0;
+    const totalTasksCompleted = verifiedCompletions;
+    const totalBugsReported = bugsReported;
+    const totalGamesTested = betaTesters.length;
 
     // Get active tests count
     const activeTests = betaTesters.filter((t) => t.lastActiveAt).length;
@@ -70,13 +76,6 @@ export async function GET(request: NextRequest) {
         totalGamesTested,
         activeTests,
       },
-      recentGames: betaTesters.slice(0, 5).map((t) => ({
-        id: t.game.id,
-        title: t.game.title,
-        coverUrl: t.game.coverUrl,
-        tasksCompleted: t.tasksCompleted,
-        bugsReported: t.bugsReported,
-      })),
     });
   } catch (error: any) {
     console.error('GET /api/beta/stats error:', error);
