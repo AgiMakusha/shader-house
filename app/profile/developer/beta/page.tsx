@@ -488,6 +488,7 @@ export default function DeveloperBetaPage() {
           setGameToPromote(null);
         }}
         onConfirm={promoteToRelease}
+        type="success"
         title={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
             <Rocket 
