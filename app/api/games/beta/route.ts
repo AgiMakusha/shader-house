@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
         description: game.description,
         coverUrl: game.coverUrl,
         testingPhase: 'beta' as const,
-        testersCount: game._count.purchases, // Count of Pro users who have access
-        feedbackCount: game._count.ratings,
+        testersCount: game._count?.betaTesters || 0, // Count of beta testers
+        feedbackCount: game._count?.betaFeedback || 0, // Count of beta feedback
         slug: game.slug,
         externalUrl: game.externalUrl,
         gameFileUrl: game.gameFileUrl,

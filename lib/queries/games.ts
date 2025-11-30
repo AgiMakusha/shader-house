@@ -279,6 +279,8 @@ export async function getBetaGames() {
           ratings: true,
           favorites: true,
           purchases: true,
+          betaTesters: true,
+          betaFeedback: true,
         },
       },
     },
