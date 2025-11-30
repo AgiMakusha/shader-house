@@ -118,7 +118,7 @@ DELETE /api/beta/tasks/:taskId
 
 #### Get Tasks for Game (Developer)
 ```http
-GET /api/beta/tasks/game/:gameId
+GET /api/beta/tasks/by-game/:gameId
 ```
 
 Returns:

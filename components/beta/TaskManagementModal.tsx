@@ -75,7 +75,7 @@ export default function TaskManagementModal({
   const fetchTasks = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/beta/tasks/game/${gameId}`);
+      const response = await fetch(`/api/beta/tasks/by-game/${gameId}`);
       if (response.ok) {
         const data = await response.json();
         setTasks(data.tasks || []);
