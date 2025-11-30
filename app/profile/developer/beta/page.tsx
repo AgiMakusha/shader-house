@@ -317,7 +317,7 @@ export default function DeveloperBetaPage() {
                   >
                     <GameCard>
                       <GameCardContent className="p-6">
-                        <div className="flex items-center gap-6">
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                           {/* Game Cover */}
                           <div
                             className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0"
@@ -379,8 +379,8 @@ export default function DeveloperBetaPage() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex flex-col gap-2">
-                            <div className="flex gap-2">
+                          <div className="flex flex-col gap-2 w-full md:w-auto">
+                            <div className="flex flex-wrap gap-2">
                               <button
                                 onClick={() => {
                                   setSelectedGame({ id: game.id, title: game.title });
