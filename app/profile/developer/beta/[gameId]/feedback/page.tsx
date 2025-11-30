@@ -31,7 +31,7 @@ interface TaskCompletion {
   status: 'PENDING' | 'VERIFIED' | 'REJECTED';
   submittedAt: string;
   verifiedAt: string | null;
-  user: {
+  user?: {
     id: string;
     name: string;
     email: string;
@@ -56,7 +56,7 @@ interface Feedback {
   screenshot: string | null;
   status: string;
   createdAt: string;
-  user: {
+  user?: {
     name: string;
     email: string;
   };
@@ -338,7 +338,7 @@ export default function GameFeedbackPage() {
                         {/* Gamer Info */}
                         <div className="flex items-center gap-2 mb-4 text-sm" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
                           <User className="w-4 h-4" />
-                          <span>{completion.user.name}</span>
+                          <span>{completion.user?.name || "Unknown User"}</span>
                           <span className="mx-2">•</span>
                           <Calendar className="w-4 h-4" />
                           <span>{new Date(completion.submittedAt).toLocaleDateString()}</span>
@@ -437,7 +437,7 @@ export default function GameFeedbackPage() {
                             {completion.task.title}
                           </h3>
                           <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
-                            {completion.user.name} • {new Date(completion.verifiedAt!).toLocaleDateString()}
+                            {completion.user?.name || "Unknown User"} • {new Date(completion.verifiedAt!).toLocaleDateString()}
                           </p>
                         </div>
                         <CheckCircle className="w-5 h-5" style={{ color: "rgba(150, 250, 150, 0.9)" }} />
@@ -477,7 +477,7 @@ export default function GameFeedbackPage() {
                       {item.description}
                     </p>
                     <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                      <span>{item.user.name}</span>
+                      <span>{item.user?.name || "Unknown User"}</span>
                       <span>•</span>
                       <span>{new Date(item.createdAt).toLocaleDateString()}</span>
                       <span>•</span>
