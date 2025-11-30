@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { useToast } from "@/hooks/useToast";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import {
   ChevronLeft,
   MessageSquare,
@@ -96,6 +97,19 @@ export default function GameFeedbackPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'completions' | 'feedback'>('completions');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    completionId: string;
+    approved: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    completionId: "",
+    approved: false,
+    title: "",
+    message: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -130,15 +144,20 @@ export default function GameFeedbackPage() {
     }
   };
 
-  const handleVerifyCompletion = async (completionId: string, approved: boolean) => {
-    const action = approved ? "approve" : "reject";
-    const confirmed = window.confirm(
-      `Are you sure you want to ${action} this task completion?${
-        approved ? "\n\nThe gamer will receive their XP and points." : ""
-      }`
-    );
+  const openConfirmModal = (completionId: string, approved: boolean) => {
+    setConfirmModal({
+      isOpen: true,
+      completionId,
+      approved,
+      title: approved ? "Approve Task Completion?" : "Reject Task Completion?",
+      message: approved
+        ? "The gamer will receive their XP and points as a reward for completing this task."
+        : "The gamer will be able to resubmit their report after rejection.",
+    });
+  };
 
-    if (!confirmed) return;
+  const handleVerifyCompletion = async () => {
+    const { completionId, approved } = confirmModal;
 
     try {
       const response = await fetch(`/api/beta/tasks/verify`, {
@@ -378,7 +397,7 @@ export default function GameFeedbackPage() {
                         {/* Actions */}
                         <div className="flex gap-3">
                           <button
-                            onClick={() => handleVerifyCompletion(completion.id, true)}
+                            onClick={() => openConfirmModal(completion.id, true)}
                             className="flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2"
                             style={{
                               background: "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)",
@@ -391,7 +410,7 @@ export default function GameFeedbackPage() {
                             Approve & Award Rewards
                           </button>
                           <button
-                            onClick={() => handleVerifyCompletion(completion.id, false)}
+                            onClick={() => openConfirmModal(completion.id, false)}
                             className="flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2"
                             style={{
                               background: "rgba(200, 100, 100, 0.2)",
@@ -512,6 +531,18 @@ export default function GameFeedbackPage() {
           />
         </div>
       )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={handleVerifyCompletion}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.approved ? "Approve & Award" : "Reject"}
+        cancelText="Cancel"
+        type={confirmModal.approved ? "success" : "warning"}
+      />
 
       {/* Toast Notifications */}
       <ToastComponent />
