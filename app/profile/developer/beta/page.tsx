@@ -10,7 +10,7 @@ import { useAudio } from "@/components/audio/AudioProvider";
 import { useToast } from "@/hooks/useToast";
 import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug, TrendingUp } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
-import ConfirmModal from "@/components/ui/ConfirmModal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Game {
   id: string;
