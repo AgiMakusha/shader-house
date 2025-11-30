@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
         task: {
           gameId: gameId,
         },
+        userId: {
+          not: null, // Only get completions with valid userId
+        },
       },
       include: {
         user: {
@@ -70,8 +73,11 @@ export async function GET(request: NextRequest) {
       ],
     });
 
+    // Filter out any completions without user data (extra safety)
+    const validCompletions = completions.filter(c => c.user);
+
     return NextResponse.json({
-      completions,
+      completions: validCompletions,
     });
   } catch (error) {
     console.error("GET /api/beta/tasks/completions error:", error);
