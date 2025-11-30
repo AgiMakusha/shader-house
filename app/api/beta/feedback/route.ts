@@ -222,6 +222,13 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Transform feedback to include user directly
+    const transformedFeedback = feedback.map((f) => ({
+      ...f,
+      user: f.tester.user,
+      tester: undefined, // Remove nested tester to avoid confusion
+    }));
+
     // Get stats
     const stats = {
       total: feedback.length,
@@ -232,7 +239,7 @@ export async function GET(request: NextRequest) {
       resolved: feedback.filter((f) => f.status === 'RESOLVED').length,
     };
 
-    return NextResponse.json({ feedback, stats });
+    return NextResponse.json({ feedback: transformedFeedback, stats });
   } catch (error: any) {
     console.error('GET /api/beta/feedback error:', error);
     return NextResponse.json(
