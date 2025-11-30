@@ -34,9 +34,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!tester || tester.status !== 'APPROVED') {
+    if (!tester) {
       return NextResponse.json(
-        { error: "You must be an approved beta tester for this game" },
+        { error: "You must be a beta tester for this game" },
         { status: 403 }
       );
     }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if task completion already exists
-    const existingCompletion = await prisma.taskCompletion.findUnique({
+    const existingCompletion = await prisma.betaTaskCompletion.findUnique({
       where: {
         userId_taskId: {
           userId: session.user.id,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
 
       // If rejected, allow resubmission by updating the existing record
-      const updated = await prisma.taskCompletion.update({
+      const updated = await prisma.betaTaskCompletion.update({
         where: { id: existingCompletion.id },
         data: {
           report: validated.report,
@@ -94,9 +94,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new task completion
-    const completion = await prisma.taskCompletion.create({
+    const completion = await prisma.betaTaskCompletion.create({
       data: {
         userId: session.user.id,
+        testerId: tester.id,
         taskId: validated.taskId,
         report: validated.report,
         screenshot: validated.screenshot,

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all task completions for this game
-    const completions = await prisma.taskCompletion.findMany({
+    const completions = await prisma.betaTaskCompletion.findMany({
       where: {
         task: {
           gameId: gameId,

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     const validated = verifySchema.parse(body);
 
     // Get the completion with task and game info
-    const completion = await prisma.taskCompletion.findUnique({
+    const completion = await prisma.betaTaskCompletion.findUnique({
       where: { id: validated.completionId },
       include: {
         task: {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       // Approve and award rewards
       const [updatedCompletion, updatedUser] = await prisma.$transaction([
         // Update completion status
-        prisma.taskCompletion.update({
+        prisma.betaTaskCompletion.update({
           where: { id: validated.completionId },
           data: {
             status: 'VERIFIED',
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Reject the completion
-      const updatedCompletion = await prisma.taskCompletion.update({
+      const updatedCompletion = await prisma.betaTaskCompletion.update({
         where: { id: validated.completionId },
         data: {
           status: 'REJECTED',

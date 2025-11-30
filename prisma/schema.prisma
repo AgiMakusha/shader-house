@@ -56,6 +56,7 @@ model User {
   playtime            PlaytimeEntry[]
   claimedGames        ClaimedGame[]
   betaTester          BetaTester[]
+  taskCompletions     BetaTaskCompletion[]
 
   @@index([email])
   @@index([subscriptionTier])
@@ -547,16 +548,33 @@ model BetaTaskCompletion {
   id       String @id @default(cuid())
   taskId   String
   testerId String
+  userId   String
 
-  completedAt DateTime @default(now())
-  isVerified  Boolean  @default(false)
+  // Completion report
+  report      String   @db.Text
+  screenshot  String?  @db.Text
+  deviceInfo  String?
+  
+  // Status tracking
+  status      TaskCompletionStatus @default(PENDING)
+  submittedAt DateTime             @default(now())
+  verifiedAt  DateTime?
 
   task   BetaTask   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   tester BetaTester @relation(fields: [testerId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([taskId, testerId])
+  @@unique([userId, taskId])
   @@index([testerId])
+  @@index([userId])
+  @@index([status])
   @@map("beta_task_completions")
+}
+
+enum TaskCompletionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 // Beta Feedback - bug reports and suggestions
