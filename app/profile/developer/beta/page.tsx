@@ -16,11 +16,11 @@ interface Game {
   slug: string;
   coverUrl: string;
   _count?: {
-    betaTesters?: number;
     betaFeedback?: number;
     purchases?: number;
     ratings?: number;
   };
+  betaTesters?: Array<{ id: string }>;
   betaAccess: {
     id: string;
     isActive: boolean;
@@ -363,7 +363,7 @@ export default function DeveloperBetaPage() {
                             <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
                               <span className="flex items-center gap-1">
                                 <Users size={14} />
-                                {game._count?.betaTesters || 0} testers
+                                {game.betaTesters?.length || 0} testers
                               </span>
                               <span className="flex items-center gap-1">
                                 <FlaskConical size={14} />
