@@ -16,8 +16,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Fetch user from database to get current subscription tier
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { subscriptionTier: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     // Check if user has Pro subscription
-    if (!hasFeatureAccess(session.user.subscriptionTier, FeatureFlag.BETA_ACCESS)) {
+    if (!hasFeatureAccess(user.subscriptionTier, FeatureFlag.BETA_ACCESS)) {
       return NextResponse.json(
         { error: 'Beta access requires Creator Support Pass subscription' },
         { status: 403 }
