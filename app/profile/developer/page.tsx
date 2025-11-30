@@ -12,7 +12,6 @@ const QUICK_ACTIONS = [
   { title: "My Games", description: "View all your published games", href: "/games?developer=me" },
   { title: "Analytics", description: "View your game stats", href: "/profile/developer/analytics" },
   { title: "Beta Access", description: "Manage beta games", href: "/profile/developer/beta" },
-  { title: "Feedback", description: "View beta tester feedback", href: "/profile/developer/feedback" },
   { title: "Community", description: "Connect with gamers", href: "/community" },
 ];
 
