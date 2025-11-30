@@ -36,6 +36,7 @@ model User {
   // Gamification
   xp     Int      @default(0)
   level  Int      @default(1)
+  points Int      @default(0) // Reward points from beta testing
   badges String[] // Badge IDs
 
   // Public Profile
