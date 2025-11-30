@@ -118,7 +118,7 @@ export function ConfirmModal({
             </h3>
 
             {/* Message */}
-            <p
+            <div
               className="text-center mb-6 leading-relaxed"
               style={{
                 color: "rgba(200, 220, 240, 0.85)",
@@ -126,7 +126,7 @@ export function ConfirmModal({
               }}
             >
               {message}
-            </p>
+            </div>
 
             {/* Buttons */}
             <div className="flex gap-3">
