@@ -345,12 +345,8 @@ export default function AchievementsPage() {
         </div>
 
         <div className="w-full max-w-4xl">
-          <FeatureGuard
-            feature={FeatureFlag.ACHIEVEMENTS}
-            userTier={user?.subscriptionTier as SubscriptionTier}
-          >
-            {/* Beta Testing Stats */}
-            {betaStats && (
+          {/* Beta Testing Stats - Available to all users */}
+          {betaStats && (
               <div
                 style={{
                   background: "linear-gradient(145deg, rgba(40, 60, 80, 0.45) 0%, rgba(30, 50, 70, 0.55) 100%)",
@@ -585,8 +581,13 @@ export default function AchievementsPage() {
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
+          <FeatureGuard
+            feature={FeatureFlag.ACHIEVEMENTS}
+            userTier={user?.subscriptionTier as SubscriptionTier}
+          >
             {/* Progress Overview */}
             <div
               style={{
