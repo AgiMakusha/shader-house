@@ -22,6 +22,9 @@ import {
   User,
   Calendar,
   Image as ImageIcon,
+  Play,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 
 interface TaskCompletion {
@@ -114,6 +117,19 @@ const getFeedbackTypeInfo = (type: string) => {
   }
 };
 
+const getStatusInfo = (status: string) => {
+  switch (status) {
+    case 'NEW':
+      return { icon: AlertCircle, label: 'New', color: 'rgba(250, 220, 100, 0.9)' };
+    case 'IN_PROGRESS':
+      return { icon: Clock, label: 'In Progress', color: 'rgba(150, 200, 255, 0.9)' };
+    case 'RESOLVED':
+      return { icon: CheckCircle, label: 'Resolved', color: 'rgba(150, 250, 150, 0.9)' };
+    default:
+      return { icon: MessageSquare, label: status, color: 'rgba(200, 240, 200, 0.7)' };
+  }
+};
+
 export default function GameFeedbackPage() {
   const router = useRouter();
   const params = useParams();
@@ -127,6 +143,7 @@ export default function GameFeedbackPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'completions' | 'feedback'>('completions');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     completionId: string;
@@ -173,6 +190,34 @@ export default function GameFeedbackPage() {
       console.error("Error fetching data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const updateFeedbackStatus = async (feedbackId: string, newStatus: string) => {
+    setUpdatingStatus(feedbackId);
+    try {
+      const response = await fetch('/api/beta/feedback/update-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackId, status: newStatus }),
+      });
+
+      if (response.ok) {
+        play('success');
+        success(`Feedback marked as ${newStatus.replace('_', ' ').toLowerCase()}!`);
+        // Refresh data
+        await fetchData();
+      } else {
+        const data = await response.json();
+        error(data.error || 'Failed to update status');
+        play('error');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      error('An error occurred while updating status');
+      play('error');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -514,7 +559,9 @@ export default function GameFeedbackPage() {
               <div className="space-y-4">
                 {feedback.map((item) => {
                   const feedbackTypeInfo = getFeedbackTypeInfo(item.type);
+                  const statusInfo = getStatusInfo(item.status);
                   const FeedbackIcon = feedbackTypeInfo.icon;
+                  const StatusIcon = statusInfo.icon;
                   
                   return (
                     <div
@@ -531,7 +578,7 @@ export default function GameFeedbackPage() {
                           style={{ color: feedbackTypeInfo.color }} 
                         />
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <h3 className="font-bold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
                               {item.title}
                             </h3>
@@ -545,14 +592,67 @@ export default function GameFeedbackPage() {
                             >
                               {feedbackTypeInfo.label}
                             </span>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
+                              style={{
+                                background: statusInfo.color.replace('0.9', '0.2'),
+                                color: statusInfo.color,
+                                border: `1px solid ${statusInfo.color.replace('0.9', '0.4')}`,
+                              }}
+                            >
+                              <StatusIcon className="w-3 h-3" />
+                              {statusInfo.label}
+                            </span>
                           </div>
                           <p className="text-sm mb-3" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
                             {item.description}
                           </p>
-                          <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                            <span>{item.user?.name || "Unknown User"}</span>
-                            <span>•</span>
-                            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                          <div className="flex items-center justify-between gap-3 flex-wrap">
+                            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                              <span>{item.user?.name || "Unknown User"}</span>
+                              <span>•</span>
+                              <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            
+                            {/* Status Update Buttons */}
+                            <div className="flex gap-2">
+                              {item.status !== 'IN_PROGRESS' && (
+                                <button
+                                  onClick={() => updateFeedbackStatus(item.id, 'IN_PROGRESS')}
+                                  disabled={updatingStatus === item.id}
+                                  className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
+                                  style={{
+                                    background: "rgba(150, 200, 255, 0.2)",
+                                    border: "1px solid rgba(150, 200, 255, 0.4)",
+                                    color: "rgba(200, 240, 255, 0.95)",
+                                    opacity: updatingStatus === item.id ? 0.5 : 1,
+                                    cursor: updatingStatus === item.id ? 'not-allowed' : 'pointer',
+                                  }}
+                                  onMouseEnter={() => play("hover")}
+                                >
+                                  <Play className="w-3 h-3" />
+                                  In Progress
+                                </button>
+                              )}
+                              {item.status !== 'RESOLVED' && (
+                                <button
+                                  onClick={() => updateFeedbackStatus(item.id, 'RESOLVED')}
+                                  disabled={updatingStatus === item.id}
+                                  className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
+                                  style={{
+                                    background: "rgba(150, 250, 150, 0.2)",
+                                    border: "1px solid rgba(150, 250, 150, 0.4)",
+                                    color: "rgba(200, 240, 200, 0.95)",
+                                    opacity: updatingStatus === item.id ? 0.5 : 1,
+                                    cursor: updatingStatus === item.id ? 'not-allowed' : 'pointer',
+                                  }}
+                                  onMouseEnter={() => play("hover")}
+                                >
+                                  <Check className="w-3 h-3" />
+                                  Resolve
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
