@@ -360,8 +360,33 @@ export default function BetaTestDetailPage() {
                     textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
                   }}
                 >
-                  <MessageSquare className="w-5 h-5" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
-                  Submit Feedback
+                  {showFeedbackForm ? (
+                    <>
+                      {feedbackType === 'BUG' && (
+                        <>
+                          <Bug className="w-5 h-5" style={{ color: "rgba(250, 150, 150, 0.9)" }} />
+                          Report a Bug
+                        </>
+                      )}
+                      {feedbackType === 'SUGGESTION' && (
+                        <>
+                          <Lightbulb className="w-5 h-5" style={{ color: "rgba(250, 220, 100, 0.9)" }} />
+                          Make a Suggestion
+                        </>
+                      )}
+                      {feedbackType === 'GENERAL' && (
+                        <>
+                          <MessageSquare className="w-5 h-5" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                          General Feedback
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="w-5 h-5" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                      Submit Feedback
+                    </>
+                  )}
                 </h2>
 
                 {!showFeedbackForm ? (
