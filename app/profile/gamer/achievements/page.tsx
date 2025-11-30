@@ -581,8 +581,7 @@ export default function AchievementsPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           <FeatureGuard
             feature={FeatureFlag.ACHIEVEMENTS}
