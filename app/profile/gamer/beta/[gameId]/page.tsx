@@ -22,7 +22,9 @@ import {
   Trophy,
   Sparkles,
   Gamepad2,
-  FlaskConical
+  FlaskConical,
+  XCircle,
+  AlertCircle
 } from "lucide-react";
 
 interface Task {
@@ -35,6 +37,7 @@ interface Task {
   isOptional: boolean;
   completed: boolean;
   completedAt: string | null;
+  completionStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED' | null;
 }
 
 interface BetaTest {
@@ -335,30 +338,52 @@ export default function BetaTestDetailPage() {
                         <button
                           key={task.id}
                           onClick={() => {
-                            if (!task.completed) {
+                            const canSubmit = !task.completed || task.completionStatus === 'REJECTED';
+                            if (canSubmit) {
                               setSelectedTask(task);
                               setShowTaskReportModal(true);
                               play("hover");
                             }
                           }}
-                          disabled={task.completed}
+                          disabled={task.completed && task.completionStatus !== 'REJECTED'}
                           className="w-full p-4 rounded-lg transition-all text-left"
                           style={{
-                            background: task.completed
+                            background: task.completionStatus === 'VERIFIED'
                               ? "rgba(100, 200, 100, 0.1)"
+                              : task.completionStatus === 'PENDING'
+                              ? "rgba(250, 220, 100, 0.05)"
+                              : task.completionStatus === 'REJECTED'
+                              ? "rgba(250, 150, 150, 0.05)"
                               : "rgba(100, 150, 255, 0.05)",
-                            border: task.completed
+                            border: task.completionStatus === 'VERIFIED'
                               ? "1px solid rgba(150, 250, 150, 0.3)"
+                              : task.completionStatus === 'PENDING'
+                              ? "1px solid rgba(250, 220, 100, 0.3)"
+                              : task.completionStatus === 'REJECTED'
+                              ? "1px solid rgba(250, 150, 150, 0.3)"
                               : "1px solid rgba(150, 180, 255, 0.2)",
-                            cursor: task.completed ? "default" : "pointer",
+                            cursor: (task.completed && task.completionStatus !== 'REJECTED') ? "default" : "pointer",
                           }}
-                          onMouseEnter={() => !task.completed && play("hover")}
+                          onMouseEnter={() => {
+                            const canSubmit = !task.completed || task.completionStatus === 'REJECTED';
+                            if (canSubmit) play("hover");
+                          }}
                         >
                           <div className="flex items-start gap-3">
-                            {task.completed ? (
+                            {task.completionStatus === 'VERIFIED' ? (
                               <CheckCircle2 
                                 className="w-5 h-5 flex-shrink-0 mt-0.5" 
                                 style={{ color: "rgba(150, 250, 150, 0.9)" }} 
+                              />
+                            ) : task.completionStatus === 'PENDING' ? (
+                              <Clock 
+                                className="w-5 h-5 flex-shrink-0 mt-0.5" 
+                                style={{ color: "rgba(250, 220, 100, 0.9)" }} 
+                              />
+                            ) : task.completionStatus === 'REJECTED' ? (
+                              <XCircle 
+                                className="w-5 h-5 flex-shrink-0 mt-0.5" 
+                                style={{ color: "rgba(250, 150, 150, 0.9)" }} 
                               />
                             ) : (
                               <Circle 
@@ -367,12 +392,16 @@ export default function BetaTestDetailPage() {
                               />
                             )}
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <h3
                                 className="font-semibold"
                                 style={{
-                                  color: task.completed
+                                  color: task.completionStatus === 'VERIFIED'
                                     ? "rgba(150, 250, 150, 0.9)"
+                                    : task.completionStatus === 'PENDING'
+                                    ? "rgba(250, 220, 100, 0.9)"
+                                    : task.completionStatus === 'REJECTED'
+                                    ? "rgba(250, 150, 150, 0.9)"
                                     : "rgba(200, 240, 200, 0.9)",
                                 }}
                               >
@@ -388,6 +417,45 @@ export default function BetaTestDetailPage() {
                                   }}
                                 >
                                   Optional
+                                </span>
+                              )}
+                              {task.completionStatus === 'PENDING' && (
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
+                                  style={{
+                                    background: "rgba(250, 220, 100, 0.15)",
+                                    color: "rgba(250, 220, 100, 0.9)",
+                                    border: "1px solid rgba(250, 220, 100, 0.3)",
+                                  }}
+                                >
+                                  <Clock className="w-3 h-3" />
+                                  Pending Verification
+                                </span>
+                              )}
+                              {task.completionStatus === 'VERIFIED' && (
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
+                                  style={{
+                                    background: "rgba(150, 250, 150, 0.15)",
+                                    color: "rgba(150, 250, 150, 0.9)",
+                                    border: "1px solid rgba(150, 250, 150, 0.3)",
+                                  }}
+                                >
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Verified
+                                </span>
+                              )}
+                              {task.completionStatus === 'REJECTED' && (
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
+                                  style={{
+                                    background: "rgba(250, 150, 150, 0.15)",
+                                    color: "rgba(250, 150, 150, 0.9)",
+                                    border: "1px solid rgba(250, 150, 150, 0.3)",
+                                  }}
+                                >
+                                  <XCircle className="w-3 h-3" />
+                                  Rejected - Can Resubmit
                                 </span>
                               )}
                             </div>

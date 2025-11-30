@@ -42,7 +42,12 @@ export async function GET(
       include: {
         completions: {
           where: {
-            testerId: tester.id,
+            userId: session.user.id,
+          },
+          select: {
+            status: true,
+            submittedAt: true,
+            verifiedAt: true,
           },
         },
       },
@@ -52,17 +57,21 @@ export async function GET(
     });
 
     // Format tasks with completion status
-    const formattedTasks = tasks.map((task) => ({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      type: task.type,
-      xpReward: task.xpReward,
-      rewardPoints: task.rewardPoints,
-      isOptional: task.isOptional,
-      completed: task.completions.length > 0,
-      completedAt: task.completions[0]?.completedAt || null,
-    }));
+    const formattedTasks = tasks.map((task) => {
+      const completion = task.completions[0];
+      return {
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        type: task.type,
+        xpReward: task.xpReward,
+        rewardPoints: task.rewardPoints,
+        isOptional: task.isOptional,
+        completed: completion?.status === 'VERIFIED',
+        completedAt: completion?.verifiedAt || null,
+        completionStatus: completion?.status || null,
+      };
+    });
 
     return NextResponse.json({ tasks: formattedTasks });
   } catch (error: any) {
