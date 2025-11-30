@@ -137,27 +137,29 @@ export default function TaskReportModal({
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        style={{ background: "rgba(0, 0, 0, 0.85)" }}
-        onClick={onClose}
-      >
-        <motion.div
-          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg p-6"
-          initial={{ scale: 0.9, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.9, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            background: "linear-gradient(135deg, rgba(20, 40, 60, 0.95) 0%, rgba(10, 20, 30, 0.98) 100%)",
-            border: "1px solid rgba(150, 180, 255, 0.3)",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
-          }}
-        >
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ background: "rgba(0, 0, 0, 0.85)" }}
+            onClick={onClose}
+          >
+            <motion.div
+              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg p-6"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: "linear-gradient(135deg, rgba(20, 40, 60, 0.95) 0%, rgba(10, 20, 30, 0.98) 100%)",
+                border: "1px solid rgba(150, 180, 255, 0.3)",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.5)",
+              }}
+            >
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-start gap-3 flex-1">
@@ -361,9 +363,12 @@ export default function TaskReportModal({
             </div>
           </form>
         </motion.div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       <ToastComponent />
-    </AnimatePresence>
+    </>
   );
 }
 
