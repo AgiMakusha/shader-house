@@ -27,6 +27,7 @@ export default function AchievementsPage() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [betaStats, setBetaStats] = useState<any>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,6 +39,17 @@ export default function AchievementsPage() {
         }
         const data = await response.json();
         setUser(data.user);
+        
+        // Fetch beta testing stats
+        try {
+          const statsResponse = await fetch("/api/beta/stats");
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            setBetaStats(statsData.stats);
+          }
+        } catch (error) {
+          console.error("Error fetching beta stats:", error);
+        }
         
         // Load achievements (mock data for now)
         setAchievements([
@@ -337,6 +349,244 @@ export default function AchievementsPage() {
             feature={FeatureFlag.ACHIEVEMENTS}
             userTier={user?.subscriptionTier as SubscriptionTier}
           >
+            {/* Beta Testing Stats */}
+            {betaStats && (
+              <div
+                style={{
+                  background: "linear-gradient(145deg, rgba(40, 60, 80, 0.45) 0%, rgba(30, 50, 70, 0.55) 100%)",
+                  border: "1px solid rgba(150, 200, 255, 0.35)",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  marginBottom: "24px",
+                }}
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <FlaskConical size={32} style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                  <div>
+                    <h2
+                      style={{
+                        fontSize: "16px",
+                        color: "rgba(200, 240, 200, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Beta Testing Stats
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "10px",
+                        color: "rgba(200, 240, 200, 0.7)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      Your contributions across all beta tests
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {/* Total XP */}
+                  <div
+                    style={{
+                      background: "rgba(250, 220, 100, 0.1)",
+                      border: "1px solid rgba(250, 220, 100, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy size={20} style={{ color: "rgba(250, 220, 100, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Total XP
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(250, 220, 100, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.totalXP}
+                    </p>
+                  </div>
+
+                  {/* Total Points */}
+                  <div
+                    style={{
+                      background: "rgba(150, 200, 255, 0.1)",
+                      border: "1px solid rgba(150, 200, 255, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles size={20} style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Total Points
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(150, 200, 255, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.totalPoints}
+                    </p>
+                  </div>
+
+                  {/* Tasks Completed */}
+                  <div
+                    style={{
+                      background: "rgba(150, 250, 150, 0.1)",
+                      border: "1px solid rgba(150, 250, 150, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target size={20} style={{ color: "rgba(150, 250, 150, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Tasks Done
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(150, 250, 150, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.totalTasksCompleted}
+                    </p>
+                  </div>
+
+                  {/* Bugs Reported */}
+                  <div
+                    style={{
+                      background: "rgba(250, 150, 150, 0.1)",
+                      border: "1px solid rgba(250, 150, 150, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap size={20} style={{ color: "rgba(250, 150, 150, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Bugs Found
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(250, 150, 150, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.totalBugsReported}
+                    </p>
+                  </div>
+
+                  {/* Games Tested */}
+                  <div
+                    style={{
+                      background: "rgba(200, 150, 255, 0.1)",
+                      border: "1px solid rgba(200, 150, 255, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Gamepad2 size={20} style={{ color: "rgba(200, 150, 255, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Games Tested
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(200, 150, 255, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.totalGamesTested}
+                    </p>
+                  </div>
+
+                  {/* Active Tests */}
+                  <div
+                    style={{
+                      background: "rgba(100, 200, 200, 0.1)",
+                      border: "1px solid rgba(100, 200, 200, 0.3)",
+                      borderRadius: "8px",
+                      padding: "16px",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users size={20} style={{ color: "rgba(100, 200, 200, 0.9)" }} />
+                      <span
+                        style={{
+                          fontSize: "9px",
+                          color: "rgba(200, 240, 200, 0.7)",
+                          fontFamily: '"Press Start 2P", monospace',
+                        }}
+                      >
+                        Active Tests
+                      </span>
+                    </div>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        color: "rgba(100, 200, 200, 0.95)",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {betaStats.activeTests}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Progress Overview */}
             <div
               style={{
