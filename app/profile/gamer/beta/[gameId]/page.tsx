@@ -81,6 +81,7 @@ export default function BetaTestDetailPage() {
 
   const [test, setTest] = useState<BetaTest | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [myFeedback, setMyFeedback] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [showTaskReportModal, setShowTaskReportModal] = useState(false);
@@ -118,6 +119,13 @@ export default function BetaTestDetailPage() {
       if (tasksResponse.ok) {
         const tasksData = await tasksResponse.json();
         setTasks(tasksData.tasks || []);
+      }
+
+      // Fetch my feedback for this game
+      const feedbackResponse = await fetch(`/api/beta/feedback/my-feedback?gameId=${gameId}`);
+      if (feedbackResponse.ok) {
+        const feedbackData = await feedbackResponse.json();
+        setMyFeedback(feedbackData.feedback || []);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -756,6 +764,102 @@ export default function BetaTestDetailPage() {
               </GameCardContent>
             </GameCard>
           </motion.div>
+
+          {/* My Submitted Feedback */}
+          {myFeedback.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <GameCard>
+                <GameCardContent className="p-6">
+                  <h2
+                    className="text-xl font-bold mb-4 pixelized flex items-center gap-2"
+                    style={{
+                      color: "rgba(180, 220, 180, 0.95)",
+                      textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                    }}
+                  >
+                    <MessageSquare className="w-5 h-5" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                    My Submitted Feedback
+                  </h2>
+
+                  <div className="space-y-3">
+                    {myFeedback.map((item) => {
+                      const getFeedbackTypeInfo = (type: string) => {
+                        switch (type) {
+                          case 'BUG':
+                            return { icon: Bug, color: 'rgba(250, 150, 150, 0.9)', bg: 'rgba(250, 150, 150, 0.1)', border: 'rgba(250, 150, 150, 0.3)' };
+                          case 'SUGGESTION':
+                            return { icon: Lightbulb, color: 'rgba(250, 220, 100, 0.9)', bg: 'rgba(250, 220, 100, 0.1)', border: 'rgba(250, 220, 100, 0.3)' };
+                          default:
+                            return { icon: MessageSquare, color: 'rgba(150, 200, 255, 0.9)', bg: 'rgba(150, 200, 255, 0.1)', border: 'rgba(150, 200, 255, 0.3)' };
+                        }
+                      };
+
+                      const getStatusInfo = (status: string) => {
+                        switch (status) {
+                          case 'NEW':
+                            return { icon: AlertCircle, label: 'New', color: 'rgba(250, 220, 100, 0.9)' };
+                          case 'IN_PROGRESS':
+                            return { icon: Clock, label: 'In Progress', color: 'rgba(150, 200, 255, 0.9)' };
+                          case 'RESOLVED':
+                            return { icon: CheckCircle2, label: 'Resolved', color: 'rgba(150, 250, 150, 0.9)' };
+                          default:
+                            return { icon: MessageSquare, label: status, color: 'rgba(200, 240, 200, 0.7)' };
+                        }
+                      };
+
+                      const typeInfo = getFeedbackTypeInfo(item.type);
+                      const statusInfo = getStatusInfo(item.status);
+                      const TypeIcon = typeInfo.icon;
+                      const StatusIcon = statusInfo.icon;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="p-4 rounded-lg"
+                          style={{
+                            background: `linear-gradient(135deg, ${typeInfo.bg} 0%, rgba(10, 20, 30, 0.6) 100%)`,
+                            border: `1px solid ${typeInfo.border}`,
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <TypeIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: typeInfo.color }} />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h3 className="font-semibold text-sm" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
+                                  {item.title}
+                                </h3>
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
+                                  style={{
+                                    background: statusInfo.color.replace('0.9', '0.2'),
+                                    color: statusInfo.color,
+                                    border: `1px solid ${statusInfo.color.replace('0.9', '0.4')}`,
+                                  }}
+                                >
+                                  <StatusIcon className="w-3 h-3" />
+                                  {statusInfo.label}
+                                </span>
+                              </div>
+                              <p className="text-xs mb-2 line-clamp-2" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                                {item.description}
+                              </p>
+                              <div className="text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                                Submitted {new Date(item.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </GameCardContent>
+              </GameCard>
+            </motion.div>
+          )}
         </div>
       </motion.main>
 
