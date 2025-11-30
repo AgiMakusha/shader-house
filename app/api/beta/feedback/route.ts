@@ -85,10 +85,52 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Auto-complete relevant tasks based on feedback type
+    const tasksToComplete = await prisma.betaTask.findMany({
+      where: {
+        gameId: validated.gameId,
+        type: validated.type === 'BUG' ? 'BUG_REPORT' : 'SUGGESTION',
+      },
+      select: { id: true },
+    });
+
+    // Mark tasks as complete if not already completed
+    for (const task of tasksToComplete) {
+      const existingCompletion = await prisma.betaTaskCompletion.findUnique({
+        where: {
+          taskId_testerId: {
+            taskId: task.id,
+            testerId: tester.id,
+          },
+        },
+      });
+
+      if (!existingCompletion) {
+        await prisma.betaTaskCompletion.create({
+          data: {
+            taskId: task.id,
+            testerId: tester.id,
+            isVerified: false, // Developer can verify later
+          },
+        });
+
+        // Increment tasks completed count
+        await prisma.betaTester.update({
+          where: { id: tester.id },
+          data: {
+            tasksCompleted: {
+              increment: 1,
+            },
+          },
+        });
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Feedback submitted successfully',
       feedback,
+      tasksCompleted: tasksToComplete.length,
     });
   } catch (error: any) {
     console.error('POST /api/beta/feedback error:', error);

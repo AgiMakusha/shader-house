@@ -7,7 +7,8 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
-import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket } from "lucide-react";
+import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo } from "lucide-react";
+import TaskManagementModal from "@/components/beta/TaskManagementModal";
 
 interface Game {
   id: string;
@@ -28,6 +29,8 @@ export default function DeveloperBetaPage() {
   const [user, setUser] = useState<any>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -344,6 +347,23 @@ export default function DeveloperBetaPage() {
 
                           {/* Action Buttons */}
                           <div className="flex gap-3">
+                            <button
+                              onClick={() => {
+                                setSelectedGame({ id: game.id, title: game.title });
+                                setTaskModalOpen(true);
+                                play("hover");
+                              }}
+                              className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
+                              style={{
+                                background: "rgba(150, 200, 255, 0.2)",
+                                border: "1px solid rgba(150, 200, 255, 0.3)",
+                                color: "rgba(150, 200, 255, 0.95)",
+                              }}
+                              onMouseEnter={() => play("hover")}
+                            >
+                              <ListTodo size={14} />
+                              Manage Tasks
+                            </button>
                             <Link
                               href={`/dashboard/games/${game.id}/edit`}
                               className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all"
@@ -383,6 +403,19 @@ export default function DeveloperBetaPage() {
           )}
         </motion.div>
       </motion.main>
+
+      {/* Task Management Modal */}
+      {selectedGame && (
+        <TaskManagementModal
+          gameId={selectedGame.id}
+          gameTitle={selectedGame.title}
+          isOpen={taskModalOpen}
+          onClose={() => {
+            setTaskModalOpen(false);
+            setSelectedGame(null);
+          }}
+        />
+      )}
     </div>
   );
 }
