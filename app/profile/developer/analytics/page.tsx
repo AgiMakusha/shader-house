@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { Star, Heart, ShoppingCart } from "lucide-react";
 
 import Particles from "@/components/fx/Particles";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
@@ -330,14 +331,46 @@ export default function AnalyticsPage() {
                             {game.tagline}
                           </p>
                           <div className="flex items-center gap-4 text-xs">
-                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                              ⭐ {game.avgRating?.toFixed(1) || "N/A"} ({game._count?.ratings || 0} ratings)
+                            <span 
+                              className="flex items-center gap-1" 
+                              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                            >
+                              <Star 
+                                size={14} 
+                                fill="rgba(250, 220, 100, 0.8)"
+                                style={{ 
+                                  color: "rgba(250, 220, 100, 0.9)",
+                                  filter: "drop-shadow(0 0 4px rgba(250, 220, 100, 0.5))"
+                                }} 
+                              />
+                              {game.avgRating?.toFixed(1) || "N/A"} ({game._count?.ratings || 0} ratings)
                             </span>
-                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                              ❤️ {game._count?.favorites || 0} favorites
+                            <span 
+                              className="flex items-center gap-1" 
+                              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                            >
+                              <Heart 
+                                size={14} 
+                                fill="rgba(250, 150, 150, 0.7)"
+                                style={{ 
+                                  color: "rgba(250, 150, 150, 0.9)",
+                                  filter: "drop-shadow(0 0 4px rgba(250, 150, 150, 0.5))"
+                                }} 
+                              />
+                              {game._count?.favorites || 0} favorites
                             </span>
-                            <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                              💰 {game._count?.purchases || 0} purchases
+                            <span 
+                              className="flex items-center gap-1" 
+                              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                            >
+                              <ShoppingCart 
+                                size={14} 
+                                style={{ 
+                                  color: "rgba(150, 250, 150, 0.9)",
+                                  filter: "drop-shadow(0 0 4px rgba(150, 250, 150, 0.5))"
+                                }} 
+                              />
+                              {game._count?.purchases || 0} purchases
                             </span>
                           </div>
                         </div>
