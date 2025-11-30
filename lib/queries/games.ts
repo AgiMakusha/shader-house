@@ -121,14 +121,7 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
             favorites: true,
             purchases: true,
             betaFeedback: true,
-          },
-        },
-        betaTesters: {
-          where: {
-            status: 'APPROVED',
-          },
-          select: {
-            id: true,
+            betaTesters: true,
           },
         },
       },
