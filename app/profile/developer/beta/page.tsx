@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
-import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare } from "lucide-react";
+import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
 
 interface Game {
@@ -15,6 +15,12 @@ interface Game {
   title: string;
   slug: string;
   coverUrl: string;
+  _count?: {
+    betaTesters?: number;
+    betaFeedback?: number;
+    purchases?: number;
+    ratings?: number;
+  };
   betaAccess: {
     id: string;
     isActive: boolean;
@@ -28,6 +34,7 @@ export default function DeveloperBetaPage() {
   const { play } = useAudio();
   const [user, setUser] = useState<any>(null);
   const [games, setGames] = useState<Game[]>([]);
+  const [gameStats, setGameStats] = useState<Record<string, { bugs: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<{ id: string; title: string } | null>(null);
@@ -52,7 +59,27 @@ export default function DeveloperBetaPage() {
         const gamesResponse = await fetch("/api/games?developer=me&status=beta");
         if (gamesResponse.ok) {
           const gamesData = await gamesResponse.json();
-          setGames(gamesData.items || []);
+          const fetchedGames = gamesData.items || [];
+          setGames(fetchedGames);
+          
+          // Fetch bug counts for each game
+          const stats: Record<string, { bugs: number }> = {};
+          await Promise.all(
+            fetchedGames.map(async (game: Game) => {
+              try {
+                const feedbackResponse = await fetch(`/api/beta/feedback?gameId=${game.id}`);
+                if (feedbackResponse.ok) {
+                  const feedbackData = await feedbackResponse.json();
+                  const bugs = feedbackData.feedback?.filter((f: any) => f.type === 'BUG').length || 0;
+                  stats[game.id] = { bugs };
+                }
+              } catch (error) {
+                console.error(`Error fetching stats for game ${game.id}:`, error);
+                stats[game.id] = { bugs: 0 };
+              }
+            })
+          );
+          setGameStats(stats);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -336,11 +363,15 @@ export default function DeveloperBetaPage() {
                             <div className="flex items-center gap-4 text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
                               <span className="flex items-center gap-1">
                                 <Users size={14} />
-                                {game._count?.purchases || 0} testers
+                                {game._count?.betaTesters || 0} testers
                               </span>
                               <span className="flex items-center gap-1">
                                 <FlaskConical size={14} />
-                                {game._count?.ratings || 0} feedback
+                                {game._count?.betaFeedback || 0} feedback
+                              </span>
+                              <span className="flex items-center gap-1" style={{ color: "rgba(250, 150, 150, 0.8)" }}>
+                                <Bug size={14} />
+                                {gameStats[game.id]?.bugs || 0} bugs
                               </span>
                             </div>
                           </div>
