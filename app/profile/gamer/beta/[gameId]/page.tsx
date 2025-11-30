@@ -25,6 +25,9 @@ interface Task {
   title: string;
   description: string;
   type: string;
+  xpReward: number;
+  rewardPoints: number;
+  isOptional: boolean;
   completed: boolean;
   completedAt: string | null;
 }
@@ -319,22 +322,60 @@ export default function BetaTestDetailPage() {
                             />
                           )}
                           <div className="flex-1">
-                            <h3
-                              className="font-semibold mb-1"
-                              style={{
-                                color: task.completed
-                                  ? "rgba(150, 250, 150, 0.9)"
-                                  : "rgba(200, 240, 200, 0.9)",
-                              }}
-                            >
-                              {task.title}
-                            </h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3
+                                className="font-semibold"
+                                style={{
+                                  color: task.completed
+                                    ? "rgba(150, 250, 150, 0.9)"
+                                    : "rgba(200, 240, 200, 0.9)",
+                                }}
+                              >
+                                {task.title}
+                              </h3>
+                              {task.isOptional && (
+                                <span
+                                  className="text-xs px-2 py-0.5 rounded"
+                                  style={{
+                                    background: "rgba(250, 220, 100, 0.2)",
+                                    color: "rgba(250, 220, 100, 0.9)",
+                                    border: "1px solid rgba(250, 220, 100, 0.3)",
+                                  }}
+                                >
+                                  Optional
+                                </span>
+                              )}
+                            </div>
                             <p
-                              className="text-xs"
+                              className="text-xs mb-2"
                               style={{ color: "rgba(200, 240, 200, 0.6)" }}
                             >
                               {task.description}
                             </p>
+                            <div className="flex items-center gap-4 text-xs">
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: "rgba(250, 220, 100, 0.8)" }}
+                              >
+                                <Trophy className="w-3 h-3" />
+                                {task.xpReward} XP
+                              </span>
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: "rgba(150, 200, 255, 0.8)" }}
+                              >
+                                ⭐ {task.rewardPoints} pts
+                              </span>
+                              {task.completed && task.completedAt && (
+                                <span
+                                  className="flex items-center gap-1"
+                                  style={{ color: "rgba(150, 250, 150, 0.7)" }}
+                                >
+                                  <Clock className="w-3 h-3" />
+                                  Completed {new Date(task.completedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
