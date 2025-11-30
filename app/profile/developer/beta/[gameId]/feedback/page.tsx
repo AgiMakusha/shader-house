@@ -128,7 +128,9 @@ export default function GameFeedbackPage() {
       const completionsResponse = await fetch(`/api/beta/tasks/completions?gameId=${gameId}`);
       if (completionsResponse.ok) {
         const completionsData = await completionsResponse.json();
-        setCompletions(completionsData.completions || []);
+        // Filter out any completions without user data
+        const validCompletions = (completionsData.completions || []).filter((c: any) => c && c.user);
+        setCompletions(validCompletions);
       }
 
       // Fetch feedback
@@ -189,9 +191,9 @@ export default function GameFeedbackPage() {
     }
   };
 
-  const pendingCompletions = completions.filter(c => c.status === 'PENDING');
-  const verifiedCompletions = completions.filter(c => c.status === 'VERIFIED');
-  const rejectedCompletions = completions.filter(c => c.status === 'REJECTED');
+  const pendingCompletions = completions.filter(c => c && c.user && c.status === 'PENDING');
+  const verifiedCompletions = completions.filter(c => c && c.user && c.status === 'VERIFIED');
+  const rejectedCompletions = completions.filter(c => c && c.user && c.status === 'REJECTED');
 
   if (isLoading) {
     return (
