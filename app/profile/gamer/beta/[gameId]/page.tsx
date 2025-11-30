@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
+import TaskReportModal from "@/components/beta/TaskReportModal";
 import { 
   ChevronLeft, 
   CheckCircle2, 
@@ -77,6 +78,8 @@ export default function BetaTestDetailPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showTaskReportModal, setShowTaskReportModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   
   // Feedback form state
   const [feedbackType, setFeedbackType] = useState<'BUG' | 'SUGGESTION' | 'GENERAL'>('BUG');
@@ -327,9 +330,17 @@ export default function BetaTestDetailPage() {
                       const TaskTypeIcon = taskTypeInfo.icon;
                       
                       return (
-                        <div
+                        <button
                           key={task.id}
-                          className="p-4 rounded-lg transition-all"
+                          onClick={() => {
+                            if (!task.completed) {
+                              setSelectedTask(task);
+                              setShowTaskReportModal(true);
+                              play("hover");
+                            }
+                          }}
+                          disabled={task.completed}
+                          className="w-full p-4 rounded-lg transition-all text-left"
                           style={{
                             background: task.completed
                               ? "rgba(100, 200, 100, 0.1)"
@@ -337,7 +348,9 @@ export default function BetaTestDetailPage() {
                             border: task.completed
                               ? "1px solid rgba(150, 250, 150, 0.3)"
                               : "1px solid rgba(150, 180, 255, 0.2)",
+                            cursor: task.completed ? "default" : "pointer",
                           }}
+                          onMouseEnter={() => !task.completed && play("hover")}
                         >
                           <div className="flex items-start gap-3">
                             {task.completed ? (
@@ -414,10 +427,10 @@ export default function BetaTestDetailPage() {
                                 </span>
                               )}
                             </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    );
+                        </button>
+                      );
                     })}
                   </div>
                 )}
@@ -675,6 +688,20 @@ export default function BetaTestDetailPage() {
           </motion.div>
         </div>
       </motion.main>
+
+      {/* Task Report Modal */}
+      <TaskReportModal
+        task={selectedTask}
+        gameId={gameId}
+        isOpen={showTaskReportModal}
+        onClose={() => {
+          setShowTaskReportModal(false);
+          setSelectedTask(null);
+        }}
+        onSuccess={() => {
+          fetchData(); // Refresh tasks
+        }}
+      />
     </div>
   );
 }

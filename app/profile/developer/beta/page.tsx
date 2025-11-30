@@ -346,47 +346,62 @@ export default function DeveloperBetaPage() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => {
-                                setSelectedGame({ id: game.id, title: game.title });
-                                setTaskModalOpen(true);
-                                play("hover");
-                              }}
-                              className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
-                              style={{
-                                background: "rgba(150, 200, 255, 0.2)",
-                                border: "1px solid rgba(150, 200, 255, 0.3)",
-                                color: "rgba(150, 200, 255, 0.95)",
-                              }}
-                              onMouseEnter={() => play("hover")}
-                            >
-                              <ListTodo size={14} />
-                              Manage Tasks
-                            </button>
-                            <Link
-                              href={`/dashboard/games/${game.id}/edit`}
-                              className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all"
-                              style={{
-                                background: "rgba(100, 200, 100, 0.2)",
-                                border: "1px solid rgba(200, 240, 200, 0.3)",
-                                color: "rgba(200, 240, 200, 0.95)",
-                              }}
-                              onMouseEnter={() => play("hover")}
-                            >
-                              Edit
-                            </Link>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedGame({ id: game.id, title: game.title });
+                                  setTaskModalOpen(true);
+                                  play("hover");
+                                }}
+                                className="px-3 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
+                                style={{
+                                  background: "rgba(150, 200, 255, 0.2)",
+                                  border: "1px solid rgba(150, 200, 255, 0.3)",
+                                  color: "rgba(150, 200, 255, 0.95)",
+                                }}
+                                onMouseEnter={() => play("hover")}
+                              >
+                                <ListTodo size={14} />
+                                Tasks
+                              </button>
+                              <Link
+                                href={`/profile/developer/beta/${game.id}/feedback`}
+                                className="px-3 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
+                                style={{
+                                  background: "rgba(250, 220, 100, 0.2)",
+                                  border: "1px solid rgba(250, 220, 100, 0.3)",
+                                  color: "rgba(250, 220, 100, 0.95)",
+                                }}
+                                onMouseEnter={() => play("hover")}
+                              >
+                                <MessageSquare size={14} />
+                                Feedback
+                              </Link>
+                              <Link
+                                href={`/dashboard/games/${game.id}/edit`}
+                                className="px-3 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all"
+                                style={{
+                                  background: "rgba(100, 200, 100, 0.2)",
+                                  border: "1px solid rgba(200, 240, 200, 0.3)",
+                                  color: "rgba(200, 240, 200, 0.95)",
+                                }}
+                                onMouseEnter={() => play("hover")}
+                              >
+                                Edit
+                              </Link>
+                            </div>
                             <motion.button
                               onClick={() => promoteToRelease(game.id, game.title)}
-                              className="px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all flex items-center gap-2"
+                              className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
                               style={{
                                 background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
                                 border: "1px solid rgba(200, 240, 200, 0.4)",
                                 color: "rgba(200, 240, 200, 0.95)",
                                 boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
                               }}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
                               onMouseEnter={() => play("hover")}
                             >
                               <Rocket className="w-4 h-4" />
