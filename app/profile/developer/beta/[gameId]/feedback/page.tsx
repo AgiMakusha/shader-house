@@ -187,7 +187,7 @@ export default function GameFeedbackPage() {
           onMouseEnter={() => play("hover")}
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Beta Dashboard
+          Back to Beta Access Management
         </Link>
 
         {game && (
