@@ -7,24 +7,23 @@ import { motion } from "framer-motion";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { useToast } from "@/hooks/useToast";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import Particles from "@/components/fx/Particles";
 import {
   ChevronLeft,
-  MessageSquare,
+  Clock,
   CheckCircle,
   XCircle,
-  Clock,
   Trophy,
   Sparkles,
   Bug,
   Lightbulb,
   Gamepad2,
   FlaskConical,
+  MessageSquare,
   User,
   Calendar,
   Image as ImageIcon,
-  Play,
-  Check,
-  AlertCircle,
+  ListTodo,
 } from "lucide-react";
 
 interface TaskCompletion {
@@ -51,25 +50,10 @@ interface TaskCompletion {
   };
 }
 
-interface Feedback {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  severity: string;
-  screenshot: string | null;
-  status: string;
-  createdAt: string;
-  user?: {
-    name: string;
-    email: string;
-  };
-}
-
 interface Game {
   id: string;
   title: string;
-  coverUrl: string;
+  slug: string;
 }
 
 const getTaskTypeInfo = (type: string) => {
@@ -87,50 +71,7 @@ const getTaskTypeInfo = (type: string) => {
   }
 };
 
-const getFeedbackTypeInfo = (type: string) => {
-  switch (type) {
-    case 'BUG':
-      return { 
-        icon: Bug, 
-        label: 'Bug Report', 
-        color: 'rgba(250, 150, 150, 0.9)',
-        bgColor: 'rgba(250, 150, 150, 0.1)',
-        borderColor: 'rgba(250, 150, 150, 0.3)'
-      };
-    case 'SUGGESTION':
-      return { 
-        icon: Lightbulb, 
-        label: 'Suggestion', 
-        color: 'rgba(250, 220, 100, 0.9)',
-        bgColor: 'rgba(250, 220, 100, 0.1)',
-        borderColor: 'rgba(250, 220, 100, 0.3)'
-      };
-    case 'GENERAL':
-    default:
-      return { 
-        icon: MessageSquare, 
-        label: 'General Feedback', 
-        color: 'rgba(150, 200, 255, 0.9)',
-        bgColor: 'rgba(150, 200, 255, 0.1)',
-        borderColor: 'rgba(150, 200, 255, 0.3)'
-      };
-  }
-};
-
-const getStatusInfo = (status: string) => {
-  switch (status) {
-    case 'NEW':
-      return { icon: AlertCircle, label: 'New', color: 'rgba(250, 220, 100, 0.9)' };
-    case 'IN_PROGRESS':
-      return { icon: Clock, label: 'In Progress', color: 'rgba(150, 200, 255, 0.9)' };
-    case 'RESOLVED':
-      return { icon: CheckCircle, label: 'Resolved', color: 'rgba(150, 250, 150, 0.9)' };
-    default:
-      return { icon: MessageSquare, label: status, color: 'rgba(200, 240, 200, 0.7)' };
-  }
-};
-
-export default function GameFeedbackPage() {
+export default function GameTasksPage() {
   const router = useRouter();
   const params = useParams();
   const { play } = useAudio();
@@ -138,10 +79,22 @@ export default function GameFeedbackPage() {
   const gameId = params.gameId as string;
 
   const [game, setGame] = useState<Game | null>(null);
-  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [completions, setCompletions] = useState<TaskCompletion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    completionId: string;
+    approved: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    completionId: "",
+    approved: false,
+    title: "",
+    message: "",
+  });
 
   useEffect(() => {
     fetchData();
@@ -149,51 +102,25 @@ export default function GameFeedbackPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch game details
+      // Fetch game info
       const gameResponse = await fetch(`/api/games/${gameId}`);
       if (gameResponse.ok) {
         const gameData = await gameResponse.json();
         setGame(gameData);
       }
 
-      // Fetch feedback
-      const feedbackResponse = await fetch(`/api/beta/feedback?gameId=${gameId}`);
-      if (feedbackResponse.ok) {
-        const feedbackData = await feedbackResponse.json();
-        setFeedback(feedbackData.feedback || []);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const updateFeedbackStatus = async (feedbackId: string, newStatus: string) => {
-    setUpdatingStatus(feedbackId);
-    try {
-      const response = await fetch('/api/beta/feedback/update-status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedbackId, status: newStatus }),
-      });
-
-      if (response.ok) {
-        play('success');
-        success(`Feedback marked as ${newStatus.replace('_', ' ').toLowerCase()}!`);
-        // Refresh data
-        await fetchData();
-      } else {
-        const data = await response.json();
-        error(data.error || 'Failed to update status');
-        play('error');
+      // Fetch task completions
+      const completionsResponse = await fetch(`/api/beta/tasks/completions?gameId=${gameId}`);
+      if (completionsResponse.ok) {
+        const completionsData = await completionsResponse.json();
+        // Filter out any completions without user or task data
+        const validCompletions = (completionsData.completions || []).filter((c: any) => c && c.user && c.task);
+        setCompletions(validCompletions);
       }
     } catch (err) {
-      console.error('Error updating status:', err);
-      error('An error occurred while updating status');
-      play('error');
+      console.error('Error fetching data:', err);
     } finally {
-      setUpdatingStatus(null);
+      setIsLoading(false);
     }
   };
 
@@ -213,17 +140,14 @@ export default function GameFeedbackPage() {
     const { completionId, approved } = confirmModal;
 
     try {
-      const response = await fetch(`/api/beta/tasks/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          completionId,
-          approved,
-        }),
+      const response = await fetch('/api/beta/tasks/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completionId, approved }),
       });
 
       if (response.ok) {
-        play("success");
+        play('success');
         if (approved) {
           success("Task completion approved! Gamer has been awarded XP and points.");
         } else {
@@ -232,13 +156,13 @@ export default function GameFeedbackPage() {
         fetchData();
       } else {
         const data = await response.json();
-        error(data.error || "Failed to verify completion");
-        play("error");
+        error(data.error || 'Failed to verify completion');
+        play('error');
       }
     } catch (err) {
-      console.error("Error verifying completion:", err);
-      error("An error occurred while verifying the completion");
-      play("error");
+      console.error('Error verifying completion:', err);
+      error('An error occurred while verifying the completion');
+      play('error');
     }
   };
 
@@ -246,60 +170,43 @@ export default function GameFeedbackPage() {
   const verifiedCompletions = completions.filter(c => c && c.user && c.task && c.status === 'VERIFIED');
   const rejectedCompletions = completions.filter(c => c && c.user && c.task && c.status === 'REJECTED');
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p style={{ color: "rgba(200, 240, 200, 0.7)" }}>Loading...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen p-6">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto mb-8">
-        <Link
-          href="/profile/developer/beta"
-          className="inline-flex items-center gap-2 mb-4 transition-all"
-          style={{ color: "rgba(150, 200, 255, 0.9)" }}
-          onMouseEnter={() => play("hover")}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Back to Beta Access Management
-        </Link>
+    <div className="min-h-screen relative" style={{ background: "linear-gradient(to bottom, #0a0f1a 0%, #1a1f2e 100%)" }}>
+      <Particles />
+      
+      <main className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            href={`/profile/developer/beta`}
+            className="inline-flex items-center gap-2 mb-4 transition-all hover:gap-3"
+            style={{ color: "rgba(150, 200, 255, 0.9)" }}
+            onMouseEnter={() => play("hover")}
+          >
+            <ChevronLeft size={20} />
+            <span>Back to Beta Management</span>
+          </Link>
 
-        {game && (
-          <div className="flex items-center gap-4">
-            {game.coverUrl && (
-              <img
-                src={game.coverUrl}
-                alt={game.title}
-                className="w-20 h-20 rounded-lg object-cover"
-              />
-            )}
-            <div>
-              <h1
-                className="text-3xl font-bold pixelized mb-2"
-                style={{
-                  color: "rgba(180, 220, 180, 0.95)",
-                  textShadow: "0 0 10px rgba(120, 200, 120, 0.6), 2px 2px 0px rgba(0, 0, 0, 0.8)",
-                }}
-              >
-                {game.title}
-              </h1>
-              <p style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                Feedback & Task Verification
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+          <h1
+            className="text-4xl font-bold mb-2"
+            style={{
+              color: "rgba(220, 240, 255, 0.95)",
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
+            }}
+          >
+            <ListTodo className="inline w-8 h-8 mr-2" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+            Manage Beta Tasks
+          </h1>
+          {game && (
+            <p style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+              Review and verify task completions for {game.title}
+            </p>
+          )}
+        </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto">
         {isLoading ? (
           <div className="text-center py-12">
-            <p style={{ color: "rgba(200, 240, 200, 0.5)" }}>Loading feedback...</p>
+            <p style={{ color: "rgba(200, 240, 200, 0.5)" }}>Loading task completions...</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -307,7 +214,7 @@ export default function GameFeedbackPage() {
             {pendingCompletions.length > 0 && (
               <div>
                 <h2
-                  className="text-xl font-bold pixelized mb-4 flex items-center gap-2"
+                  className="text-xl font-bold mb-4 flex items-center gap-2"
                   style={{ color: "rgba(250, 220, 100, 0.95)" }}
                 >
                   <Clock className="w-5 h-5" />
@@ -317,7 +224,7 @@ export default function GameFeedbackPage() {
                   {pendingCompletions.map((completion) => {
                     const taskTypeInfo = getTaskTypeInfo(completion.task.type);
                     const TaskTypeIcon = taskTypeInfo.icon;
-
+                    
                     return (
                       <motion.div
                         key={completion.id}
@@ -378,16 +285,21 @@ export default function GameFeedbackPage() {
                         <div
                           className="p-4 rounded-lg mb-4"
                           style={{
-                            background: "rgba(100, 150, 255, 0.1)",
+                            background: "rgba(100, 150, 255, 0.05)",
                             border: "1px solid rgba(150, 180, 255, 0.2)",
                           }}
                         >
-                          <h4 className="text-sm font-bold mb-2" style={{ color: "rgba(150, 200, 255, 0.9)" }}>
-                            Gamer's Report:
+                          <h4 className="font-semibold mb-2 text-sm" style={{ color: "rgba(200, 240, 200, 0.9)" }}>
+                            Gamer Report:
                           </h4>
-                          <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.8)", lineHeight: "1.6" }}>
+                          <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
                             {completion.report}
                           </p>
+                          {completion.deviceInfo && (
+                            <p className="text-xs mt-2" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                              Device: {completion.deviceInfo}
+                            </p>
+                          )}
                         </div>
 
                         {/* Screenshot */}
@@ -395,17 +307,25 @@ export default function GameFeedbackPage() {
                           <div className="mb-4">
                             <button
                               onClick={() => setSelectedImage(completion.screenshot)}
-                              className="flex items-center gap-2 text-sm transition-all"
-                              style={{ color: "rgba(150, 200, 255, 0.9)" }}
-                              onMouseEnter={() => play("hover")}
+                              className="relative group"
                             >
-                              <ImageIcon className="w-4 h-4" />
-                              View Screenshot
+                              <img
+                                src={completion.screenshot}
+                                alt="Task completion screenshot"
+                                className="rounded-lg max-w-xs max-h-48 object-cover"
+                                style={{ border: "1px solid rgba(150, 180, 255, 0.3)" }}
+                              />
+                              <div
+                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{ background: "rgba(0, 0, 0, 0.5)" }}
+                              >
+                                <ImageIcon className="w-8 h-8" style={{ color: "rgba(200, 240, 200, 0.9)" }} />
+                              </div>
                             </button>
                           </div>
                         )}
 
-                        {/* Actions */}
+                        {/* Action Buttons */}
                         <div className="flex gap-3">
                           <button
                             onClick={() => openConfirmModal(completion.id, true)}
@@ -424,9 +344,9 @@ export default function GameFeedbackPage() {
                             onClick={() => openConfirmModal(completion.id, false)}
                             className="flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2"
                             style={{
-                              background: "rgba(200, 100, 100, 0.2)",
-                              border: "1px solid rgba(240, 150, 150, 0.3)",
-                              color: "rgba(240, 200, 200, 0.95)",
+                              background: "rgba(250, 150, 150, 0.1)",
+                              border: "1px solid rgba(250, 150, 150, 0.3)",
+                              color: "rgba(250, 180, 180, 0.95)",
                             }}
                             onMouseEnter={() => play("hover")}
                           >
@@ -445,7 +365,7 @@ export default function GameFeedbackPage() {
             {verifiedCompletions.length > 0 && (
               <div>
                 <h2
-                  className="text-xl font-bold pixelized mb-4 flex items-center gap-2"
+                  className="text-xl font-bold mb-4 flex items-center gap-2"
                   style={{ color: "rgba(150, 250, 150, 0.95)" }}
                 >
                   <CheckCircle className="w-5 h-5" />
@@ -486,124 +406,8 @@ export default function GameFeedbackPage() {
               </div>
             )}
           </div>
-        ) : (
-          <div>
-            {/* General Feedback */}
-            {feedback.length > 0 ? (
-              <div className="space-y-4">
-                {feedback.map((item) => {
-                  const feedbackTypeInfo = getFeedbackTypeInfo(item.type);
-                  const statusInfo = getStatusInfo(item.status);
-                  const FeedbackIcon = feedbackTypeInfo.icon;
-                  const StatusIcon = statusInfo.icon;
-                  
-                  return (
-                    <div
-                      key={item.id}
-                      className="p-6 rounded-lg"
-                      style={{
-                        background: `linear-gradient(135deg, ${feedbackTypeInfo.bgColor} 0%, rgba(10, 20, 30, 0.8) 100%)`,
-                        border: `1px solid ${feedbackTypeInfo.borderColor}`,
-                      }}
-                    >
-                      <div className="flex items-start gap-3 mb-3">
-                        <FeedbackIcon 
-                          className="w-5 h-5 flex-shrink-0 mt-0.5" 
-                          style={{ color: feedbackTypeInfo.color }} 
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="font-bold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
-                              {item.title}
-                            </h3>
-                            <span
-                              className="text-xs px-2 py-0.5 rounded"
-                              style={{
-                                background: feedbackTypeInfo.bgColor,
-                                color: feedbackTypeInfo.color,
-                                border: `1px solid ${feedbackTypeInfo.borderColor}`,
-                              }}
-                            >
-                              {feedbackTypeInfo.label}
-                            </span>
-                            <span
-                              className="text-xs px-2 py-0.5 rounded flex items-center gap-1"
-                              style={{
-                                background: statusInfo.color.replace('0.9', '0.2'),
-                                color: statusInfo.color,
-                                border: `1px solid ${statusInfo.color.replace('0.9', '0.4')}`,
-                              }}
-                            >
-                              <StatusIcon className="w-3 h-3" />
-                              {statusInfo.label}
-                            </span>
-                          </div>
-                          <p className="text-sm mb-3" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                            {item.description}
-                          </p>
-                          <div className="flex items-center justify-between gap-3 flex-wrap">
-                            <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                              <span>{item.user?.name || "Unknown User"}</span>
-                              <span>•</span>
-                              <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            
-                            {/* Status Update Buttons */}
-                            <div className="flex gap-2">
-                              {item.status !== 'IN_PROGRESS' && (
-                                <button
-                                  onClick={() => updateFeedbackStatus(item.id, 'IN_PROGRESS')}
-                                  disabled={updatingStatus === item.id}
-                                  className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
-                                  style={{
-                                    background: "rgba(150, 200, 255, 0.2)",
-                                    border: "1px solid rgba(150, 200, 255, 0.4)",
-                                    color: "rgba(200, 240, 255, 0.95)",
-                                    opacity: updatingStatus === item.id ? 0.5 : 1,
-                                    cursor: updatingStatus === item.id ? 'not-allowed' : 'pointer',
-                                  }}
-                                  onMouseEnter={() => play("hover")}
-                                >
-                                  <Play className="w-3 h-3" />
-                                  In Progress
-                                </button>
-                              )}
-                              {item.status !== 'RESOLVED' && (
-                                <button
-                                  onClick={() => updateFeedbackStatus(item.id, 'RESOLVED')}
-                                  disabled={updatingStatus === item.id}
-                                  className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
-                                  style={{
-                                    background: "rgba(150, 250, 150, 0.2)",
-                                    border: "1px solid rgba(150, 250, 150, 0.4)",
-                                    color: "rgba(200, 240, 200, 0.95)",
-                                    opacity: updatingStatus === item.id ? 0.5 : 1,
-                                    cursor: updatingStatus === item.id ? 'not-allowed' : 'pointer',
-                                  }}
-                                  onMouseEnter={() => play("hover")}
-                                >
-                                  <Check className="w-3 h-3" />
-                                  Resolve
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                  No feedback yet
-                </p>
-              </div>
-            )}
-          </div>
         )}
-      </div>
+      </main>
 
       {/* Image Modal */}
       {selectedImage && (

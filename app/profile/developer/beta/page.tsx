@@ -396,8 +396,21 @@ export default function DeveloperBetaPage() {
                                 onMouseEnter={() => play("hover")}
                               >
                                 <ListTodo size={14} />
-                                Tasks
+                                Create Tasks
                               </button>
+                              <Link
+                                href={`/profile/developer/beta/${game.id}/tasks`}
+                                className="px-3 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
+                                style={{
+                                  background: "rgba(150, 250, 150, 0.2)",
+                                  border: "1px solid rgba(150, 250, 150, 0.3)",
+                                  color: "rgba(150, 250, 150, 0.95)",
+                                }}
+                                onMouseEnter={() => play("hover")}
+                              >
+                                <ListTodo size={14} />
+                                Review Tasks
+                              </Link>
                               <Link
                                 href={`/profile/developer/beta/${game.id}/feedback`}
                                 className="px-3 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center gap-2"
