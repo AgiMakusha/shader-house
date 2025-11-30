@@ -85,7 +85,7 @@ export default function BetaTestDetailPage() {
       }
 
       // Fetch tasks
-      const tasksResponse = await fetch(`/api/beta/tasks/${gameId}`);
+      const tasksResponse = await fetch(`/api/beta/tasks/for-game/${gameId}`);
       if (tasksResponse.ok) {
         const tasksData = await tasksResponse.json();
         setTasks(tasksData.tasks || []);

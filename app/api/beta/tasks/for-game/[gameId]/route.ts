@@ -3,7 +3,7 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 
 /**
- * GET /api/beta/tasks/:gameId
+ * GET /api/beta/tasks/for-game/:gameId
  * Get tasks for a specific game with completion status (for gamers)
  */
 export async function GET(
@@ -66,10 +66,11 @@ export async function GET(
 
     return NextResponse.json({ tasks: formattedTasks });
   } catch (error: any) {
-    console.error('GET /api/beta/tasks/:gameId error:', error);
+    console.error('GET /api/beta/tasks/for-game/:gameId error:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch tasks' },
       { status: 500 }
     );
   }
 }
+
