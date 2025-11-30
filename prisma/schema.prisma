@@ -537,10 +537,9 @@ model BetaTask {
 
 enum TaskType {
   BUG_REPORT    // Report bugs
-  PLAYTIME      // Play for X minutes
-  FEEDBACK      // Submit feedback
-  LEVEL_TEST    // Test specific level
-  GENERAL       // General task
+  SUGGESTION    // Make suggestions
+  PLAY_LEVEL    // Play specific level
+  TEST_FEATURE  // Test specific feature
 }
 
 // Task completion tracking
