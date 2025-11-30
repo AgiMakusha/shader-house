@@ -204,13 +204,13 @@ export default function DeveloperFeedbackPage() {
         {/* Header */}
         <div className="w-full max-w-6xl mb-8">
           <Link
-            href="/profile/developer"
+            href="/profile/developer/beta"
             className="inline-flex items-center gap-2 mb-6 text-sm transition-colors"
             style={{ color: "rgba(200, 240, 200, 0.7)" }}
             onMouseEnter={() => play("hover")}
           >
             <ChevronLeft className="w-4 h-4" />
-            Back to Profile
+            Back to Beta Access Management
           </Link>
 
           <h1
