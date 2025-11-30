@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { useToast } from "@/hooks/useToast";
 import { 
   ChevronLeft, 
   Bug,
@@ -15,7 +16,9 @@ import {
   Clock,
   AlertCircle,
   TrendingUp,
-  Filter
+  Filter,
+  Play,
+  Check
 } from "lucide-react";
 
 interface FeedbackItem {
@@ -91,6 +94,7 @@ const getStatusInfo = (status: string) => {
 export default function AllFeedbackPage() {
   const router = useRouter();
   const { play } = useAudio();
+  const { success, error: showError, ToastComponent } = useToast();
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [stats, setStats] = useState<FeedbackStats>({
     totalBugs: 0,
@@ -103,6 +107,7 @@ export default function AllFeedbackPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('ALL');
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -136,6 +141,34 @@ export default function AllFeedbackPage() {
       console.error('Error fetching feedback:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const updateFeedbackStatus = async (feedbackId: string, newStatus: string) => {
+    setUpdatingStatus(feedbackId);
+    try {
+      const response = await fetch('/api/beta/feedback/update-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feedbackId, status: newStatus }),
+      });
+
+      if (response.ok) {
+        play('success');
+        success(`Feedback marked as ${newStatus.replace('_', ' ').toLowerCase()}!`);
+        // Refresh data
+        await fetchData();
+      } else {
+        const data = await response.json();
+        showError(data.error || 'Failed to update status');
+        play('error');
+      }
+    } catch (err) {
+      console.error('Error updating status:', err);
+      showError('An error occurred while updating status');
+      play('error');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -333,15 +366,13 @@ export default function AllFeedbackPage() {
               const StatusIcon = statusInfo.icon;
 
               return (
-                <Link
+                <div
                   key={item.id}
-                  href={`/profile/developer/beta/${item.game.id}/feedback`}
-                  className="block p-6 rounded-lg transition-all hover:scale-[1.01]"
+                  className="p-6 rounded-lg"
                   style={{
                     background: `linear-gradient(135deg, ${feedbackTypeInfo.bgColor} 0%, rgba(10, 20, 30, 0.8) 100%)`,
                     border: `1px solid ${feedbackTypeInfo.borderColor}`,
                   }}
-                  onMouseEnter={() => play("hover")}
                 >
                   <div className="flex items-start gap-3">
                     <FeedbackIcon 
@@ -378,18 +409,63 @@ export default function AllFeedbackPage() {
                       <p className="text-sm mb-3 line-clamp-2" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
                         {item.description}
                       </p>
-                      <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                        <span className="font-semibold" style={{ color: "rgba(150, 200, 255, 0.9)" }}>
-                          {item.game.title}
-                        </span>
-                        <span>•</span>
-                        <span>{item.user?.name || "Unknown User"}</span>
-                        <span>•</span>
-                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                          <Link
+                            href={`/profile/developer/beta/${item.game.id}/feedback`}
+                            className="font-semibold hover:underline"
+                            style={{ color: "rgba(150, 200, 255, 0.9)" }}
+                            onMouseEnter={() => play("hover")}
+                          >
+                            {item.game.title}
+                          </Link>
+                          <span>•</span>
+                          <span>{item.user?.name || "Unknown User"}</span>
+                          <span>•</span>
+                          <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        
+                        {/* Status Update Buttons */}
+                        <div className="flex gap-2">
+                          {item.status !== 'IN_PROGRESS' && (
+                            <button
+                              onClick={() => updateFeedbackStatus(item.id, 'IN_PROGRESS')}
+                              disabled={updatingStatus === item.id}
+                              className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
+                              style={{
+                                background: "rgba(150, 200, 255, 0.2)",
+                                border: "1px solid rgba(150, 200, 255, 0.4)",
+                                color: "rgba(200, 240, 255, 0.95)",
+                                opacity: updatingStatus === item.id ? 0.5 : 1,
+                              }}
+                              onMouseEnter={() => play("hover")}
+                            >
+                              <Play className="w-3 h-3" />
+                              In Progress
+                            </button>
+                          )}
+                          {item.status !== 'RESOLVED' && (
+                            <button
+                              onClick={() => updateFeedbackStatus(item.id, 'RESOLVED')}
+                              disabled={updatingStatus === item.id}
+                              className="px-3 py-1 rounded text-xs font-medium transition-all flex items-center gap-1"
+                              style={{
+                                background: "rgba(150, 250, 150, 0.2)",
+                                border: "1px solid rgba(150, 250, 150, 0.4)",
+                                color: "rgba(200, 240, 200, 0.95)",
+                                opacity: updatingStatus === item.id ? 0.5 : 1,
+                              }}
+                              onMouseEnter={() => play("hover")}
+                            >
+                              <Check className="w-3 h-3" />
+                              Resolve
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -401,6 +477,9 @@ export default function AllFeedbackPage() {
           </div>
         )}
       </main>
+
+      {/* Toast Notifications */}
+      <ToastComponent />
     </div>
   );
 }
