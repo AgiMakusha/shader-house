@@ -8,7 +8,7 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { useToast } from "@/hooks/useToast";
-import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug } from "lucide-react";
+import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug, TrendingUp } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
 
 interface Game {
@@ -240,6 +240,23 @@ export default function DeveloperBetaPage() {
                       <Crown size={14} />
                       <span>Pro members only</span>
                     </div>
+                  </div>
+                  
+                  {/* Link to All Feedback */}
+                  <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(240, 220, 140, 0.2)" }}>
+                    <Link
+                      href="/profile/developer/feedback"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      style={{
+                        background: "rgba(100, 200, 100, 0.2)",
+                        border: "1px solid rgba(150, 250, 150, 0.3)",
+                        color: "rgba(200, 240, 200, 0.95)",
+                      }}
+                      onMouseEnter={() => play("hover")}
+                    >
+                      <TrendingUp size={16} />
+                      View All Feedback & Track Progress
+                    </Link>
                   </div>
                 </div>
               </div>
