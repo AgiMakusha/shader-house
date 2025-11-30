@@ -108,9 +108,9 @@ export async function POST(request: NextRequest) {
     for (const task of tasksToComplete) {
       const existingCompletion = await prisma.betaTaskCompletion.findUnique({
         where: {
-          taskId_testerId: {
+          userId_taskId: {
+            userId: session.user.id,
             taskId: task.id,
-            testerId: tester.id,
           },
         },
       });
@@ -120,7 +120,9 @@ export async function POST(request: NextRequest) {
           data: {
             taskId: task.id,
             testerId: tester.id,
-            isVerified: false, // Developer can verify later
+            userId: session.user.id,
+            report: "Auto-completed via feedback submission",
+            status: "VERIFIED", // Auto-verify feedback-based completions
           },
         });
 
