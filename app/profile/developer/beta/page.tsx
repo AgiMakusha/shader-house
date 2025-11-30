@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
-import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo } from "lucide-react";
+import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
 
 interface Game {
