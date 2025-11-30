@@ -731,7 +731,7 @@ export default function MembershipPage() {
                   
                   {/* Onboarding Hints */}
                   <div className="space-y-3">
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <div
                         className="p-2 rounded-lg flex-shrink-0"
                         style={{
@@ -759,7 +759,7 @@ export default function MembershipPage() {
                         <span className="font-bold" style={{ color: "rgba(240, 220, 140, 0.95)" }}>Upgrade to Creator Support Pass</span> for beta access, exclusive games & support indie developers
                       </p>
                     </div>
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <div
                         className="p-2 rounded-lg flex-shrink-0"
                         style={{
