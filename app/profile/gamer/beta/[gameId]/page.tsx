@@ -17,7 +17,8 @@ import {
   Upload,
   Send,
   Clock,
-  Trophy
+  Trophy,
+  Sparkles
 } from "lucide-react";
 
 interface Task {
@@ -364,7 +365,8 @@ export default function BetaTestDetailPage() {
                                 className="flex items-center gap-1"
                                 style={{ color: "rgba(150, 200, 255, 0.8)" }}
                               >
-                                ⭐ {task.rewardPoints} pts
+                                <Sparkles className="w-3 h-3" />
+                                {task.rewardPoints} pts
                               </span>
                               {task.completed && task.completedAt && (
                                 <span
