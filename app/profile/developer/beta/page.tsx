@@ -488,7 +488,23 @@ export default function DeveloperBetaPage() {
           setGameToPromote(null);
         }}
         onConfirm={promoteToRelease}
-        title="Promote to Full Release?"
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <Rocket 
+              size={24} 
+              style={{ 
+                color: 'rgba(150, 250, 150, 0.9)',
+                filter: 'drop-shadow(0 0 8px rgba(150, 250, 150, 0.6))'
+              }} 
+            />
+            <span style={{ 
+              color: 'rgba(150, 250, 150, 0.95)',
+              textShadow: '0 0 8px rgba(150, 250, 150, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8)'
+            }}>
+              Promote to Full Release?
+            </span>
+          </div>
+        }
         message={
           gameToPromote ? (
             <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '10px', lineHeight: '1.8' }}>
@@ -503,9 +519,23 @@ export default function DeveloperBetaPage() {
                   <li style={{ marginBottom: '6px' }}>• Remove it from Beta Games list</li>
                 </ul>
               </div>
-              <p style={{ color: 'rgba(250, 150, 150, 0.9)', fontSize: '9px' }}>
-                ⚠️ This action cannot be undone
-              </p>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                gap: '8px',
+                color: 'rgba(250, 150, 150, 0.9)', 
+                fontSize: '9px' 
+              }}>
+                <TrendingUp 
+                  size={12} 
+                  style={{ 
+                    color: 'rgba(250, 150, 150, 0.9)',
+                    filter: 'drop-shadow(0 0 4px rgba(250, 150, 150, 0.6))'
+                  }} 
+                />
+                <span>This action cannot be undone</span>
+              </div>
             </div>
           ) : ''
         }
