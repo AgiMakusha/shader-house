@@ -84,6 +84,36 @@ const getTaskTypeInfo = (type: string) => {
   }
 };
 
+const getFeedbackTypeInfo = (type: string) => {
+  switch (type) {
+    case 'BUG':
+      return { 
+        icon: Bug, 
+        label: 'Bug Report', 
+        color: 'rgba(250, 150, 150, 0.9)',
+        bgColor: 'rgba(250, 150, 150, 0.1)',
+        borderColor: 'rgba(250, 150, 150, 0.3)'
+      };
+    case 'SUGGESTION':
+      return { 
+        icon: Lightbulb, 
+        label: 'Suggestion', 
+        color: 'rgba(250, 220, 100, 0.9)',
+        bgColor: 'rgba(250, 220, 100, 0.1)',
+        borderColor: 'rgba(250, 220, 100, 0.3)'
+      };
+    case 'GENERAL':
+    default:
+      return { 
+        icon: MessageSquare, 
+        label: 'General Feedback', 
+        color: 'rgba(150, 200, 255, 0.9)',
+        bgColor: 'rgba(150, 200, 255, 0.1)',
+        borderColor: 'rgba(150, 200, 255, 0.3)'
+      };
+  }
+};
+
 export default function GameFeedbackPage() {
   const router = useRouter();
   const params = useParams();
@@ -482,30 +512,53 @@ export default function GameFeedbackPage() {
             {/* General Feedback */}
             {feedback.length > 0 ? (
               <div className="space-y-4">
-                {feedback.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-6 rounded-lg"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(20, 40, 60, 0.6) 0%, rgba(10, 20, 30, 0.8) 100%)",
-                      border: "1px solid rgba(150, 180, 255, 0.3)",
-                    }}
-                  >
-                    <h3 className="font-bold mb-2" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
-                      {item.title}
-                    </h3>
-                    <p className="text-sm mb-3" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                      {item.description}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                      <span>{item.user?.name || "Unknown User"}</span>
-                      <span>•</span>
-                      <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span>{item.type}</span>
+                {feedback.map((item) => {
+                  const feedbackTypeInfo = getFeedbackTypeInfo(item.type);
+                  const FeedbackIcon = feedbackTypeInfo.icon;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-6 rounded-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${feedbackTypeInfo.bgColor} 0%, rgba(10, 20, 30, 0.8) 100%)`,
+                        border: `1px solid ${feedbackTypeInfo.borderColor}`,
+                      }}
+                    >
+                      <div className="flex items-start gap-3 mb-3">
+                        <FeedbackIcon 
+                          className="w-5 h-5 flex-shrink-0 mt-0.5" 
+                          style={{ color: feedbackTypeInfo.color }} 
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
+                              {item.title}
+                            </h3>
+                            <span
+                              className="text-xs px-2 py-0.5 rounded"
+                              style={{
+                                background: feedbackTypeInfo.bgColor,
+                                color: feedbackTypeInfo.color,
+                                border: `1px solid ${feedbackTypeInfo.borderColor}`,
+                              }}
+                            >
+                              {feedbackTypeInfo.label}
+                            </span>
+                          </div>
+                          <p className="text-sm mb-3" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                            {item.description}
+                          </p>
+                          <div className="flex items-center gap-3 text-xs" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                            <span>{item.user?.name || "Unknown User"}</span>
+                            <span>•</span>
+                            <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
