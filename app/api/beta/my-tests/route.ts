@@ -47,17 +47,29 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get total tasks for each game
+    // Get total tasks and verified completions for each game
     const testsWithProgress = await Promise.all(
       tests.map(async (test) => {
         const totalTasks = await prisma.betaTask.count({
           where: { gameId: test.gameId },
         });
 
+        // Count verified task completions for this user
+        const verifiedCompletions = await prisma.betaTaskCompletion.count({
+          where: {
+            userId: session.user.id,
+            task: {
+              gameId: test.gameId,
+            },
+            status: 'VERIFIED',
+          },
+        });
+
         return {
           ...test,
           totalTasks,
-          progress: totalTasks > 0 ? (test.tasksCompleted / totalTasks) * 100 : 0,
+          tasksCompleted: verifiedCompletions, // Override with actual verified count
+          progress: totalTasks > 0 ? (verifiedCompletions / totalTasks) * 100 : 0,
         };
       })
     );
