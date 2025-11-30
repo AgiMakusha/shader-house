@@ -249,7 +249,7 @@ export default function GameFeedbackPage() {
                           
                           {/* Status Update Buttons */}
                           <div className="flex gap-2">
-                            {item.status !== 'IN_PROGRESS' && (
+                            {item.status !== 'IN_PROGRESS' && item.status !== 'RESOLVED' && (
                               <button
                                 onClick={() => updateFeedbackStatus(item.id, 'IN_PROGRESS')}
                                 disabled={updatingStatus === item.id}
