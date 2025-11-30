@@ -10,6 +10,7 @@ import { useAudio } from "@/components/audio/AudioProvider";
 import { useToast } from "@/hooks/useToast";
 import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug, TrendingUp } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Game {
   id: string;
@@ -40,6 +41,8 @@ export default function DeveloperBetaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<{ id: string; title: string } | null>(null);
+  const [promoteModalOpen, setPromoteModalOpen] = useState(false);
+  const [gameToPromote, setGameToPromote] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,25 +96,24 @@ export default function DeveloperBetaPage() {
     fetchData();
   }, [router]);
 
-  const promoteToRelease = async (gameId: string, gameTitle: string) => {
-    const confirmed = window.confirm(
-      `Promote "${gameTitle}" to Full Release?\n\n` +
-      `This will:\n` +
-      `• Move the game from Beta to Public Marketplace\n` +
-      `• Make it visible to all users (not just Pro subscribers)\n` +
-      `• Remove it from the Beta Games list\n\n` +
-      `This action cannot be undone. Are you sure?`
-    );
+  const handlePromoteClick = (gameId: string, gameTitle: string) => {
+    setGameToPromote({ id: gameId, title: gameTitle });
+    setPromoteModalOpen(true);
+  };
 
-    if (!confirmed) return;
+  const promoteToRelease = async () => {
+    if (!gameToPromote) return;
 
     try {
-      const response = await fetch(`/api/games/${gameId}/promote`, {
+      const response = await fetch(`/api/games/${gameToPromote.id}/promote`, {
         method: "POST",
       });
 
       if (response.ok) {
         play("success");
+        success(`"${gameToPromote.title}" has been promoted to Full Release! 🚀`);
+        setPromoteModalOpen(false);
+        setGameToPromote(null);
         // Refresh games list
         const gamesResponse = await fetch("/api/games?developer=me&status=beta");
         if (gamesResponse.ok) {
@@ -438,7 +440,7 @@ export default function DeveloperBetaPage() {
                               </Link>
                             </div>
                             <motion.button
-                              onClick={() => promoteToRelease(game.id, game.title)}
+                              onClick={() => handlePromoteClick(game.id, game.title)}
                               className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
                               style={{
                                 background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
@@ -477,6 +479,39 @@ export default function DeveloperBetaPage() {
           }}
         />
       )}
+
+      {/* Promote to Release Confirmation Modal */}
+      <ConfirmModal
+        isOpen={promoteModalOpen}
+        onClose={() => {
+          setPromoteModalOpen(false);
+          setGameToPromote(null);
+        }}
+        onConfirm={promoteToRelease}
+        title="Promote to Full Release?"
+        message={
+          gameToPromote ? (
+            <div style={{ fontFamily: '"Press Start 2P", monospace', fontSize: '10px', lineHeight: '1.8' }}>
+              <p style={{ marginBottom: '16px', color: 'rgba(200, 240, 200, 0.9)' }}>
+                Promote <strong>"{gameToPromote.title}"</strong> to the public marketplace?
+              </p>
+              <div style={{ color: 'rgba(200, 240, 200, 0.7)', marginBottom: '16px' }}>
+                <p style={{ marginBottom: '8px' }}>This will:</p>
+                <ul style={{ listStyle: 'none', padding: 0 }}>
+                  <li style={{ marginBottom: '6px' }}>• Move game from Beta to Public Marketplace</li>
+                  <li style={{ marginBottom: '6px' }}>• Make it visible to all users</li>
+                  <li style={{ marginBottom: '6px' }}>• Remove it from Beta Games list</li>
+                </ul>
+              </div>
+              <p style={{ color: 'rgba(250, 150, 150, 0.9)', fontSize: '9px' }}>
+                ⚠️ This action cannot be undone
+              </p>
+            </div>
+          ) : ''
+        }
+        confirmText="Promote to Release"
+        cancelText="Cancel"
+      />
 
       {/* Toast Notifications */}
       <ToastComponent />
