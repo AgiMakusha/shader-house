@@ -86,13 +86,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Auto-complete relevant tasks based on feedback type
-    const tasksToComplete = await prisma.betaTask.findMany({
-      where: {
-        gameId: validated.gameId,
-        type: validated.type === 'BUG' ? 'BUG_REPORT' : 'SUGGESTION',
-      },
-      select: { id: true },
-    });
+    let taskType: 'BUG_REPORT' | 'SUGGESTION' | null = null;
+    if (validated.type === 'BUG') {
+      taskType = 'BUG_REPORT';
+    } else if (validated.type === 'SUGGESTION') {
+      taskType = 'SUGGESTION';
+    }
+
+    const tasksToComplete = taskType
+      ? await prisma.betaTask.findMany({
+          where: {
+            gameId: validated.gameId,
+            type: taskType,
+          },
+          select: { id: true },
+        })
+      : [];
 
     // Mark tasks as complete if not already completed
     for (const task of tasksToComplete) {
@@ -134,6 +143,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('POST /api/beta/feedback error:', error);
+    console.error('Error stack:', error.stack);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -143,7 +153,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: error.message || 'Failed to submit feedback' },
+      { 
+        error: error.message || 'Failed to submit feedback',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
