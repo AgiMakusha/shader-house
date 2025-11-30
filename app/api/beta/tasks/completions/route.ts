@@ -43,9 +43,6 @@ export async function GET(request: NextRequest) {
         task: {
           gameId: gameId,
         },
-        userId: {
-          not: null, // Only get completions with valid userId
-        },
       },
       include: {
         user: {
