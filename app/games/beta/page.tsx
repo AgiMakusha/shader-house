@@ -7,6 +7,7 @@ import Particles from "@/components/fx/Particles";
 import { FlaskConical, Lock, Crown, Users } from "lucide-react";
 import { FeatureFlag, hasFeatureAccess, SubscriptionTier } from "@/lib/subscriptions/types";
 import { FeatureGuard } from "@/components/subscriptions/FeatureGuard";
+import { useToast } from "@/hooks/useToast";
 
 interface BetaGame {
   id: string;
@@ -23,6 +24,7 @@ interface BetaGame {
 
 export default function BetaAccessPage() {
   const router = useRouter();
+  const { success, error, ToastComponent } = useToast();
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [betaGames, setBetaGames] = useState<BetaGame[]>([]);
@@ -78,14 +80,14 @@ export default function BetaAccessPage() {
       if (response.ok) {
         // Success! Update joined tests
         setJoinedTests(prev => new Set([...prev, gameId]));
-        alert(`✅ Successfully joined beta test for "${gameTitle}"!\n\nGo to "My Beta Tests" to start testing.`);
+        success(`Successfully joined beta test for "${gameTitle}"! Go to "My Beta Tests" to start testing.`);
       } else {
         const data = await response.json();
-        alert(data.error || "Failed to join beta test");
+        error(data.error || "Failed to join beta test");
       }
-    } catch (error) {
-      console.error("Error joining beta:", error);
-      alert("An error occurred while joining the beta test");
+    } catch (err) {
+      console.error("Error joining beta:", err);
+      error("An error occurred while joining the beta test");
     } finally {
       setJoiningGame(null);
     }
@@ -492,6 +494,9 @@ export default function BetaAccessPage() {
           </FeatureGuard>
         </div>
       </main>
+
+      {/* Toast Notifications */}
+      <ToastComponent />
     </div>
   );
 }

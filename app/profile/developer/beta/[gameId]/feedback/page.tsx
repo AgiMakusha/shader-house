@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { useToast } from "@/hooks/useToast";
 import {
   ChevronLeft,
   MessageSquare,
@@ -86,6 +87,7 @@ export default function GameFeedbackPage() {
   const router = useRouter();
   const params = useParams();
   const { play } = useAudio();
+  const { success, error, warning, ToastComponent } = useToast();
   const gameId = params.gameId as string;
 
   const [game, setGame] = useState<Game | null>(null);
@@ -150,16 +152,20 @@ export default function GameFeedbackPage() {
 
       if (response.ok) {
         play("success");
-        alert(`Task completion ${approved ? "approved" : "rejected"} successfully!`);
+        if (approved) {
+          success("Task completion approved! Gamer has been awarded XP and points.");
+        } else {
+          warning("Task completion rejected. Gamer can resubmit.");
+        }
         fetchData();
       } else {
         const data = await response.json();
-        alert(data.error || "Failed to verify completion");
+        error(data.error || "Failed to verify completion");
         play("error");
       }
-    } catch (error) {
-      console.error("Error verifying completion:", error);
-      alert("An error occurred");
+    } catch (err) {
+      console.error("Error verifying completion:", err);
+      error("An error occurred while verifying the completion");
       play("error");
     }
   };
@@ -506,6 +512,9 @@ export default function GameFeedbackPage() {
           />
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <ToastComponent />
     </div>
   );
 }

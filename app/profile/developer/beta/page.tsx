@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { useToast } from "@/hooks/useToast";
 import { FlaskConical, Users, Crown, Lock, ChevronLeft, Rocket, ListTodo, MessageSquare, Bug } from "lucide-react";
 import TaskManagementModal from "@/components/beta/TaskManagementModal";
 
@@ -32,6 +33,7 @@ interface Game {
 export default function DeveloperBetaPage() {
   const router = useRouter();
   const { play } = useAudio();
+  const { success, error, ToastComponent } = useToast();
   const [user, setUser] = useState<any>(null);
   const [games, setGames] = useState<Game[]>([]);
   const [gameStats, setGameStats] = useState<Record<string, { bugs: number }>>({});
@@ -118,12 +120,12 @@ export default function DeveloperBetaPage() {
         }
       } else {
         const data = await response.json();
-        alert(data.error || "Failed to promote game");
+        error(data.error || "Failed to promote game");
         play("error");
       }
-    } catch (error) {
-      console.error("Error promoting game:", error);
-      alert("An error occurred while promoting the game");
+    } catch (err) {
+      console.error("Error promoting game:", err);
+      error("An error occurred while promoting the game");
       play("error");
     }
   };
@@ -462,6 +464,9 @@ export default function DeveloperBetaPage() {
           }}
         />
       )}
+
+      {/* Toast Notifications */}
+      <ToastComponent />
     </div>
   );
 }

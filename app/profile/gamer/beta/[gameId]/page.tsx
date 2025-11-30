@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { useToast } from "@/hooks/useToast";
 import TaskReportModal from "@/components/beta/TaskReportModal";
 import { 
   ChevronLeft, 
@@ -72,6 +73,7 @@ export default function BetaTestDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { play } = useAudio();
+  const { success, error, ToastComponent } = useToast();
   const gameId = params.gameId as string;
 
   const [test, setTest] = useState<BetaTest | null>(null);
@@ -125,7 +127,7 @@ export default function BetaTestDetailPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("Screenshot must be less than 5MB");
+        error("Screenshot must be less than 5MB");
         return;
       }
 
@@ -142,7 +144,7 @@ export default function BetaTestDetailPage() {
     e.preventDefault();
     
     if (!title.trim() || !description.trim()) {
-      alert("Please fill in all required fields");
+      error("Please fill in all required fields");
       return;
     }
 
@@ -165,7 +167,7 @@ export default function BetaTestDetailPage() {
 
       if (response.ok) {
         play("success");
-        alert("Feedback submitted successfully!");
+        success("Feedback submitted successfully!");
         
         // Reset form
         setTitle('');
@@ -180,17 +182,17 @@ export default function BetaTestDetailPage() {
         
         // Show detailed validation errors if available
         if (data.details && Array.isArray(data.details)) {
-          const errorMessages = data.details.map((err: any) => err.message).join('\n');
-          alert(`Validation Error:\n\n${errorMessages}`);
+          const errorMessages = data.details.map((err: any) => err.message).join(', ');
+          error(`Validation Error: ${errorMessages}`);
         } else {
-          alert(data.error || "Failed to submit feedback");
+          error(data.error || "Failed to submit feedback");
         }
         
         play("error");
       }
-    } catch (error) {
-      console.error("Error submitting feedback:", error);
-      alert("An error occurred");
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      error("An error occurred while submitting feedback");
       play("error");
     } finally {
       setIsSubmitting(false);
@@ -702,6 +704,9 @@ export default function BetaTestDetailPage() {
           fetchData(); // Refresh tasks
         }}
       />
+
+      {/* Toast Notifications */}
+      <ToastComponent />
     </div>
   );
 }

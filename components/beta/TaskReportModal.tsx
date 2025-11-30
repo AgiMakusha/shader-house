@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAudio } from "@/components/audio/AudioProvider";
+import { useToast } from "@/hooks/useToast";
 import {
   X,
   Upload,
@@ -57,6 +58,7 @@ export default function TaskReportModal({
   onSuccess,
 }: TaskReportModalProps) {
   const { play } = useAudio();
+  const { success, error, ToastComponent } = useToast();
   const [report, setReport] = useState("");
   const [screenshot, setScreenshot] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,7 +72,7 @@ export default function TaskReportModal({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("Screenshot must be less than 5MB");
+        error("Screenshot must be less than 5MB");
         return;
       }
 
@@ -87,7 +89,7 @@ export default function TaskReportModal({
     e.preventDefault();
 
     if (!report.trim() || report.trim().length < 20) {
-      alert("Please provide a detailed report (at least 20 characters)");
+      error("Please provide a detailed report (at least 20 characters)");
       return;
     }
 
@@ -108,7 +110,7 @@ export default function TaskReportModal({
 
       if (response.ok) {
         play("success");
-        alert("Task report submitted! Waiting for developer verification.");
+        success("Task report submitted! Waiting for developer verification.");
         setReport("");
         setScreenshot("");
         onSuccess();
@@ -117,17 +119,17 @@ export default function TaskReportModal({
         const data = await response.json();
         
         if (data.details && Array.isArray(data.details)) {
-          const errorMessages = data.details.map((err: any) => err.message).join('\n');
-          alert(`Validation Error:\n\n${errorMessages}`);
+          const errorMessages = data.details.map((err: any) => err.message).join(', ');
+          error(`Validation Error: ${errorMessages}`);
         } else {
-          alert(data.error || "Failed to submit report");
+          error(data.error || "Failed to submit report");
         }
         
         play("error");
       }
-    } catch (error) {
-      console.error("Error submitting report:", error);
-      alert("An error occurred");
+    } catch (err) {
+      console.error("Error submitting report:", err);
+      error("An error occurred while submitting your report");
       play("error");
     } finally {
       setIsSubmitting(false);
@@ -360,6 +362,7 @@ export default function TaskReportModal({
           </form>
         </motion.div>
       </motion.div>
+      <ToastComponent />
     </AnimatePresence>
   );
 }
