@@ -18,7 +18,9 @@ import {
   Send,
   Clock,
   Trophy,
-  Sparkles
+  Sparkles,
+  Gamepad2,
+  FlaskConical
 } from "lucide-react";
 
 interface Task {
@@ -49,6 +51,21 @@ interface BetaTest {
     };
   };
 }
+
+const getTaskTypeInfo = (type: string) => {
+  switch (type) {
+    case 'BUG_REPORT':
+      return { icon: Bug, label: 'Bug Report', color: 'rgba(250, 150, 150, 0.9)' };
+    case 'SUGGESTION':
+      return { icon: Lightbulb, label: 'Suggestion', color: 'rgba(250, 220, 100, 0.9)' };
+    case 'PLAY_LEVEL':
+      return { icon: Gamepad2, label: 'Play Level', color: 'rgba(150, 200, 255, 0.9)' };
+    case 'TEST_FEATURE':
+      return { icon: FlaskConical, label: 'Test Feature', color: 'rgba(150, 250, 150, 0.9)' };
+    default:
+      return { icon: MessageSquare, label: 'Task', color: 'rgba(200, 240, 200, 0.7)' };
+  }
+};
 
 export default function BetaTestDetailPage() {
   const router = useRouter();
@@ -297,31 +314,35 @@ export default function BetaTestDetailPage() {
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="p-4 rounded-lg transition-all"
-                        style={{
-                          background: task.completed
-                            ? "rgba(100, 200, 100, 0.1)"
-                            : "rgba(100, 150, 255, 0.05)",
-                          border: task.completed
-                            ? "1px solid rgba(150, 250, 150, 0.3)"
-                            : "1px solid rgba(150, 180, 255, 0.2)",
-                        }}
-                      >
-                        <div className="flex items-start gap-3">
-                          {task.completed ? (
-                            <CheckCircle2 
-                              className="w-5 h-5 flex-shrink-0 mt-0.5" 
-                              style={{ color: "rgba(150, 250, 150, 0.9)" }} 
-                            />
-                          ) : (
-                            <Circle 
-                              className="w-5 h-5 flex-shrink-0 mt-0.5" 
-                              style={{ color: "rgba(150, 180, 255, 0.5)" }} 
-                            />
-                          )}
+                    {tasks.map((task) => {
+                      const taskTypeInfo = getTaskTypeInfo(task.type);
+                      const TaskTypeIcon = taskTypeInfo.icon;
+                      
+                      return (
+                        <div
+                          key={task.id}
+                          className="p-4 rounded-lg transition-all"
+                          style={{
+                            background: task.completed
+                              ? "rgba(100, 200, 100, 0.1)"
+                              : "rgba(100, 150, 255, 0.05)",
+                            border: task.completed
+                              ? "1px solid rgba(150, 250, 150, 0.3)"
+                              : "1px solid rgba(150, 180, 255, 0.2)",
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            {task.completed ? (
+                              <CheckCircle2 
+                                className="w-5 h-5 flex-shrink-0 mt-0.5" 
+                                style={{ color: "rgba(150, 250, 150, 0.9)" }} 
+                              />
+                            ) : (
+                              <Circle 
+                                className="w-5 h-5 flex-shrink-0 mt-0.5" 
+                                style={{ color: "rgba(150, 180, 255, 0.5)" }} 
+                              />
+                            )}
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3
@@ -353,7 +374,14 @@ export default function BetaTestDetailPage() {
                             >
                               {task.description}
                             </p>
-                            <div className="flex items-center gap-4 text-xs">
+                            <div className="flex items-center gap-4 text-xs flex-wrap">
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: taskTypeInfo.color }}
+                              >
+                                <TaskTypeIcon className="w-3 h-3" />
+                                {taskTypeInfo.label}
+                              </span>
                               <span
                                 className="flex items-center gap-1"
                                 style={{ color: "rgba(250, 220, 100, 0.8)" }}
@@ -381,7 +409,8 @@ export default function BetaTestDetailPage() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </GameCardContent>
