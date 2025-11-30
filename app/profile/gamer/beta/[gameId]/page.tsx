@@ -174,7 +174,15 @@ export default function BetaTestDetailPage() {
         fetchData();
       } else {
         const data = await response.json();
-        alert(data.error || "Failed to submit feedback");
+        
+        // Show detailed validation errors if available
+        if (data.details && Array.isArray(data.details)) {
+          const errorMessages = data.details.map((err: any) => err.message).join('\n');
+          alert(`Validation Error:\n\n${errorMessages}`);
+        } else {
+          alert(data.error || "Failed to submit feedback");
+        }
+        
         play("error");
       }
     } catch (error) {

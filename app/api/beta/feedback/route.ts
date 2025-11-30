@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log('📝 Feedback submission body:', JSON.stringify(body, null, 2));
     const validated = feedbackSchema.parse(body);
 
     // Check if user is a beta tester for this game
