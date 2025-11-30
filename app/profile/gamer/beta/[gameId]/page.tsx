@@ -290,7 +290,7 @@ export default function BetaTestDetailPage() {
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4" style={{ color: "rgba(250, 220, 100, 0.9)" }} />
                   <span style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                    {test.tasksCompleted} tasks completed
+                    {tasks.filter(t => t.completionStatus === 'VERIFIED').length} tasks completed
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
