@@ -10,6 +10,7 @@ import { FavoriteButton } from "@/components/games/FavoriteButton";
 import { RatingForm } from "@/components/games/RatingForm";
 import { RatingDisplay } from "@/components/games/RatingDisplay";
 import { PurchaseButton } from "@/components/games/PurchaseButton";
+import { GameAccessTracker } from "@/components/games/GameAccessTracker";
 
 interface PageProps {
   params: Promise<{
@@ -43,6 +44,9 @@ export default async function GameDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-dvh relative overflow-hidden">
       <Particles />
+      
+      {/* Track game access for achievements (invisible component) */}
+      {session?.user?.id && <GameAccessTracker gameId={game.id} />}
 
       <main className="relative z-10 flex min-h-dvh flex-col items-center justify-start p-6 pt-12">
         {/* Header */}

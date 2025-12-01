@@ -319,7 +319,7 @@ export function GameForm({ initialData, mode }: GameFormProps) {
               value={(formData.priceCents / 100).toFixed(2)}
               onChange={(e) => handleChange('priceCents', Math.round(parseFloat(e.target.value) * 100))}
               placeholder="0.00"
-              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               style={{ color: "rgba(200, 240, 200, 0.85)" }}
             />
             <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.5)" }}>

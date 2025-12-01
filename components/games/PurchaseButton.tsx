@@ -28,6 +28,18 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
   const canPlayFree = hasUnlimitedAccess && !isFree; // Premium users can play paid games for free
   const hasGameAccess = gameFileUrl || externalUrl; // Game is available if either file or link exists
 
+  const trackGameAccess = async () => {
+    // Track game access for achievements
+    try {
+      await fetch(`/api/games/${gameId}/access`, {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Failed to track game access:', error);
+      // Don't block the user if tracking fails
+    }
+  };
+
   const handlePurchase = async () => {
     if (isProcessing) return;
 
@@ -47,6 +59,10 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
       }
 
       play("success");
+      
+      // Track game access for achievements
+      await trackGameAccess();
+      
       router.refresh();
       
       // If there's a game file, download it; otherwise open external URL
@@ -66,6 +82,19 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
 
   // If user has unlimited access via Creator Support Pass
   if (canPlayFree && hasGameAccess) {
+    const handleProAccess = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault(); // Prevent immediate navigation
+      play("activate");
+      await trackGameAccess(); // Track for achievements first
+      
+      // Then navigate/download after tracking completes
+      if (gameFileUrl) {
+        window.location.href = gameFileUrl; // Trigger download
+      } else if (externalUrl) {
+        window.open(externalUrl, '_blank'); // Open in new tab
+      }
+    };
+
     return (
       <div className="space-y-3">
         <div
@@ -85,7 +114,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
           <a
             href={gameFileUrl}
             download
-            onClick={() => play("activate")}
+            onClick={handleProAccess}
             className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
             style={{
               background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
@@ -103,7 +132,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
             href={externalUrl!}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => play("activate")}
+            onClick={handleProAccess}
             className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
             style={{
               background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
@@ -132,6 +161,19 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
   }
 
   if (isPurchased) {
+    const handlePlayAccess = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault(); // Prevent immediate navigation
+      play("activate");
+      await trackGameAccess(); // Track for achievements first
+      
+      // Then navigate/download after tracking completes
+      if (gameFileUrl) {
+        window.location.href = gameFileUrl; // Trigger download
+      } else if (externalUrl) {
+        window.open(externalUrl, '_blank'); // Open in new tab
+      }
+    };
+
     return (
       <div className="space-y-3">
         <div
@@ -148,6 +190,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
           <a
             href={gameFileUrl}
             download
+            onClick={handlePlayAccess}
             className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
             style={{
               background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
@@ -164,6 +207,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
             href={externalUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handlePlayAccess}
             className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
             style={{
               background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",

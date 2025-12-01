@@ -111,7 +111,7 @@ export default function DeveloperBetaPage() {
 
       if (response.ok) {
         play("success");
-        success(`"${gameToPromote.title}" has been promoted to Full Release! 🚀`);
+        success(`"${gameToPromote.title}" has been promoted to Full Release!`);
         setPromoteModalOpen(false);
         setGameToPromote(null);
         // Refresh games list

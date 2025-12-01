@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
     const [
       reviewsCount,
       betaTestsCount,
-      purchasesCount,
+      gamesAccessedCount,
+      favoritesCount,
     ] = await Promise.all([
       // Count reviews (ratings with comments)
       prisma.rating.count({
@@ -35,32 +36,45 @@ export async function GET(request: NextRequest) {
           userId: session.user.id,
         },
       }),
-      // Count purchases/games owned
-      prisma.purchase.count({
+      // Count games accessed (played/downloaded)
+      prisma.gameAccess.count({
+        where: {
+          userId: session.user.id,
+        },
+      }),
+      // Count favorited games
+      prisma.favorite.count({
         where: {
           userId: session.user.id,
         },
       }),
     ]);
 
+    console.log('🏆 Achievement stats for user:', session.user.email, {
+      reviewsCount,
+      betaTestsCount,
+      gamesAccessedCount,
+      favoritesCount,
+    });
+
     // Calculate achievement progress
     const achievements = [
       {
         id: '1',
         name: 'First Steps',
-        description: 'Complete your first game',
+        description: 'Discover your first game',
         icon: 'gamepad',
-        unlocked: purchasesCount > 0,
-        unlockedAt: purchasesCount > 0 ? new Date() : null,
+        unlocked: gamesAccessedCount > 0,
+        unlockedAt: gamesAccessedCount > 0 ? new Date() : null,
         rarity: 'common',
       },
       {
         id: '2',
-        name: 'Supporter',
-        description: 'Support your first developer',
+        name: 'Collector',
+        description: 'Add your first game to favorites',
         icon: 'heart',
-        unlocked: purchasesCount > 0,
-        unlockedAt: purchasesCount > 0 ? new Date() : null,
+        unlocked: favoritesCount > 0,
+        unlockedAt: favoritesCount > 0 ? new Date() : null,
         rarity: 'common',
       },
       {
@@ -88,7 +102,7 @@ export async function GET(request: NextRequest) {
         name: 'Legend',
         description: 'Unlock all other achievements',
         icon: 'crown',
-        unlocked: purchasesCount > 0 && betaTestsCount >= 5 && reviewsCount >= 10,
+        unlocked: gamesAccessedCount > 0 && betaTestsCount >= 5 && reviewsCount >= 10,
         rarity: 'legendary',
       },
     ];

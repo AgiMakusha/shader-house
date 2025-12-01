@@ -27,6 +27,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.amazonaws.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'share.google',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
     ],
   },
 };

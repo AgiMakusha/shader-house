@@ -52,6 +52,7 @@ model User {
   ratings             Rating[]
   favorites           Favorite[]
   purchases           Purchase[]
+  gameAccess          GameAccess[]
   subscriptions       Subscription[]
   supportedDevelopers DeveloperSupport[]
   playtime            PlaytimeEntry[]
@@ -218,6 +219,7 @@ model Game {
   ratings      Rating[]
   favorites    Favorite[]
   purchases    Purchase[]
+  gameAccess   GameAccess[]
   proLibrary   ProLibraryGame?
   playtime     PlaytimeEntry[]
   claimedGames ClaimedGame[]
@@ -327,6 +329,22 @@ model Purchase {
   @@index([gameId])
   @@index([userId])
   @@map("purchases")
+}
+
+// Track when users access/play games (for achievements and analytics)
+model GameAccess {
+  id         String   @id @default(cuid())
+  gameId     String
+  userId     String
+  accessedAt DateTime @default(now())
+  
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([gameId])
+  @@index([userId])
+  @@map("game_access")
 }
 
 // ============================================

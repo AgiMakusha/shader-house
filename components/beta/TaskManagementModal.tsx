@@ -476,7 +476,7 @@ export default function TaskManagementModal({
                         onChange={(e) => setXpReward(Math.max(0, Math.min(1000, parseInt(e.target.value) || 0)))}
                         min="0"
                         max="1000"
-                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all"
+                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         style={{ color: "rgba(200, 240, 200, 0.85)" }}
                       />
                     </div>
@@ -490,21 +490,50 @@ export default function TaskManagementModal({
                         onChange={(e) => setRewardPoints(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
                         min="0"
                         max="100"
-                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all"
+                        className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         style={{ color: "rgba(200, 240, 200, 0.85)" }}
                       />
                     </div>
                   </div>
 
                   {/* Optional */}
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isOptional}
-                      onChange={(e) => setIsOptional(e.target.checked)}
-                      className="w-5 h-5 rounded"
-                    />
-                    <span className="text-sm" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                  <label className="flex items-center gap-2.5 cursor-pointer group">
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={isOptional}
+                        onChange={(e) => setIsOptional(e.target.checked)}
+                        className="peer w-[18px] h-[18px] rounded-md cursor-pointer appearance-none transition-all hover:border-[rgba(150,220,150,0.7)]"
+                        style={{
+                          border: '2px solid rgba(180, 220, 180, 0.45)',
+                          backgroundColor: isOptional ? 'rgba(120, 200, 120, 0.75)' : 'rgba(100, 180, 100, 0.18)',
+                          boxShadow: isOptional 
+                            ? '0 0 12px rgba(120, 200, 120, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.2)'
+                            : '0 2px 4px rgba(0, 0, 0, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.08)',
+                        }}
+                      />
+                      {isOptional && (
+                        <svg
+                          className="absolute w-3.5 h-3.5 pointer-events-none"
+                          style={{ color: 'rgba(240, 255, 240, 0.98)', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </div>
+                    <span 
+                      className="text-sm select-none transition-all leading-tight"
+                      style={{ 
+                        color: isOptional ? 'rgba(210, 245, 210, 0.85)' : 'rgba(190, 230, 190, 0.65)',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                      }}
+                    >
                       This task is optional
                     </span>
                   </label>
