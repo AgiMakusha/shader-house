@@ -154,8 +154,22 @@ export default function BetaTestDetailPage() {
   const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !description.trim()) {
-      error("Please fill in all required fields");
+    // Custom validation
+    if (!title.trim()) {
+      error("Please enter a title for your feedback");
+      play("error");
+      return;
+    }
+    
+    if (!description.trim()) {
+      error("Please provide a description");
+      play("error");
+      return;
+    }
+    
+    if (description.trim().length < 10) {
+      error("Description must be at least 10 characters");
+      play("error");
       return;
     }
 
@@ -648,7 +662,6 @@ export default function BetaTestDetailPage() {
                         placeholder="Brief summary..."
                         className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all"
                         style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                        required
                       />
                     </div>
 
@@ -667,7 +680,6 @@ export default function BetaTestDetailPage() {
                         rows={4}
                         className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all resize-none"
                         style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                        required
                       />
                     </div>
 
