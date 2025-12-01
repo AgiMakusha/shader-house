@@ -51,55 +51,16 @@ export default function AchievementsPage() {
           console.error("Error fetching beta stats:", error);
         }
         
-        // Load achievements (mock data for now)
-        setAchievements([
-          {
-            id: '1',
-            name: 'First Steps',
-            description: 'Complete your first game',
-            icon: 'gamepad',
-            unlocked: true,
-            unlockedAt: new Date(),
-            rarity: 'common',
-          },
-          {
-            id: '2',
-            name: 'Supporter',
-            description: 'Support your first developer',
-            icon: 'heart',
-            unlocked: true,
-            unlockedAt: new Date(),
-            rarity: 'common',
-          },
-          {
-            id: '3',
-            name: 'Game Tester',
-            description: 'Test 5 beta games',
-            icon: 'flask',
-            unlocked: false,
-            progress: 2,
-            maxProgress: 5,
-            rarity: 'rare',
-          },
-          {
-            id: '4',
-            name: 'Community Leader',
-            description: 'Write 10 helpful reviews',
-            icon: 'message',
-            unlocked: false,
-            progress: 4,
-            maxProgress: 10,
-            rarity: 'epic',
-          },
-          {
-            id: '5',
-            name: 'Legend',
-            description: 'Unlock all other achievements',
-            icon: 'crown',
-            unlocked: false,
-            rarity: 'legendary',
-          },
-        ]);
+        // Fetch real achievements data
+        try {
+          const achievementsResponse = await fetch("/api/achievements");
+          if (achievementsResponse.ok) {
+            const achievementsData = await achievementsResponse.json();
+            setAchievements(achievementsData.achievements || []);
+          }
+        } catch (error) {
+          console.error("Error fetching achievements:", error);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
         router.push("/auth/login");
