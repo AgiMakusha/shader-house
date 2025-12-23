@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 // Define providers directly for client-side rendering
@@ -13,15 +14,22 @@ const oauthProvidersList = [
 interface OAuthButtonsProps {
   className?: string;
   disabled?: boolean;
+  /** 'login' = only existing users can sign in, 'signup' = allow new users */
+  mode?: 'login' | 'signup';
 }
 
-export default function OAuthButtons({ className = "", disabled = false }: OAuthButtonsProps) {
+export default function OAuthButtons({ className = "", disabled = false, mode = 'login' }: OAuthButtonsProps) {
+  const [shakeKey, setShakeKey] = useState(0);
+
   const handleOAuthLogin = (providerId: string) => {
     if (disabled) {
-      return; // Don't allow OAuth login if disabled
+      // Trigger shake animation when clicking disabled button
+      setShakeKey(prev => prev + 1);
+      return;
     }
     // Redirect to server - server will check if OAuth is configured
-    window.location.href = `/api/auth/oauth/${providerId}`;
+    // Pass mode to indicate if this is login (existing users) or signup (new users allowed)
+    window.location.href = `/api/auth/oauth/${providerId}?mode=${mode}`;
   };
 
   const getProviderIcon = (provider: string) => {
@@ -68,19 +76,25 @@ export default function OAuthButtons({ className = "", disabled = false }: OAuth
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <motion.div 
+        key={shakeKey}
+        className="grid grid-cols-1 gap-3"
+        animate={disabled && shakeKey > 0 ? { x: [0, -8, 8, -6, 6, -4, 4, 0] } : {}}
+        transition={{ duration: 0.5 }}
+      >
         {oauthProvidersList.map((provider) => (
           <motion.button
             key={provider.id}
             type="button"
             onClick={() => handleOAuthLogin(provider.id)}
-            disabled={disabled}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all disabled:cursor-not-allowed"
+            disabled={false} // Keep button clickable to trigger shake animation
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all"
             style={{
               background: disabled ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.05)',
               border: `1px solid ${disabled ? 'rgba(200, 240, 200, 0.1)' : 'rgba(200, 240, 200, 0.2)'}`,
               color: disabled ? 'rgba(200, 240, 200, 0.4)' : 'rgba(200, 240, 200, 0.9)',
               opacity: disabled ? 0.5 : 1,
+              cursor: disabled ? 'not-allowed' : 'pointer',
             }}
             whileHover={!disabled ? { scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.08)' } : {}}
             whileTap={!disabled ? { scale: 0.98 } : {}}
@@ -89,7 +103,7 @@ export default function OAuthButtons({ className = "", disabled = false }: OAuth
             <span>Continue with {provider.name}</span>
           </motion.button>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

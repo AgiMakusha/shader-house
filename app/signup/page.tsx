@@ -1018,24 +1018,27 @@ function SignupPageContent() {
                     <div className="space-y-3">
                       <AnimatePresence>
                         {!acceptTerms && (
-                          <motion.p
-                            className="text-xs text-center px-4 py-2 rounded-lg"
+                          <motion.div
+                            className="text-sm text-center px-4 py-3 rounded-lg flex items-center justify-center gap-2"
                             style={{ 
-                              color: 'rgba(200, 240, 200, 0.6)',
-                              backgroundColor: 'rgba(200, 100, 100, 0.1)',
-                              border: '1px solid rgba(200, 100, 100, 0.2)',
-                              textShadow: '0 1px 2px rgba(0, 0, 0, 0.4)',
+                              color: 'rgba(255, 200, 150, 0.95)',
+                              backgroundColor: 'rgba(200, 100, 50, 0.2)',
+                              border: '1px solid rgba(255, 180, 100, 0.4)',
+                              textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
                             }}
                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                             animate={{ opacity: 1, height: 'auto', marginBottom: 12 }}
                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                             transition={{ duration: 0.3 }}
                           >
-                            ⚠️ Please accept the Terms of Service to continue with OAuth
-                          </motion.p>
+                            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Accept the Terms of Service above to sign up with OAuth</span>
+                          </motion.div>
                         )}
                       </AnimatePresence>
-                      <OAuthButtons disabled={!acceptTerms} />
+                      <OAuthButtons disabled={!acceptTerms} mode="signup" />
                     </div>
                   )}
                 </form>

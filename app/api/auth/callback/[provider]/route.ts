@@ -14,6 +14,9 @@ export async function GET(
     const state = searchParams.get('state');
     const error = searchParams.get('error');
 
+    // Get OAuth mode from cookie (login = existing users only, signup = allow new users)
+    const oauthMode = request.cookies.get('oauth_mode')?.value || 'login';
+
     // Check for OAuth errors
     if (error) {
       console.error('OAuth error:', error);
@@ -89,7 +92,20 @@ export async function GET(
         });
       }
     } else {
-      // Create new user with OAuth account
+      // No existing user found
+      
+      // If mode is 'login', don't allow creating new users - redirect with error
+      if (oauthMode === 'login') {
+        const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+        const response = NextResponse.redirect(
+          new URL(`/login?error=no_account&provider=${providerName}`, request.url)
+        );
+        response.cookies.delete('oauth_state');
+        response.cookies.delete('oauth_mode');
+        return response;
+      }
+      
+      // Mode is 'signup' - create new user with OAuth account
       isNewUser = true;
       user = await prisma.user.create({
         data: {
@@ -135,7 +151,7 @@ export async function GET(
       createdAt: user.createdAt.getTime(),
     }, true);
 
-    // Clear OAuth state cookie and redirect based on role and signup status
+    // Clear OAuth cookies and redirect based on role and signup status
     let redirectUrl: string;
     const userRole = user.role?.toUpperCase();
     if (userRole === 'DEVELOPER') {
@@ -146,6 +162,7 @@ export async function GET(
     }
     const response = NextResponse.redirect(new URL(redirectUrl, request.url));
     response.cookies.delete('oauth_state');
+    response.cookies.delete('oauth_mode');
     
     return response;
   } catch (error) {

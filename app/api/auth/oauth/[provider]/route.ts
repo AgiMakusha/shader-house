@@ -8,6 +8,10 @@ export async function GET(
 ) {
   try {
     const { provider } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    
+    // Get OAuth mode: 'login' (existing users only) or 'signup' (allow new users)
+    const mode = searchParams.get('mode') || 'login';
     
     // Check if provider exists and is configured
     const providerConfig = oauthProviders[provider];
@@ -28,6 +32,14 @@ export async function GET(
     // Store state in a cookie for verification later
     const response = NextResponse.redirect(getOAuthAuthorizationUrl(provider, state));
     response.cookies.set('oauth_state', state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 10, // 10 minutes
+    });
+    
+    // Store OAuth mode in cookie to check in callback
+    response.cookies.set('oauth_mode', mode, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

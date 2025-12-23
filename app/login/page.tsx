@@ -19,7 +19,10 @@ function LoginErrorHandler({ onError }: { onError: (error: string) => void }) {
     const errorType = searchParams.get('error');
     const provider = searchParams.get('provider');
     
-    if (errorType === 'oauth_not_configured') {
+    if (errorType === 'no_account') {
+      const providerName = provider || 'this provider';
+      onError(`No account found with ${providerName}. Please sign up first to create an account.`);
+    } else if (errorType === 'oauth_not_configured') {
       const providerName = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'OAuth';
       onError(`${providerName} login is not available yet. Please use email/password or try another method.`);
     } else if (errorType === 'oauth_init_failed') {
@@ -28,6 +31,8 @@ function LoginErrorHandler({ onError }: { onError: (error: string) => void }) {
       onError('Invalid login method selected.');
     } else if (errorType === 'oauth_failed') {
       onError('Login failed. Please try again or use email/password.');
+    } else if (errorType === 'oauth_callback_failed') {
+      onError('Authentication failed. Please try again.');
     }
   }, [searchParams, onError]);
   
@@ -355,7 +360,7 @@ export default function LoginPage() {
                   </motion.button>
 
                   {/* OAuth Buttons */}
-                  <OAuthButtons />
+                  <OAuthButtons mode="login" />
                 </form>
               </GameCardContent>
             </GameCard>
