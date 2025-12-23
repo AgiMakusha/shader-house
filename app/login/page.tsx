@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -11,9 +11,31 @@ import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import OAuthButtons from "@/components/auth/OAuthButtons";
 
+// Separate component for handling search params (requires Suspense)
+function LoginErrorHandler({ onError }: { onError: (error: string) => void }) {
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const errorType = searchParams.get('error');
+    const provider = searchParams.get('provider');
+    
+    if (errorType === 'oauth_not_configured') {
+      const providerName = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'OAuth';
+      onError(`${providerName} login is not available yet. Please use email/password or try another method.`);
+    } else if (errorType === 'oauth_init_failed') {
+      onError('Failed to initiate login. Please try again.');
+    } else if (errorType === 'invalid_provider') {
+      onError('Invalid login method selected.');
+    } else if (errorType === 'oauth_failed') {
+      onError('Login failed. Please try again or use email/password.');
+    }
+  }, [searchParams, onError]);
+  
+  return null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { play } = useAudio();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,23 +43,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
-
-  // Handle OAuth error messages from URL
-  useEffect(() => {
-    const errorType = searchParams.get('error');
-    const provider = searchParams.get('provider');
-    
-    if (errorType === 'oauth_not_configured') {
-      const providerName = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'OAuth';
-      setError(`${providerName} login is not available yet. Please use email/password or try another method.`);
-    } else if (errorType === 'oauth_init_failed') {
-      setError('Failed to initiate login. Please try again.');
-    } else if (errorType === 'invalid_provider') {
-      setError('Invalid login method selected.');
-    } else if (errorType === 'oauth_failed') {
-      setError('Login failed. Please try again or use email/password.');
-    }
-  }, [searchParams]);
 
   const validateFields = () => {
     const errors: { email?: string; password?: string } = {};
@@ -107,6 +112,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
+      <Suspense fallback={null}>
+        <LoginErrorHandler onError={setError} />
+      </Suspense>
       <Particles />
       
       <motion.main 
