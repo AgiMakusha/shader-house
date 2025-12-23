@@ -143,7 +143,6 @@ function getEventSeverity(eventType: SecurityEventType): SecuritySeverity {
     'MULTIPLE_FAILED_ATTEMPTS': 'error',
     'SUSPICIOUS_ACTIVITY': 'error',
     'UNUSUAL_LOCATION': 'error',
-    'ADMIN_USER_SUSPENDED': 'error',
     'ADMIN_GAME_REMOVED': 'error',
     'ADMIN_CONTENT_REMOVED': 'error',
     
@@ -152,6 +151,8 @@ function getEventSeverity(eventType: SecurityEventType): SecuritySeverity {
     'ACCOUNT_SUSPENDED': 'critical',
     'ACCOUNT_UNSUSPENDED': 'critical',
     'SESSION_HIJACK_SUSPECTED': 'critical',
+    'ADMIN_USER_SUSPENDED': 'critical',
+    'ADMIN_USER_UNSUSPENDED': 'critical',
     'ADMIN_USER_DELETED': 'critical',
   };
 
