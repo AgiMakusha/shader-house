@@ -13,7 +13,7 @@ import { ProfileCardPreview } from "@/components/profile/ProfileCardPreview";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { AccountDeletion } from "@/components/profile/AccountDeletion";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
-import { LinkedAccounts, SessionManagement, TwoFactorSetup, DataExport, EmailChange } from "@/components/security";
+import { LinkedAccounts, SessionManagement, TwoFactorSetup, DataExport, EmailChange, SetPassword } from "@/components/security";
 
 export default function GamerSettingsPage() {
   const router = useRouter();
@@ -696,122 +696,132 @@ export default function GamerSettingsPage() {
         </motion.div>
 
 
+        {/* Set Password (for OAuth users) or Change Password Section */}
         <motion.div
           className="w-full max-w-4xl mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <GameCard>
-            <GameCardContent className="p-8 space-y-6">
-              <h2
-                className="text-2xl font-bold pixelized"
-                style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-              >
-                Security
-              </h2>
-
-              <form onSubmit={handlePasswordChange} className="space-y-6">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                    Current Password
-                  </span>
-                  <input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
-                    style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                  />
-                </label>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <label className="space-y-2">
-                    <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                      New Password
-                    </span>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Choose something strong"
-                      required
-                      minLength={8}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
-                      style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                    />
-                    <PasswordStrength password={newPassword} />
-                  </label>
-
-                  <label className="space-y-2">
-                    <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                      Confirm Password
-                    </span>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Retype new password"
-                      required
-                      minLength={8}
-                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
-                      style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                    />
-                  </label>
-                </div>
-
-                {passwordError && (
-                  <div
-                    className="p-3 rounded-lg"
-                    style={{
-                      background: "rgba(180, 60, 60, 0.15)",
-                      border: "1px solid rgba(255, 120, 120, 0.3)",
-                      color: "rgba(255, 180, 180, 0.95)",
-                      textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
-                      fontSize: "12px",
-                      fontFamily: '"Press Start 2P", monospace',
-                    }}
-                  >
-                    {passwordError}
-                  </div>
-                )}
-
-                {passwordSuccess && (
-                  <div
-                    className="p-3 rounded-lg"
-                    style={{
-                      background: "rgba(100, 200, 100, 0.15)",
-                      border: "1px solid rgba(150, 240, 150, 0.3)",
-                      color: "rgba(180, 240, 180, 0.95)",
-                      textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
-                      fontSize: "12px",
-                      fontFamily: '"Press Start 2P", monospace',
-                    }}
-                  >
-                    ✓ {passwordSuccess}
-                  </div>
-                )}
-
-                <motion.button
-                  type="submit"
-                  disabled={isSavingSecurity}
-                  className="px-6 py-3 rounded-lg font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.2) 100%)",
-                    border: "1px solid rgba(200, 240, 200, 0.3)",
-                    color: "rgba(200, 240, 200, 0.95)",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  }}
-                  whileHover={!isSavingSecurity ? { scale: 1.02 } : {}}
-                  whileTap={!isSavingSecurity ? { scale: 0.98 } : {}}
+          {!user?.hasPassword ? (
+            <SetPassword
+              onPasswordSet={() => {
+                // Refresh user data to update hasPassword flag
+                fetch("/api/auth/me").then(res => res.json()).then(data => setUser(data.user));
+              }}
+            />
+          ) : (
+            <GameCard>
+              <GameCardContent className="p-8 space-y-6">
+                <h2
+                  className="text-2xl font-bold pixelized"
+                  style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
                 >
-                  {isSavingSecurity ? "Updating..." : "Update Password"}
-                </motion.button>
-              </form>
-            </GameCardContent>
-          </GameCard>
+                  Security
+                </h2>
+
+                <form onSubmit={handlePasswordChange} className="space-y-6">
+                  <label className="space-y-2">
+                    <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                      Current Password
+                    </span>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
+                      style={{ color: "rgba(200, 240, 200, 0.85)" }}
+                    />
+                  </label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                        New Password
+                      </span>
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Choose something strong"
+                        required
+                        minLength={8}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
+                        style={{ color: "rgba(200, 240, 200, 0.85)" }}
+                      />
+                      <PasswordStrength password={newPassword} />
+                    </label>
+
+                    <label className="space-y-2">
+                      <span className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                        Confirm Password
+                      </span>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Retype new password"
+                        required
+                        minLength={8}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
+                        style={{ color: "rgba(200, 240, 200, 0.85)" }}
+                      />
+                    </label>
+                  </div>
+
+                  {passwordError && (
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{
+                        background: "rgba(180, 60, 60, 0.15)",
+                        border: "1px solid rgba(255, 120, 120, 0.3)",
+                        color: "rgba(255, 180, 180, 0.95)",
+                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
+                        fontSize: "12px",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {passwordSuccess && (
+                    <div
+                      className="p-3 rounded-lg"
+                      style={{
+                        background: "rgba(100, 200, 100, 0.15)",
+                        border: "1px solid rgba(150, 240, 150, 0.3)",
+                        color: "rgba(180, 240, 180, 0.95)",
+                        textShadow: "0 1px 2px rgba(0, 0, 0, 0.6)",
+                        fontSize: "12px",
+                        fontFamily: '"Press Start 2P", monospace',
+                      }}
+                    >
+                      ✓ {passwordSuccess}
+                    </div>
+                  )}
+
+                  <motion.button
+                    type="submit"
+                    disabled={isSavingSecurity}
+                    className="px-6 py-3 rounded-lg font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.2) 100%)",
+                      border: "1px solid rgba(200, 240, 200, 0.3)",
+                      color: "rgba(200, 240, 200, 0.95)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    }}
+                    whileHover={!isSavingSecurity ? { scale: 1.02 } : {}}
+                    whileTap={!isSavingSecurity ? { scale: 0.98 } : {}}
+                  >
+                    {isSavingSecurity ? "Updating..." : "Update Password"}
+                  </motion.button>
+                </form>
+              </GameCardContent>
+            </GameCard>
+          )}
         </motion.div>
 
         <motion.div

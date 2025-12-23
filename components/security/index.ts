@@ -3,4 +3,5 @@ export { SessionManagement } from './SessionManagement';
 export { TwoFactorSetup } from './TwoFactorSetup';
 export { DataExport } from './DataExport';
 export { EmailChange } from './EmailChange';
+export { SetPassword } from './SetPassword';
 
