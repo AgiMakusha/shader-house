@@ -3,6 +3,8 @@ import { loginSchema } from "@/lib/auth/validation";
 import { createSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
+import { quickBotCheck } from "@/lib/security/bot-detection";
+import { logSecurityEvent } from "@/lib/security/audit-log";
 import bcrypt from "bcryptjs";
 
 // Rate limit config: 5 failed attempts per 15 minutes per IP/email
@@ -29,6 +31,30 @@ export async function POST(request: NextRequest) {
           retryAfter: new Date(ipRateLimit.resetAt).toISOString()
         },
         { status: 429 }
+      );
+    }
+    
+    // Bot detection check (honeypot + behavioral signals)
+    const botCheck = quickBotCheck(
+      body.behavioralSignals || null,
+      body.honeypot ? {
+        website: body.honeypot.username, // Map username honeypot to website field
+        _formTimestamp: body.honeypot._formTimestamp,
+        _formToken: body.honeypot._formToken,
+      } : null
+    );
+    
+    if (botCheck.isBot) {
+      logSecurityEvent('LOGIN_BLOCKED_BOT', {
+        ipAddress: clientIP,
+        userAgent: userAgent || undefined,
+        endpoint: '/api/auth/login',
+        details: { reason: botCheck.reason },
+        success: false,
+      });
+      return NextResponse.json(
+        { error: "Suspicious activity detected. Please try again." },
+        { status: 403 }
       );
     }
     
@@ -93,11 +119,29 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
+      logSecurityEvent('LOGIN_FAILURE', {
+        userId: user.id,
+        ipAddress: clientIP,
+        userAgent: userAgent || undefined,
+        endpoint: '/api/auth/login',
+        details: { reason: 'Invalid password' },
+        success: false,
+      });
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
       );
     }
+
+    // Log successful login
+    logSecurityEvent('LOGIN_SUCCESS', {
+      userId: user.id,
+      ipAddress: clientIP,
+      userAgent: userAgent || undefined,
+      endpoint: '/api/auth/login',
+      details: { rememberMe },
+      success: true,
+    });
 
     // Create session
     await createSession({

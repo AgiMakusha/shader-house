@@ -32,6 +32,43 @@ This document explains the multi-layered bot protection system implemented in Sh
 - **Cost**: Free (DIY implementation)
 - **Status**: ✅ Already configured
 
+### 5. **Honeypot Fields** (NEW)
+- **What it is**: Invisible form fields that bots fill but humans never see
+- **How it works**:
+  - Hidden fields with enticing names like "website", "email_confirm"
+  - If any honeypot field is filled → definite bot
+  - Includes timestamp validation to detect instant form submissions
+  - Includes form token validation
+- **Cost**: Free (zero dependencies)
+- **Status**: ✅ Already configured
+- **Files**: `lib/security/honeypot.ts`
+
+### 6. **Browser Fingerprinting** (NEW)
+- **What it is**: Collects browser signals to detect headless browsers and automation
+- **Signals collected**:
+  - Screen properties (size, color depth, pixel ratio)
+  - WebGL vendor/renderer (bots often fail this)
+  - Canvas fingerprint
+  - Audio context fingerprint
+  - Installed fonts detection
+  - Headless browser indicators (WebDriver, PhantomJS, Selenium, etc.)
+  - Plugin count
+  - Hardware concurrency
+  - Touch support
+- **Cost**: Free (client-side JavaScript)
+- **Status**: ✅ Already configured
+- **Files**: `hooks/useBrowserFingerprint.ts`
+
+### 7. **Enhanced Bot Detection** (NEW)
+- **What it is**: Combines all signals into a unified bot score
+- **How it works**:
+  - Weighted combination of behavioral, browser, honeypot, and request signals
+  - Categorizes threats: clean, suspicious, likely_bot, definite_bot
+  - Logs all suspicious activity for monitoring
+- **Cost**: Free
+- **Status**: ✅ Already configured
+- **Files**: `lib/security/bot-detection.ts`
+
 ---
 
 ## 🚀 Quick Setup
@@ -85,28 +122,36 @@ npm run dev
 User visits /signup
   ↓
 1. Behavioral tracking starts (mouse, keyboard, time)
+2. Browser fingerprinting collects signals
+3. Form timestamp recorded
+4. Form token generated
   ↓
-2. User fills form
+5. User fills form (honeypot fields remain hidden/empty)
   ↓
-3. User completes Turnstile challenge (if configured)
+6. User completes Turnstile challenge (if configured)
   ↓
-4. User submits form
+7. User submits form
   ↓
-5. Server checks:
+8. Server checks (in order):
    ├─ Rate limit (3 attempts per 15 min)
    ├─ Turnstile token validity
+   ├─ Honeypot fields (must be empty)
+   ├─ Form timestamp (must be > 3 seconds)
+   ├─ Browser fingerprint (headless detection)
    ├─ Behavioral signals (bot score < 50)
+   ├─ Combined bot score (< 60)
    ├─ Email not disposable
    └─ Email format valid
   ↓
-6. If all pass → Create account
-   If any fail → Show error
+9. If all pass → Create account
+   If any fail → Show error + log suspicious activity
 ```
 
 ### Bot Detection Scoring
 
-The system calculates a bot score (0-100) based on:
+The enhanced system calculates a combined bot score from multiple sources:
 
+#### Behavioral Signals (Weight: 30%)
 | Signal | Points | Threshold |
 |--------|--------|-----------|
 | No mouse movements | +30 | 0 movements |
@@ -119,7 +164,42 @@ The system calculates a bot score (0-100) based on:
 | Clipboard paste | +5 | Detected |
 | Rapid submission (< 1s) | +25 | < 1 second |
 
-**Bot threshold**: Score ≥ 50 = Likely bot (blocked)
+#### Browser Fingerprint Signals (Weight: 35%)
+| Signal | Points | Description |
+|--------|--------|-------------|
+| WebDriver detected | +50 | Selenium/Puppeteer |
+| PhantomJS detected | +50 | PhantomJS browser |
+| Selenium detected | +50 | Selenium markers |
+| No WebGL | +20 | Missing graphics API |
+| Canvas failed | +15 | Can't render canvas |
+| Audio failed | +10 | No audio context |
+| Invalid screen | +30 | 0x0 resolution |
+| Headless resolution | +15 | 800x600 |
+| Cookies disabled | +15 | No cookies |
+| No plugins | +10 | Empty plugins |
+| Few fonts | +15 | < 5 fonts |
+
+#### Honeypot Signals (Weight: 20%)
+| Signal | Points | Description |
+|--------|--------|-------------|
+| Any field filled | +100 | Definite bot |
+| Form < 1 second | +100 | Instant submission |
+| Form < 3 seconds | +50 | Very fast submission |
+| Invalid token | +50 | Token manipulation |
+
+#### Request Signals (Weight: 15%)
+| Signal | Points | Description |
+|--------|--------|-------------|
+| Bot User-Agent | +40 | Contains bot/scrape/etc |
+| No User-Agent | +25 | Missing or short |
+| No Accept-Language | +15 | Missing header |
+| No Accept-Encoding | +10 | Missing header |
+
+**Combined Thresholds**:
+- Score < 40: Clean (allowed)
+- Score 40-59: Suspicious (allowed with logging)
+- Score 60-79: Likely bot (blocked)
+- Score ≥ 80: Definite bot (blocked)
 
 ---
 
@@ -318,11 +398,88 @@ Then update `lib/security/rate-limit.ts` to use Redis.
 - [ ] Rate limiting tested
 - [ ] Disposable email blocking verified
 - [ ] Behavioral signals tracking
+- [ ] Honeypot fields in signup form
+- [ ] Honeypot fields in login form
+- [ ] Browser fingerprinting enabled
+- [ ] Enhanced bot detection active
 - [ ] Production keys separate from dev keys
 - [ ] Server logs monitoring bot attempts
 - [ ] Rate limit thresholds appropriate
 - [ ] Bot score threshold tuned
 - [ ] User feedback mechanism for false positives
+
+---
+
+## 🔧 Security Files Reference
+
+### Honeypot System
+- `lib/security/honeypot.ts` - Server-side honeypot validation
+- Usage in forms: Hidden fields with CSS `position: absolute; left: -9999px`
+
+### Browser Fingerprinting
+- `hooks/useBrowserFingerprint.ts` - Client-side signal collection
+- Collects: WebGL, Canvas, Audio, Fonts, Headless indicators
+
+### Enhanced Bot Detection
+- `lib/security/bot-detection.ts` - Combined detection system
+- `detectBot()` - Full detection with all signals
+- `quickBotCheck()` - Lightweight check for login/less critical endpoints
+- `logBotDetection()` - Monitoring and logging
+
+### Content Spam Detection
+- `lib/security/spam-detection.ts` - Analyze user-generated content
+- `checkSpam()` - Full spam analysis with scoring
+- `checkProfanity()` - Filter inappropriate language
+- `isDefiniteSpam()` - Quick check for obvious spam
+
+### Content Rate Limiting
+- `lib/security/content-rate-limit.ts` - Per-user posting limits
+- `checkContentRateLimit()` - Check if user can post
+- `recordContentPost()` - Track post after creation
+- `checkCooldown()` - Minimum time between posts
+- **Limits:**
+  - Threads: 3/hour, 10/day
+  - Posts/Comments: 10/15min, 50/hour
+  - Reviews: 5/day
+  - Reports: 10/day
+
+### Email Verification Guard
+- `lib/security/email-verification-guard.ts` - Block unverified users
+- `isEmailVerified()` - Check verification status
+- `canPerformAction()` - Combined check with grace period
+
+### Audit Logging
+- `lib/security/audit-log.ts` - Security event tracking
+- `logSecurityEvent()` - Log any security event
+- `getSecuritySummary()` - Admin dashboard stats
+- `getUserSecurityEvents()` - User-specific events
+- **Event Categories:**
+  - Authentication (login, logout, session)
+  - Registration (success, blocked)
+  - Password (changed, reset)
+  - 2FA (enabled, disabled, verified)
+  - Content (spam flagged, rate limited)
+  - Admin actions
+
+### Security Headers
+- `next.config.ts` - HTTP security headers
+- **Headers Applied:**
+  - `X-Frame-Options: DENY` - Prevent clickjacking
+  - `X-Content-Type-Options: nosniff` - Prevent MIME sniffing
+  - `X-XSS-Protection: 1; mode=block` - XSS filter
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Content-Security-Policy` - Full CSP
+  - `Permissions-Policy` - Feature restrictions
+  - `Strict-Transport-Security` - HTTPS enforcement (production)
+
+### Updated Forms
+- `app/signup/page.tsx` - Full protection (honeypot + fingerprint + behavioral)
+- `app/login/page.tsx` - Quick protection (honeypot + behavioral)
+
+### Updated APIs
+- `app/api/discussions/threads/route.ts` - Spam + rate limit + email verification
+- `app/api/auth/login/route.ts` - Bot detection + audit logging
+- `app/api/auth/register/route.ts` - Full bot detection + audit logging
 
 ---
 

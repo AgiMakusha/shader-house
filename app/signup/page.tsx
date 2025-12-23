@@ -15,6 +15,8 @@ import { checkIndieEligibility, INDIE_POLICY, FIELD_TOOLTIPS } from "@/lib/indie
 import OAuthButtons from "@/components/auth/OAuthButtons";
 import TurnstileWidget from "@/components/security/TurnstileWidget";
 import { useBehavioralTracking } from "@/hooks/useBehavioralTracking";
+import { useBrowserFingerprint } from "@/hooks/useBrowserFingerprint";
+import { generateFormToken, HONEYPOT_STYLES } from "@/lib/security/honeypot";
 
 type DeveloperType = "INDIE" | "STUDIO";
 type CompanyType = "NONE" | "SOLE_PROP" | "LLC" | "CORP";
@@ -54,6 +56,15 @@ function SignupPageContent() {
   
   // Track behavioral signals for bot detection
   const behavioralSignals = useBehavioralTracking();
+  
+  // Collect browser fingerprint for bot detection
+  const { signals: browserSignals } = useBrowserFingerprint();
+  
+  // Honeypot fields (invisible to humans, filled by bots)
+  const [honeypotWebsite, setHoneypotWebsite] = useState("");
+  const [honeypotEmailConfirm, setHoneypotEmailConfirm] = useState("");
+  const [formTimestamp] = useState(() => Date.now());
+  const [formToken] = useState(() => generateFormToken());
 
   // Check indie eligibility whenever relevant fields change
   useEffect(() => {
@@ -179,6 +190,14 @@ function SignupPageContent() {
         role,
         turnstileToken, // Include Turnstile token
         behavioralSignals, // Include behavioral signals for bot detection
+        browserSignals, // Include browser fingerprint for bot detection
+        // Honeypot fields (should be empty for real users)
+        honeypot: {
+          website: honeypotWebsite,
+          email_confirm: honeypotEmailConfirm,
+          _formTimestamp: formTimestamp,
+          _formToken: formToken,
+        },
       };
       
       // Only include developer profile if role is developer
@@ -369,6 +388,43 @@ function SignupPageContent() {
             <GameCard>
               <GameCardContent className="p-8 w-full items-stretch text-left">
                 <form onSubmit={handleSubmit} noValidate className="space-y-6 w-full">
+                  {/* Honeypot fields - invisible to humans, filled by bots */}
+                  <div 
+                    aria-hidden="true"
+                    style={HONEYPOT_STYLES.container}
+                  >
+                    <label htmlFor="website">Website (leave blank)</label>
+                    <input
+                      type="text"
+                      id="website"
+                      name="website"
+                      value={honeypotWebsite}
+                      onChange={(e) => setHoneypotWebsite(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                    <label htmlFor="email_confirm">Confirm Email (leave blank)</label>
+                    <input
+                      type="email"
+                      id="email_confirm"
+                      name="email_confirm"
+                      value={honeypotEmailConfirm}
+                      onChange={(e) => setHoneypotEmailConfirm(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                    <input
+                      type="hidden"
+                      name="_formTimestamp"
+                      value={formTimestamp}
+                    />
+                    <input
+                      type="hidden"
+                      name="_formToken"
+                      value={formToken}
+                    />
+                  </div>
+
                   {/* Basic Information Section */}
                   <div className="space-y-4">
                     <h2 

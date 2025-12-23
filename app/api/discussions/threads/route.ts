@@ -11,6 +11,10 @@ import { z } from 'zod';
 import { awardReward } from '@/lib/rewards/utils';
 import { ThreadCategory } from '@prisma/client';
 import { notifyNewCommunityThread } from '@/lib/notifications/triggers';
+import { checkSpam } from '@/lib/security/spam-detection';
+import { checkContentRateLimit, recordContentPost, checkCooldown, recordPostTime } from '@/lib/security/content-rate-limit';
+import { isEmailVerified, getUnverifiedEmailError } from '@/lib/security/email-verification-guard';
+import { logSecurityEvent } from '@/lib/security/audit-log';
 
 // Validation schema
 const createThreadSchema = z.object({
@@ -125,6 +129,54 @@ export async function POST(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    // 1. Email verification check
+    const emailCheck = await isEmailVerified(session.user.id);
+    if (!emailCheck.verified) {
+      logSecurityEvent('CONTENT_BLOCKED_UNVERIFIED', {
+        userId: session.user.id,
+        ipAddress: clientIP,
+        endpoint: '/api/discussions/threads',
+        details: { action: 'create_thread' },
+        success: false,
+      });
+      return NextResponse.json(getUnverifiedEmailError(), { status: 403 });
+    }
+    
+    // 2. Cooldown check (minimum time between posts)
+    const cooldownCheck = checkCooldown(session.user.id, 'thread');
+    if (!cooldownCheck.canPost) {
+      return NextResponse.json(
+        { error: `Please wait ${cooldownCheck.waitSeconds} seconds before creating another thread.` },
+        { status: 429 }
+      );
+    }
+    
+    // 3. Rate limit check
+    const rateLimitCheck = checkContentRateLimit(session.user.id, 'thread');
+    if (!rateLimitCheck.allowed) {
+      logSecurityEvent('CONTENT_BLOCKED_RATE_LIMIT', {
+        userId: session.user.id,
+        ipAddress: clientIP,
+        endpoint: '/api/discussions/threads',
+        details: { 
+          limitType: rateLimitCheck.limitType,
+          resetAt: new Date(rateLimitCheck.resetAt).toISOString(),
+        },
+        success: false,
+      });
+      return NextResponse.json(
+        { 
+          error: `You've reached the thread limit. Try again later.`,
+          resetAt: new Date(rateLimitCheck.resetAt).toISOString(),
+        },
+        { status: 429 }
+      );
+    }
     
     let body;
     try {
@@ -137,6 +189,28 @@ export async function POST(request: NextRequest) {
     }
     
     const validated = createThreadSchema.parse(body);
+    
+    // 4. Spam detection check
+    const spamCheckTitle = checkSpam(validated.title);
+    const spamCheckContent = checkSpam(validated.content);
+    
+    if (spamCheckTitle.isSpam || spamCheckContent.isSpam) {
+      logSecurityEvent('CONTENT_FLAGGED_SPAM', {
+        userId: session.user.id,
+        ipAddress: clientIP,
+        endpoint: '/api/discussions/threads',
+        details: {
+          titleScore: spamCheckTitle.score,
+          contentScore: spamCheckContent.score,
+          reasons: [...spamCheckTitle.reasons, ...spamCheckContent.reasons],
+        },
+        success: false,
+      });
+      return NextResponse.json(
+        { error: 'Your post was flagged as potential spam. Please revise and try again.' },
+        { status: 400 }
+      );
+    }
     
     // Normalize mediaUrls - ensure it's always an array
     const mediaUrls = Array.isArray(validated.mediaUrls) 
@@ -216,6 +290,10 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+    
+    // Record rate limit usage and cooldown
+    recordContentPost(session.user.id, 'thread');
+    recordPostTime(session.user.id, 'thread');
     
     // Award XP and Points (don't fail thread creation if reward fails)
     let reward = null;

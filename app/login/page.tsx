@@ -10,6 +10,8 @@ import { GameHouse } from "@/components/icons";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import OAuthButtons from "@/components/auth/OAuthButtons";
+import { useBehavioralTracking } from "@/hooks/useBehavioralTracking";
+import { generateFormToken, HONEYPOT_STYLES } from "@/lib/security/honeypot";
 
 // Separate component for handling search params (requires Suspense)
 function LoginErrorHandler({ onError }: { onError: (error: string) => void }) {
@@ -51,6 +53,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Security: Track behavioral signals for bot detection
+  const behavioralSignals = useBehavioralTracking();
+  
+  // Security: Honeypot fields (invisible to humans, filled by bots)
+  const [honeypotUsername, setHoneypotUsername] = useState("");
+  const [formTimestamp] = useState(() => Date.now());
+  const [formToken] = useState(() => generateFormToken());
 
   const validateFields = () => {
     const errors: { email?: string; password?: string } = {};
@@ -85,7 +95,18 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, rememberMe }),
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          rememberMe,
+          behavioralSignals, // Include behavioral signals for bot detection
+          // Honeypot fields (should be empty for real users)
+          honeypot: {
+            username: honeypotUsername,
+            _formTimestamp: formTimestamp,
+            _formToken: formToken,
+          },
+        }),
       });
 
       const data = await response.json();
@@ -190,6 +211,33 @@ export default function LoginPage() {
             <GameCard>
               <GameCardContent className="p-8">
                 <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                  {/* Honeypot fields - invisible to humans, filled by bots */}
+                  <div 
+                    aria-hidden="true"
+                    style={HONEYPOT_STYLES.container}
+                  >
+                    <label htmlFor="username">Username (leave blank)</label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={honeypotUsername}
+                      onChange={(e) => setHoneypotUsername(e.target.value)}
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                    <input
+                      type="hidden"
+                      name="_formTimestamp"
+                      value={formTimestamp}
+                    />
+                    <input
+                      type="hidden"
+                      name="_formToken"
+                      value={formToken}
+                    />
+                  </div>
+
                   {/* Email Field */}
                   <div className="space-y-2">
                     <label 

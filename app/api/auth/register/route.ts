@@ -9,6 +9,8 @@ import { verifyTurnstileToken } from "@/lib/security/turnstile";
 import { validateEmail } from "@/lib/security/email-validation";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { isLikelyBot, calculateBotScore } from "@/lib/security/behavioral-signals";
+import { detectBot, logBotDetection } from "@/lib/security/bot-detection";
+import { logSecurityEvent } from "@/lib/security/audit-log";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
@@ -52,11 +54,50 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 3. Behavioral signals check
+    // 3. Enhanced bot detection (honeypot, browser fingerprint, behavioral signals)
+    const botDetectionResult = detectBot(
+      body.behavioralSignals || null,
+      body.browserSignals || null,
+      body.honeypot || null,
+      {
+        ip: clientIP,
+        userAgent: userAgent || '',
+        headers: {
+          'accept-language': request.headers.get('accept-language') || undefined,
+          'accept-encoding': request.headers.get('accept-encoding') || undefined,
+          'accept': request.headers.get('accept') || undefined,
+        },
+      }
+    );
+    
+    // Log all suspicious activity for monitoring
+    logBotDetection(botDetectionResult, clientIP, '/api/auth/register');
+    
+    // Block definite bots and likely bots
+    if (botDetectionResult.isBot) {
+      logSecurityEvent('REGISTER_BLOCKED_BOT', {
+        ipAddress: clientIP,
+        userAgent: userAgent || undefined,
+        endpoint: '/api/auth/register',
+        details: {
+          score: botDetectionResult.score,
+          confidence: botDetectionResult.confidence,
+          reasons: botDetectionResult.reasons,
+          email: body.email,
+        },
+        success: false,
+      });
+      return NextResponse.json(
+        { error: "Automated registration detected. Please try again." },
+        { status: 403 }
+      );
+    }
+    
+    // Legacy behavioral check as fallback (in case new detection misses something)
     if (body.behavioralSignals) {
       const botScore = calculateBotScore(body.behavioralSignals);
       if (isLikelyBot(body.behavioralSignals)) {
-        console.warn(`Potential bot detected: score=${botScore}, ip=${clientIP}`);
+        console.warn(`Behavioral bot detected: score=${botScore}, ip=${clientIP}`);
         return NextResponse.json(
           { error: "Automated registration detected. Please try again." },
           { status: 403 }
@@ -85,6 +126,13 @@ export async function POST(request: NextRequest) {
     // 4. Email validation (disposable email check)
     const emailValidation = validateEmail(email);
     if (!emailValidation.valid) {
+      logSecurityEvent('REGISTER_BLOCKED_DISPOSABLE_EMAIL', {
+        ipAddress: clientIP,
+        userAgent: userAgent || undefined,
+        endpoint: '/api/auth/register',
+        details: { email, reason: emailValidation.reason },
+        success: false,
+      });
       return NextResponse.json(
         { error: emailValidation.reason },
         { status: 400 }
@@ -163,6 +211,19 @@ export async function POST(request: NextRequest) {
       console.error("Failed to send verification email:", emailError);
       // Continue with registration even if email fails
     }
+
+    // Log successful registration
+    logSecurityEvent('REGISTER_SUCCESS', {
+      userId: newUser.id,
+      ipAddress: clientIP,
+      userAgent: userAgent || undefined,
+      endpoint: '/api/auth/register',
+      details: { 
+        role: newUser.role,
+        isDeveloper: role === 'developer',
+      },
+      success: true,
+    });
 
     // Create session (auto-login after registration)
     await createSession({
