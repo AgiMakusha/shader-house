@@ -124,7 +124,7 @@ export function detectBot(
 
   // ============ BROWSER SIGNALS ============
   if (browser) {
-    // Headless browser indicators (critical)
+    // Headless browser indicators (critical - these are definite bot signals)
     if (browser.hasWebdriver) {
       breakdown.browser += 50;
       reasons.push('WebDriver detected');
@@ -146,49 +146,49 @@ export function detectBot(
       reasons.push('CasperJS detected');
     }
 
-    // Missing browser features
+    // Missing browser features - reduced penalties for privacy browsers
     if (!browser.webglVendor && !browser.webglRenderer) {
-      breakdown.browser += 20;
+      breakdown.browser += 10; // Reduced from 20 - some privacy browsers block WebGL
       reasons.push('No WebGL support');
     }
     if (browser.canvasHash === 'no-canvas' || browser.canvasHash === 'error') {
-      breakdown.browser += 15;
+      breakdown.browser += 8; // Reduced from 15 - privacy browsers may block canvas
       reasons.push('Canvas fingerprint failed');
     }
     if (browser.audioHash === 'no-audio' || browser.audioHash === 'error') {
-      breakdown.browser += 10;
+      breakdown.browser += 5; // Reduced from 10
       reasons.push('Audio fingerprint failed');
     }
 
-    // Screen anomalies
+    // Screen anomalies - only flag truly suspicious sizes
     if (browser.screenWidth === 0 || browser.screenHeight === 0) {
-      breakdown.browser += 30;
+      breakdown.browser += 25; // Reduced from 30
       reasons.push('Invalid screen dimensions');
     }
     if (browser.screenWidth === 800 && browser.screenHeight === 600) {
-      breakdown.browser += 15;
+      breakdown.browser += 10; // Reduced from 15
       reasons.push('Typical headless resolution');
     }
 
-    // Missing capabilities
+    // Missing capabilities - reduced penalties, many are normal for mobile/privacy browsers
     if (!browser.cookiesEnabled) {
-      breakdown.browser += 15;
+      breakdown.browser += 10; // Reduced from 15
       reasons.push('Cookies disabled');
     }
     if (browser.pluginCount === 0) {
-      breakdown.browser += 10;
-      reasons.push('No browser plugins');
+      breakdown.browser += 0; // Removed - modern Chrome has no plugins, this is normal
+      // reasons.push('No browser plugins'); // Removed
     }
     if (browser.fontsDetected < 5) {
-      breakdown.browser += 15;
+      breakdown.browser += 8; // Reduced from 15
       reasons.push('Very few fonts installed');
     }
     if (browser.hardwareConcurrency === 0) {
-      breakdown.browser += 10;
+      breakdown.browser += 5; // Reduced from 10
       reasons.push('No hardware concurrency info');
     }
     if (!browser.languages) {
-      breakdown.browser += 10;
+      breakdown.browser += 5; // Reduced from 10
       reasons.push('No language preferences');
     }
 
@@ -200,10 +200,10 @@ export function detectBot(
   if (request) {
     // User-Agent analysis
     if (!request.userAgent || request.userAgent.length < 20) {
-      breakdown.request += 25;
+      breakdown.request += 20; // Reduced from 25
       reasons.push('Invalid or missing User-Agent');
     } else {
-      // Known bot patterns in User-Agent
+      // Known bot patterns in User-Agent - keep strict as these are definite bot indicators
       const botPatterns = /bot|crawl|spider|scrape|headless|phantom|selenium|puppeteer|playwright|wget|curl|python-requests|axios|fetch|node-fetch/i;
       if (botPatterns.test(request.userAgent)) {
         breakdown.request += 40;
@@ -211,21 +211,21 @@ export function detectBot(
       }
     }
 
-    // Missing common headers
+    // Missing common headers - reduced penalties, privacy extensions often strip these
     if (!request.headers['accept-language']) {
-      breakdown.request += 15;
+      breakdown.request += 8; // Reduced from 15
       reasons.push('Missing Accept-Language header');
     }
     if (!request.headers['accept-encoding']) {
-      breakdown.request += 10;
+      breakdown.request += 5; // Reduced from 10
       reasons.push('Missing Accept-Encoding header');
     }
     if (!request.headers['accept']) {
-      breakdown.request += 10;
+      breakdown.request += 5; // Reduced from 10
       reasons.push('Missing Accept header');
     }
 
-    // Check for automation indicators in headers
+    // Check for automation indicators in headers - keep strict
     const suspiciousHeaders = ['x-requested-with-automation', 'x-selenium', 'x-puppeteer'];
     for (const header of suspiciousHeaders) {
       if (request.headers[header]) {
@@ -255,19 +255,21 @@ export function detectBot(
   );
 
   // Determine confidence and category
+  // Note: Thresholds raised to reduce false positives for legitimate users
+  // (mobile users, privacy-focused browsers, fast typers)
   let confidence: 'low' | 'medium' | 'high' | 'critical';
   let category: 'clean' | 'suspicious' | 'likely_bot' | 'definite_bot';
   let isBot: boolean;
 
-  if (totalScore >= 80) {
+  if (totalScore >= 85) {
     confidence = 'critical';
     category = 'definite_bot';
     isBot = true;
-  } else if (totalScore >= 60) {
+  } else if (totalScore >= 75) {
     confidence = 'high';
     category = 'likely_bot';
     isBot = true;
-  } else if (totalScore >= 40) {
+  } else if (totalScore >= 50) {
     confidence = 'medium';
     category = 'suspicious';
     isBot = false; // Give benefit of doubt

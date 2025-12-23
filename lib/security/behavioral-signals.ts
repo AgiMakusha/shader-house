@@ -14,44 +14,46 @@ export interface BehavioralSignals {
 
 /**
  * Calculate a simple bot score (0-100, higher = more likely bot)
+ * Note: Reduced penalties to be more fair to mobile users and fast typers
  */
 export function calculateBotScore(signals: BehavioralSignals): number {
   let score = 0;
 
-  // No mouse movements (bots often don't simulate mouse)
+  // No mouse movements - reduced penalty since mobile/touch users won't have mouse movements
   if (signals.mouseMovements === 0) {
-    score += 30;
+    score += 15; // Reduced from 30
   } else if (signals.mouseMovements < 5) {
-    score += 15;
+    score += 5; // Reduced from 15
   }
 
   // No keystrokes (bots paste or autofill)
   if (signals.keystrokes === 0) {
-    score += 25;
+    score += 20; // Reduced from 25
   } else if (signals.keystrokes < 10) {
-    score += 10;
+    score += 5; // Reduced from 10
   }
 
   // Too little time on page (< 3 seconds)
   if (signals.timeOnPage < 3000) {
-    score += 20;
+    score += 15; // Reduced from 20
   } else if (signals.timeOnPage < 5000) {
-    score += 10;
+    score += 5; // Reduced from 10
   }
 
-  // Form filled too quickly (< 2 seconds)
+  // Form filled too quickly (< 2 seconds) - reduced since password managers fill fast
   if (signals.formFillTime < 2000) {
-    score += 15;
+    score += 10; // Reduced from 15
   }
 
-  // Clipboard paste detected (not necessarily bad, but worth noting)
+  // Clipboard paste detected - removed penalty, paste is normal behavior
+  // (users often paste emails, use password managers, etc.)
   if (signals.clipboardPaste) {
-    score += 5;
+    score += 0; // Removed penalty
   }
 
   // Rapid submission (submitted within 1 second of page load)
   if (signals.rapidSubmission) {
-    score += 25;
+    score += 20; // Reduced from 25
   }
 
   return Math.min(100, score);
@@ -59,10 +61,11 @@ export function calculateBotScore(signals: BehavioralSignals): number {
 
 /**
  * Determine if signals indicate likely bot
+ * Note: Threshold raised to reduce false positives for mobile users and fast typers
  */
 export function isLikelyBot(signals: BehavioralSignals): boolean {
   const score = calculateBotScore(signals);
-  return score >= 50; // Threshold for bot detection
+  return score >= 75; // Raised threshold to reduce false positives
 }
 
 /**
