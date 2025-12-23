@@ -247,7 +247,8 @@ export function getRecentEvents(options?: {
     filtered = filtered.filter(e => e.severity === options.severity);
   }
   if (options?.since) {
-    filtered = filtered.filter(e => e.timestamp >= options.since);
+    const sinceDate = options.since;
+    filtered = filtered.filter(e => e.timestamp >= sinceDate);
   }
 
   // Sort by timestamp descending
