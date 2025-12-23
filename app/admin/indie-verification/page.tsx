@@ -277,26 +277,26 @@ export default function IndieVerificationPage() {
           >
             <GameCard>
               <GameCardContent className="p-4">
-                <div className="flex justify-around items-center">
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-amber-400">{stats.pending}</span>
-                    <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Pending</p>
+                <div className="flex justify-around items-center gap-6">
+                  <div className="text-center px-4">
+                    <div className="text-2xl font-bold text-amber-400">{stats.pending}</div>
+                    <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Pending</p>
                   </div>
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-green-400">{stats.approved}</span>
-                    <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Approved</p>
+                  <div className="text-center px-4">
+                    <div className="text-2xl font-bold text-green-400">{stats.approved}</div>
+                    <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Approved</p>
                   </div>
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-red-400">{stats.rejected}</span>
-                    <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Rejected</p>
+                  <div className="text-center px-4">
+                    <div className="text-2xl font-bold text-red-400">{stats.rejected}</div>
+                    <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Rejected</p>
                   </div>
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-blue-400">{stats.appealing}</span>
-                    <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Appealing</p>
+                  <div className="text-center px-4">
+                    <div className="text-2xl font-bold text-blue-400">{stats.appealing}</div>
+                    <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Appealing</p>
                   </div>
-                  <div className="text-center">
-                    <span className="text-2xl font-bold" style={{ color: "rgba(200, 240, 200, 0.9)" }}>{stats.total}</span>
-                    <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Total</p>
+                  <div className="text-center px-4">
+                    <div className="text-2xl font-bold" style={{ color: "rgba(200, 240, 200, 0.9)" }}>{stats.total}</div>
+                    <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.7)" }}>Total</p>
                   </div>
                 </div>
               </GameCardContent>
