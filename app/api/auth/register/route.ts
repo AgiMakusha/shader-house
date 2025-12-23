@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
     }
     
     // 3. Enhanced bot detection (honeypot, browser fingerprint, behavioral signals)
+    // NOTE: Bot detection temporarily disabled to prevent false positives during MVP testing
+    // TODO: Re-enable and fine-tune after launch
     const botDetectionResult = detectBot(
       body.behavioralSignals || null,
       body.browserSignals || null,
@@ -70,11 +72,22 @@ export async function POST(request: NextRequest) {
       }
     );
     
-    // Log all suspicious activity for monitoring
+    // Log all suspicious activity for monitoring (keep logging for analysis)
     logBotDetection(botDetectionResult, clientIP, '/api/auth/register');
     
-    // Block definite bots and likely bots
-    if (botDetectionResult.isBot) {
+    // Log the detection result for debugging
+    console.log('[BOT DETECTION DEBUG]', {
+      isBot: botDetectionResult.isBot,
+      score: botDetectionResult.score,
+      confidence: botDetectionResult.confidence,
+      category: botDetectionResult.category,
+      reasons: botDetectionResult.reasons,
+      breakdown: botDetectionResult.breakdown,
+    });
+    
+    // Only block DEFINITE bots (critical confidence) - honeypot triggers
+    // Skip blocking for likely_bot to reduce false positives during MVP
+    if (botDetectionResult.isBot && botDetectionResult.confidence === 'critical') {
       logSecurityEvent('REGISTER_BLOCKED_BOT', {
         ipAddress: clientIP,
         userAgent: userAgent || undefined,
@@ -93,16 +106,22 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Legacy behavioral check as fallback (in case new detection misses something)
+    // Legacy behavioral check disabled - too many false positives
+    // Keep the code for future use but don't block
     if (body.behavioralSignals) {
       const botScore = calculateBotScore(body.behavioralSignals);
-      if (isLikelyBot(body.behavioralSignals)) {
-        console.warn(`Behavioral bot detected: score=${botScore}, ip=${clientIP}`);
-        return NextResponse.json(
-          { error: "Automated registration detected. Please try again." },
-          { status: 403 }
-        );
-      }
+      console.log('[BEHAVIORAL DEBUG]', {
+        score: botScore,
+        signals: body.behavioralSignals,
+        wouldBlock: isLikelyBot(body.behavioralSignals),
+      });
+      // Disabled blocking - just log for now
+      // if (isLikelyBot(body.behavioralSignals)) {
+      //   return NextResponse.json(
+      //     { error: "Automated registration detected. Please try again." },
+      //     { status: 403 }
+      //   );
+      // }
     }
     
     // Check if this is a developer registration with profile
