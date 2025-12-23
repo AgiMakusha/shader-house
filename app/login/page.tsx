@@ -22,6 +22,9 @@ function LoginErrorHandler({ onError }: { onError: (error: string) => void }) {
     if (errorType === 'no_account') {
       const providerName = provider || 'this provider';
       onError(`No account found with ${providerName}. Please sign up first to create an account.`);
+    } else if (errorType === 'no_email') {
+      const providerName = provider || 'your provider';
+      onError(`Could not get email from ${providerName}. Please make sure your account has a verified public email, or try a different sign-in method.`);
     } else if (errorType === 'oauth_not_configured') {
       const providerName = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'OAuth';
       onError(`${providerName} login is not available yet. Please use email/password or try another method.`);

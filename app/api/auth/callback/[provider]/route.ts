@@ -167,6 +167,14 @@ export async function GET(
     return response;
   } catch (error) {
     console.error('OAuth callback error:', error);
+    
+    // Check for specific error messages
+    const errorMessage = error instanceof Error ? error.message : '';
+    
+    if (errorMessage.includes('email from GitHub')) {
+      return NextResponse.redirect(new URL('/login?error=no_email&provider=GitHub', request.url));
+    }
+    
     return NextResponse.redirect(new URL('/login?error=oauth_callback_failed', request.url));
   }
 }

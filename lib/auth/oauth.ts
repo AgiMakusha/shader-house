@@ -137,13 +137,44 @@ export async function fetchUserInfo(provider: string, accessToken: string): Prom
         name: data.name,
         image: data.picture,
       };
-    case 'github':
+    case 'github': {
+      // GitHub may not return email if it's private - need to fetch from /user/emails
+      let email = data.email;
+      
+      if (!email) {
+        try {
+          const emailResponse = await fetch('https://api.github.com/user/emails', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              Accept: 'application/json',
+            },
+          });
+          
+          if (emailResponse.ok) {
+            const emails = await emailResponse.json();
+            // Find primary email, or first verified email, or first email
+            const primaryEmail = emails.find((e: { primary: boolean; verified: boolean; email: string }) => e.primary && e.verified);
+            const verifiedEmail = emails.find((e: { verified: boolean; email: string }) => e.verified);
+            const firstEmail = emails[0];
+            
+            email = primaryEmail?.email || verifiedEmail?.email || firstEmail?.email;
+          }
+        } catch (emailError) {
+          console.error('Failed to fetch GitHub emails:', emailError);
+        }
+      }
+      
+      if (!email) {
+        throw new Error('Could not retrieve email from GitHub. Please make sure your GitHub account has a verified email address.');
+      }
+      
       return {
         id: data.id.toString(),
-        email: data.email,
+        email,
         name: data.name || data.login,
         image: data.avatar_url,
       };
+    }
     case 'discord':
       return {
         id: data.id,
