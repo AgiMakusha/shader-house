@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOAuthAuthorizationUrl } from '@/lib/auth/oauth';
+import { getOAuthAuthorizationUrl, oauthProviders } from '@/lib/auth/oauth';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function GET(
@@ -8,6 +8,19 @@ export async function GET(
 ) {
   try {
     const { provider } = await params;
+    
+    // Check if provider exists and is configured
+    const providerConfig = oauthProviders[provider];
+    if (!providerConfig) {
+      return NextResponse.redirect(new URL('/login?error=invalid_provider', request.url));
+    }
+    
+    if (!providerConfig.clientId || !providerConfig.clientSecret) {
+      console.error(`OAuth provider ${provider} is not configured. Missing credentials.`);
+      return NextResponse.redirect(
+        new URL(`/login?error=oauth_not_configured&provider=${provider}`, request.url)
+      );
+    }
     
     // Generate a state parameter for CSRF protection
     const state = uuidv4();

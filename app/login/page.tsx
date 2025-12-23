@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
@@ -13,6 +13,7 @@ import OAuthButtons from "@/components/auth/OAuthButtons";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { play } = useAudio();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +21,23 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  // Handle OAuth error messages from URL
+  useEffect(() => {
+    const errorType = searchParams.get('error');
+    const provider = searchParams.get('provider');
+    
+    if (errorType === 'oauth_not_configured') {
+      const providerName = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : 'OAuth';
+      setError(`${providerName} login is not available yet. Please use email/password or try another method.`);
+    } else if (errorType === 'oauth_init_failed') {
+      setError('Failed to initiate login. Please try again.');
+    } else if (errorType === 'invalid_provider') {
+      setError('Invalid login method selected.');
+    } else if (errorType === 'oauth_failed') {
+      setError('Login failed. Please try again or use email/password.');
+    }
+  }, [searchParams]);
 
   const validateFields = () => {
     const errors: { email?: string; password?: string } = {};

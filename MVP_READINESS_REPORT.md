@@ -459,7 +459,7 @@ TURNSTILE_SECRET_KEY
 
 ### Pre-Launch (Recommended)
 - [x] Set up email service (Resend SMTP configured)
-- [ ] Configure at least one OAuth provider
+- [x] Configure at least one OAuth provider (Google)
 - [ ] Set up Stripe (or keep demo mode for testing)
 - [ ] Configure Cloudflare Turnstile
 - [ ] Set up error monitoring (Sentry)

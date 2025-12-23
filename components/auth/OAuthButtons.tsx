@@ -1,7 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { oauthProviders } from "@/lib/auth/oauth";
+
+// Define providers directly for client-side rendering
+// Server will validate if credentials are configured
+const oauthProvidersList = [
+  { id: 'google', name: 'Google' },
+  { id: 'github', name: 'GitHub' },
+  { id: 'discord', name: 'Discord' },
+];
 
 interface OAuthButtonsProps {
   className?: string;
@@ -9,28 +16,12 @@ interface OAuthButtonsProps {
 }
 
 export default function OAuthButtons({ className = "", disabled = false }: OAuthButtonsProps) {
-  // Check if any OAuth providers are configured
-  const configuredProviders = Object.values(oauthProviders).filter(
-    (provider) => provider.clientId && provider.clientSecret
-  );
-
-  // For development: show all providers even if not configured
-  const providersToShow = configuredProviders.length > 0 
-    ? configuredProviders 
-    : Object.values(oauthProviders); // Show all for UI preview
-
-  const handleOAuthLogin = (provider: string) => {
+  const handleOAuthLogin = (providerId: string) => {
     if (disabled) {
       return; // Don't allow OAuth login if disabled
     }
-    
-    // Check if provider is configured
-    const providerConfig = oauthProviders[provider];
-    if (!providerConfig.clientId || !providerConfig.clientSecret) {
-      alert(`${providerConfig.name} OAuth is not configured yet.\n\nPlease add ${provider.toUpperCase()}_CLIENT_ID and ${provider.toUpperCase()}_CLIENT_SECRET to your .env file.\n\nSee ENV_SETUP.md for instructions.`);
-      return;
-    }
-    window.location.href = `/api/auth/oauth/${provider}`;
+    // Redirect to server - server will check if OAuth is configured
+    window.location.href = `/api/auth/oauth/${providerId}`;
   };
 
   const getProviderIcon = (provider: string) => {
@@ -78,7 +69,7 @@ export default function OAuthButtons({ className = "", disabled = false }: OAuth
       </div>
 
       <div className="grid grid-cols-1 gap-3">
-        {providersToShow.map((provider) => (
+        {oauthProvidersList.map((provider) => (
           <motion.button
             key={provider.id}
             type="button"
