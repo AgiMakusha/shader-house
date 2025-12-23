@@ -154,7 +154,7 @@ export function LinkedAccounts({ accounts, hasPassword, onUnlink, onRefresh }: L
               return (
                 <motion.div
                   key={account.id}
-                  className="flex items-center justify-between p-4 rounded-lg"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg"
                   style={{
                     background: "rgba(255, 255, 255, 0.05)",
                     border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -162,14 +162,14 @@ export function LinkedAccounts({ accounts, hasPassword, onUnlink, onRefresh }: L
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center font-bold"
-                      style={{ background: provider.bg, color: provider.color }}
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: provider.bg }}
                     >
-                      {provider.icon}
+                      {getProviderIcon(account.provider)}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-semibold capitalize" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
                         {account.provider}
                       </p>
@@ -182,7 +182,7 @@ export function LinkedAccounts({ accounts, hasPassword, onUnlink, onRefresh }: L
                   <motion.button
                     onClick={() => handleUnlink(account.id, account.provider)}
                     disabled={!canUnlink || unlinkingId === account.id}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 justify-center sm:justify-start"
                     style={{
                       background: canUnlink ? "rgba(200, 80, 80, 0.2)" : "rgba(100, 100, 100, 0.1)",
                       border: "1px solid rgba(200, 80, 80, 0.3)",
