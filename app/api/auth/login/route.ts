@@ -74,10 +74,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      // Generic error message to prevent email enumeration
+      // Tell user no account exists - they need to sign up first
       return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
+        { error: "No account found with this email. Please sign up first to create an account." },
+        { status: 404 }
       );
     }
 
