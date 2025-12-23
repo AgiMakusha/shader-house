@@ -43,7 +43,7 @@ export default function RegisterPage() {
             className="text-3xl md:text-5xl font-bold tracking-wider uppercase pixelized"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" as const }}
             style={{
               textShadow: `
                 0 0 10px rgba(100, 200, 100, 0.6),

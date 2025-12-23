@@ -46,7 +46,7 @@ export function PasswordStrength({ password, className = "" }: PasswordStrengthP
               className={`h-full rounded-full ${colors[strength.label]}`}
               initial={{ width: "0%" }}
               animate={{ width: index <= strength.score ? "100%" : "0%" }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              transition={{ duration: 0.3, ease: "easeOut" as const }}
             />
           </motion.div>
         ))}

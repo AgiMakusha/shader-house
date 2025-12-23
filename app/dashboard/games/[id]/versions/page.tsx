@@ -216,7 +216,7 @@ export default function VersionManagementPage({ params }: PageProps) {
             <button
               onClick={() => {
                 setShowNewVersionForm(!showNewVersionForm);
-                play("click");
+                play("hover");
               }}
               className="px-4 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center gap-2 hover:scale-105 transition-transform"
               style={{

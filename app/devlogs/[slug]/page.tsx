@@ -46,7 +46,7 @@ const getCategoryInfo = (category: DevlogCategory) => {
     case 'TIPS_AND_TRICKS':
       return { icon: Lightbulb, label: 'Tips & Tricks', color: 'rgba(255, 220, 100, 0.9)' };
     default:
-      return { icon: BookOpen, label: category.replace(/_/g, ' '), color: 'rgba(180, 220, 180, 0.9)' };
+      return { icon: BookOpen, label: String(category).replace(/_/g, ' '), color: 'rgba(180, 220, 180, 0.9)' };
   }
 };
 

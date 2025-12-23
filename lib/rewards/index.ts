@@ -170,7 +170,7 @@ export async function awardRewards(
       
       // Check if user unlocks a badge
       const unlock = LEVEL_UNLOCKS[level as keyof typeof LEVEL_UNLOCKS];
-      if (unlock?.badge) {
+      if (unlock && 'badge' in unlock && unlock.badge) {
         // Add badge
         await prisma.user.update({
           where: { id: userId },
@@ -235,8 +235,8 @@ export async function awardRewards(
     unlockedBadges: leveledUp 
       ? Object.entries(LEVEL_UNLOCKS)
           .filter(([level]) => parseInt(level) > oldLevel && parseInt(level) <= newLevel)
-          .map(([, unlock]) => unlock.badge)
-          .filter(Boolean)
+          .map(([, unlock]) => ('badge' in unlock ? unlock.badge : null))
+          .filter(Boolean) as string[]
       : [],
   };
 }
@@ -246,7 +246,7 @@ export async function awardRewards(
  */
 export function canPerformAction(level: number, action: string): boolean {
   for (const [unlockLevel, unlock] of Object.entries(LEVEL_UNLOCKS)) {
-    if (level >= parseInt(unlockLevel) && unlock.features.includes(action)) {
+    if (level >= parseInt(unlockLevel) && (unlock.features as readonly string[]).includes(action)) {
       return true;
     }
   }

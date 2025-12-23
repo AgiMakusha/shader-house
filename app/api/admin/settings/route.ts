@@ -238,6 +238,7 @@ export async function GET() {
     });
 
     // Group settings by category
+    type SettingWithExtras = (typeof settings)[0] & { options: string[]; parsedValue: unknown };
     const grouped = settings.reduce((acc, setting) => {
       if (!acc[setting.category]) {
         acc[setting.category] = [];
@@ -255,7 +256,7 @@ export async function GET() {
         parsedValue: parseSettingValue(setting.value, setting.type),
       });
       return acc;
-    }, {} as Record<string, typeof settings>);
+    }, {} as Record<string, SettingWithExtras[]>);
 
     return NextResponse.json({
       settings: grouped,

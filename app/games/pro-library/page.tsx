@@ -18,9 +18,12 @@ interface Game {
   priceCents: number;
   avgRating: number;
   favCount: number;
+  releaseStatus?: string;
   developer: {
     name: string;
   };
+  gameTags: { tag: { name: string; slug: string } }[];
+  _count?: { ratings: number };
 }
 
 export default function ProLibraryPage() {

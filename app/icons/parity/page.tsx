@@ -32,11 +32,12 @@ export default function IconParityPage() {
                       className="bg-gray-800 rounded-lg p-4 flex items-center justify-center"
                       style={{ width: size + 32, height: size + 32 }}
                     >
-                      <IconComponent 
-                        className="text-white" 
-                        title={title}
-                        style={{ width: size, height: size }}
-                      />
+                      <div style={{ width: size, height: size }}>
+                          <IconComponent 
+                            className="text-white w-full h-full" 
+                            title={title}
+                          />
+                        </div>
                     </div>
                     <span className="text-sm text-gray-400 mt-2">{size}px</span>
                   </div>

@@ -63,15 +63,13 @@ export function Avatar({ image, role = "GAMER", size = 32, className = "" }: Ava
       }}
     >
       {role === "DEVELOPER" ? (
-        <BuildTools 
-          className="icon-ink" 
-          style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
-        />
+        <div style={{ width: `${iconSize}px`, height: `${iconSize}px` }}>
+          <BuildTools className="icon-ink w-full h-full" />
+        </div>
       ) : (
-        <GameController 
-          className="icon-ink" 
-          style={{ width: `${iconSize}px`, height: `${iconSize}px` }}
-        />
+        <div style={{ width: `${iconSize}px`, height: `${iconSize}px` }}>
+          <GameController className="icon-ink w-full h-full" />
+        </div>
       )}
     </div>
   );

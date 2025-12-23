@@ -84,8 +84,8 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const errorArray = Array.isArray(validation.error.errors) 
-          ? validation.error.errors 
+        const errorArray = Array.isArray(validation.error.issues) 
+          ? validation.error.issues 
           : (validation.error.issues || []);
         
         if (!Array.isArray(errorArray) || errorArray.length === 0) {

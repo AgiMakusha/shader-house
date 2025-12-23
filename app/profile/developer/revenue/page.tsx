@@ -249,7 +249,7 @@ export default function DeveloperRevenuePage() {
                   Revenue Breakdown
                 </h2>
                 <button 
-                  onClick={() => play("click")}
+                  onClick={() => play("hover")}
                   className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all hover:scale-105"
                   style={{
                     background: "linear-gradient(135deg, rgba(100, 200, 100, 0.2) 0%, rgba(80, 180, 80, 0.1) 100%)",

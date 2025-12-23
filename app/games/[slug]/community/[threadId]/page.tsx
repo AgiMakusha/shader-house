@@ -95,7 +95,7 @@ export default async function ThreadDetailPage({ params, searchParams }: PagePro
             isDeveloper={isDeveloper}
             isLoggedIn={!!session?.user}
             userId={session?.user?.id}
-            userLevel={session?.user?.level || 1}
+            userLevel={1}
             userRole={session?.user?.role}
             viewOnly={isViewOnly}
           />

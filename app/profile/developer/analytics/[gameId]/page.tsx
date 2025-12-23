@@ -204,7 +204,7 @@ export default function GameAnalyticsPage({ params }: PageProps) {
                   key={p.value}
                   onClick={() => {
                     setPeriod(p.value);
-                    play("click");
+                    play("hover");
                   }}
                   className="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
                   style={{

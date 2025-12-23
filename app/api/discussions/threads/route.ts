@@ -293,10 +293,10 @@ export async function POST(request: NextRequest) {
     
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {
-      const errorMsg = error.errors[0].message || 'Invalid input provided';
-      console.error('Validation error:', error.errors);
+      const errorMsg = error.issues[0].message || 'Invalid input provided';
+      console.error('Validation error:', error.issues);
       return NextResponse.json(
-        { error: errorMsg, details: error.errors },
+        { error: errorMsg, details: error.issues },
         { status: 400 }
       );
     }

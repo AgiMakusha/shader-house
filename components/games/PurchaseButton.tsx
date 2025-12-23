@@ -45,7 +45,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
 
     setIsProcessing(true);
     setError('');
-    play("activate");
+    play("success");
 
     try {
       // Use the new checkout API that supports Stripe
@@ -92,7 +92,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
   if (canPlayFree && hasGameAccess) {
     const handleProAccess = async (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault(); // Prevent immediate navigation
-      play("activate");
+      play("success");
       await trackGameAccess(); // Track for achievements first
       
       // Then navigate/download after tracking completes
@@ -163,7 +163,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
   if (isPurchased) {
     const handlePlayAccess = async (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault(); // Prevent immediate navigation
-      play("activate");
+      play("success");
       await trackGameAccess(); // Track for achievements first
       
       // Then navigate/download after tracking completes

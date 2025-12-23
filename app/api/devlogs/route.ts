@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
         const purchases = await prisma.purchase.findMany({
           where: {
             gameId: devlog.gameId,
-            status: 'COMPLETED',
+            paymentStatus: 'completed',
           },
           select: { userId: true },
         });
@@ -295,37 +295,13 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // Notify users who wishlisted the game
-        const wishlists = await prisma.wishlist.findMany({
-          where: { gameId: devlog.gameId },
-          select: { userId: true },
-        });
-
-        for (const wishlist of wishlists) {
-          // Skip if already notified or is the developer
-          if (notifiedUserIds.has(wishlist.userId) || wishlist.userId === userId) {
-            continue;
-          }
-          notifiedUserIds.add(wishlist.userId);
-          await createNotification({
-            userId: wishlist.userId,
-            type: 'NEW_DEVLOG',
-            title: `New Devlog for ${devlog.game.title}`,
-            message: `${developerName} posted a devlog update: "${devlog.title}"`,
-            link: `/devlogs/${devlog.slug}`,
-            metadata: {
-              devlogId: devlog.id,
-              developerId: userId,
-              gameId: devlog.gameId,
-            },
-          });
-        }
+        // TODO: Add wishlist notifications when wishlist feature is implemented
+        // For now, we only notify users who purchased the game
 
         // Notify beta testers of the game
-        const betaTesters = await prisma.betaAccess.findMany({
+        const betaTesters = await prisma.betaTester.findMany({
           where: { 
             gameId: devlog.gameId,
-            status: 'APPROVED',
           },
           select: { userId: true },
         });

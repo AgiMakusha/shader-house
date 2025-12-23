@@ -3,7 +3,7 @@ import { getSessionFromRequest } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { sendEmail, renderVerificationEmail } from "@/lib/email/send";
+import { sendEmail, renderVerificationEmail } from "@/lib/email/service";
 
 // POST - Request email change (sends verification to new email)
 export async function POST(request: NextRequest) {

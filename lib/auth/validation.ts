@@ -37,22 +37,22 @@ export const registerSchema = z.object(baseRegisterFields).refine((data) => data
 // Developer profile validation
 export const developerProfileSchema = z.object({
   developerType: z.enum(["INDIE", "STUDIO"], {
-    required_error: "Please select your developer type",
+    message: "Please select your developer type",
   }),
   teamSize: z.number()
     .int("Team size must be a whole number")
     .min(0, "Team size cannot be negative")
     .max(500, "Team size cannot exceed 500"),
   hasPublisher: z.boolean({
-    required_error: "Please indicate if you have a publisher",
+    message: "Please indicate if you have a publisher",
   }),
   ownsIP: z.boolean({
-    required_error: "Please indicate if you own your IP",
+    message: "Please indicate if you own your IP",
   }),
   fundingSources: z.array(z.enum(["SELF", "CROWDFUND", "ANGEL", "VC", "MAJOR_PUBLISHER"]))
     .min(1, "Please select at least one funding source"),
   companyType: z.enum(["NONE", "SOLE_PROP", "LLC", "CORP"], {
-    required_error: "Please select your company type",
+    message: "Please select your company type",
   }),
   evidenceLinks: z.array(z.string().url("Please enter valid URLs"))
     .min(1, "Please provide at least one evidence link")

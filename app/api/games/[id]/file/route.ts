@@ -10,7 +10,7 @@ import { deleteUploadedFile } from '@/lib/utils/file-manager';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSessionFromRequest(request);
@@ -19,7 +19,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const gameId = params.id;
+    const { id: gameId } = await params;
 
     // Fetch the game and verify ownership
     const game = await prisma.game.findUnique({

@@ -53,7 +53,7 @@ export async function getSession(): Promise<SessionPayload | null> {
 
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    return payload as SessionPayload;
+    return payload as unknown as SessionPayload;
   } catch (error) {
     console.error("Session verification failed:", error);
     return null;
@@ -67,7 +67,7 @@ export async function getSessionFromRequest(request: NextRequest): Promise<Sessi
 
   try {
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    return payload as SessionPayload;
+    return payload as unknown as SessionPayload;
   } catch (error) {
     return null;
   }

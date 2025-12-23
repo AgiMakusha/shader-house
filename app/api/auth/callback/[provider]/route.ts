@@ -39,7 +39,6 @@ export async function GET(
     // Check if user exists
     let user = await prisma.user.findUnique({
       where: { email: userInfo.email },
-      include: { accounts: true },
       select: {
         id: true,
         email: true,

@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
                 key={range.value}
                 onClick={() => {
                   setTimeRange(range.value);
-                  play("click");
+                  play("hover");
                 }}
                 className="px-4 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
                 style={{

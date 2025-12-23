@@ -43,7 +43,7 @@ export default function MyProjectsPage() {
 
   const handleNewProject = () => {
     setShowNewProjectForm(true);
-    play("click");
+    play("hover");
   };
 
   const handleCancelNewProject = () => {

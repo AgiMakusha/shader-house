@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import { PricingCard } from "@/components/subscriptions/PricingCard";
 import { FeatureComparison } from "@/components/subscriptions/FeatureComparison";
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions/types";
 
-export default function MembershipPage() {
+function MembershipPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { play } = useAudio();
@@ -867,5 +867,20 @@ export default function MembershipPage() {
         </motion.p>
       </motion.main>
     </div>
+  );
+}
+
+export default function MembershipPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh relative overflow-hidden flex items-center justify-center">
+        <Particles />
+        <div className="text-center">
+          <div className="text-xl font-semibold text-white">Loading...</div>
+        </div>
+      </div>
+    }>
+      <MembershipPageContent />
+    </Suspense>
   );
 }

@@ -109,7 +109,7 @@ const getCategoryInfo = (category: DevlogCategory) => {
     default:
       return {
         icon: BookOpen,
-        label: category.replace(/_/g, ' '),
+        label: String(category).replace(/_/g, ' '),
         color: 'rgba(180, 220, 180, 0.9)',
         bgColor: 'rgba(180, 220, 180, 0.15)',
       };

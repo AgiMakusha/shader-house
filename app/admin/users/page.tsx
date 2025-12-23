@@ -407,7 +407,7 @@ export default function AdminUsersPage() {
                                 {user.role}
                               </span>
                               {user.emailVerified && (
-                                <CheckCircle className="w-4 h-4 text-green-400" title="Email verified" />
+                                <span title="Email verified"><CheckCircle className="w-4 h-4 text-green-400" /></span>
                               )}
                             </div>
                             <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
@@ -435,7 +435,7 @@ export default function AdminUsersPage() {
                           )}
                           <div className="flex items-center gap-2">
                             {user.subscriptionTier !== "FREE" && (
-                              <Crown className="w-5 h-5 text-amber-400" title={`${user.subscriptionTier} subscriber`} />
+                              <span title={`${user.subscriptionTier} subscriber`}><Crown className="w-5 h-5 text-amber-400" /></span>
                             )}
                             <span className="text-sm px-2 py-1 rounded" style={{ background: "rgba(255, 255, 255, 0.1)", color: "rgba(200, 240, 200, 0.7)" }}>
                               Lvl {user.level}

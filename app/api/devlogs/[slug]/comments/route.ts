@@ -150,7 +150,7 @@ export async function POST(
     if (parentComment && parentComment.userId !== userId) {
       await createNotification({
         userId: parentComment.userId,
-        type: 'DEVLOG_COMMENT_REPLY',
+        type: 'DEVLOG_COMMENT',
         title: 'Reply to Your Comment',
         message: `${commenterName} replied to your comment on "${devlog.title}"`,
         link: `/devlogs/${slug}#comment-${comment.id}`,

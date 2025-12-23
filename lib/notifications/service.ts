@@ -82,7 +82,6 @@ export async function createNotification(options: CreateNotificationOptions) {
       break;
     case 'NEW_DEVLOG':
     case 'DEVLOG_COMMENT':
-    case 'DEVLOG_COMMENT_REPLY':
     case 'DEVLOG_LIKE':
       const notifyDevlogs = user.notifyDevlogs ?? true;
       shouldNotify = shouldNotify && notifyDevlogs;

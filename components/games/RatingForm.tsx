@@ -93,7 +93,7 @@ export function RatingForm({ gameId, userRating }: RatingFormProps) {
                 type="button"
                 onClick={() => {
                   setStars(star);
-                  play("activate");
+                  play("success");
                 }}
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(0)}

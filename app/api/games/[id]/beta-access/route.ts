@@ -79,7 +79,9 @@ export async function POST(
         data: {
           gameId,
           isActive,
-          maxTesters: 100, // Default max testers
+          title: 'Beta Testing',
+          description: 'Join the beta testing program for this game',
+          startDate: new Date(),
         },
       });
     }

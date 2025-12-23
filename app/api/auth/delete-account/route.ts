@@ -9,7 +9,7 @@ import { z } from 'zod';
 const deleteAccountSchema = z.object({
   password: z.string().min(1, "Password is required to confirm account deletion"),
   confirmation: z.literal("DELETE MY ACCOUNT", {
-    errorMap: () => ({ message: 'Please type "DELETE MY ACCOUNT" exactly to confirm' }),
+    message: 'Please type "DELETE MY ACCOUNT" exactly to confirm',
   }),
   reason: z.string().optional(),
 });
@@ -203,7 +203,7 @@ export async function GET(req: NextRequest) {
         accounts: {
           select: {
             provider: true,
-            createdAt: true,
+            providerAccountId: true,
           },
         },
         games: {

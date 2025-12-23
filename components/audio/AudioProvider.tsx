@@ -14,7 +14,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const [muted, setMuted] = useState(prefersReducedMotion);
   const interacted = useRef(false);
-  const cache = useRef<Record<SoundName, HTMLAudioElement>>({});
+  const cache = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
 
   useEffect(() => {
     const markInteracted = () => {

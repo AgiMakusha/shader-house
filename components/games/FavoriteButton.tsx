@@ -20,7 +20,7 @@ export function FavoriteButton({ gameId, initialFavorited, initialCount }: Favor
     if (isLoading) return;
 
     setIsLoading(true);
-    play("activate");
+    play("success");
 
     try {
       const response = await fetch(`/api/games/${gameId}/favorite`, {

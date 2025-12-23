@@ -69,7 +69,7 @@ export default function BetaAccessPage() {
         const testsResponse = await fetch("/api/beta/my-tests");
         if (testsResponse.ok) {
           const testsData = await testsResponse.json();
-          const joined = new Set(testsData.tests.map((t: any) => t.gameId));
+          const joined = new Set<string>(testsData.tests.map((t: any) => t.gameId));
           setJoinedTests(joined);
         }
         

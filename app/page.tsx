@@ -87,12 +87,12 @@ export default function Page() {
     hidden: { 
       opacity: 0, 
       scale: 0.9,
-      transition: { duration: CARD_IN_MS / 1000, ease: "easeOut" }
+      transition: { duration: CARD_IN_MS / 1000, ease: "easeOut" as const }
     },
     visible: { 
       opacity: 1, 
       scale: 1,
-      transition: { duration: CARD_IN_MS / 1000, ease: "easeOut" }
+      transition: { duration: CARD_IN_MS / 1000, ease: "easeOut" as const }
     }
   };
 
@@ -103,7 +103,7 @@ export default function Page() {
       scale: 1,
       transition: { 
         duration: 0.4, 
-        ease: "easeOut",
+        ease: "easeOut" as const,
         delay: shouldReduceMotion ? 0 : (ICON_DELAY_MS - CARD_IN_MS) / 1000
       }
     }
@@ -116,7 +116,7 @@ export default function Page() {
       y: 0,
       transition: { 
         duration: 0.6, 
-        ease: "easeOut",
+        ease: "easeOut" as const,
         delay: shouldReduceMotion ? 0 : (TITLE_DELAY_MS - CARD_IN_MS) / 1000
       }
     }
@@ -129,7 +129,7 @@ export default function Page() {
       y: 0,
       transition: { 
         duration: 0.6, 
-        ease: "easeOut",
+        ease: "easeOut" as const,
         delay: shouldReduceMotion ? 0 : (SLOGAN_DELAY_MS - CARD_IN_MS) / 1000
       }
     }
@@ -149,7 +149,7 @@ export default function Page() {
         }}
         transition={{ 
           duration: FADE_OUT_MS / 1000, 
-          ease: "easeInOut" 
+          ease: "easeInOut" as const 
         }}
         style={{
           background: "rgba(0, 0, 0, 0.3)",

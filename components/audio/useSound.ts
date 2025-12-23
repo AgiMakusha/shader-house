@@ -1,7 +1,7 @@
 import { useRef } from "react";
 type SoundName = "door" | "hover" | "success" | "error";
 export function useSound() {
-  const cache = useRef<Record<SoundName, HTMLAudioElement>>({});
+  const cache = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
   const play = (name: SoundName) => {
     if (!cache.current[name]) {
       const src =

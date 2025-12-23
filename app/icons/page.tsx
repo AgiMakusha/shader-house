@@ -59,7 +59,7 @@ export default function IconsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut" as const }}
           >
             <h1 
               className="text-3xl md:text-5xl font-bold tracking-wider uppercase pixelized mb-4"
@@ -94,7 +94,7 @@ export default function IconsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            transition={{ duration: 0.8, ease: "easeOut" as const, delay: 0.2 }}
             className="flex justify-center space-x-4"
           >
             {/* Size Toggle */}
@@ -142,7 +142,7 @@ export default function IconsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
                   duration: 0.6, 
-                  ease: "easeOut",
+                  ease: "easeOut" as const,
                   delay: index * 0.1 
                 }}
                 className="space-y-4"
@@ -213,7 +213,7 @@ export default function IconsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.5 }}
+            transition={{ duration: 0.8, ease: "easeOut" as const, delay: 0.5 }}
             className="mt-12 p-6 rounded-lg"
             style={{
               background: `

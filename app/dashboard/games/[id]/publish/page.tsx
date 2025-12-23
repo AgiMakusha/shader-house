@@ -58,7 +58,7 @@ export default function PublishGamePage() {
 
     setIsProcessing(true);
     setError("");
-    play("activate");
+    play("success");
 
     try {
       const response = await fetch("/api/payments/publishing-fee", {
@@ -94,7 +94,7 @@ export default function PublishGamePage() {
   };
 
   const handleSkipForNow = () => {
-    play("activate");
+    play("success");
     router.push("/profile/developer/projects");
   };
 

@@ -50,16 +50,16 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
       rest: { 
         scale: 1, 
         rotateY: 0,
-        transition: { duration: 0.2, ease: "easeOut" }
+        transition: { duration: 0.2, ease: "easeOut" as const }
       },
       hover: { 
         scale: 1.02, 
         rotateY: 2,
-        transition: { duration: 0.2, ease: "easeOut" }
+        transition: { duration: 0.2, ease: "easeOut" as const }
       },
       tap: { 
         scale: 0.98,
-        transition: { duration: 0.1, ease: "easeOut" }
+        transition: { duration: 0.1, ease: "easeOut" as const }
       }
     };
 

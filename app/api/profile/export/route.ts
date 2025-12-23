@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
             id: true,
             provider: true,
             type: true,
-            createdAt: true,
           },
         },
         ratings: {
@@ -184,7 +183,6 @@ export async function GET(request: NextRequest) {
       linkedAccounts: user.accounts.map(a => ({
         provider: a.provider,
         type: a.type,
-        linkedAt: a.createdAt,
       })),
       
       gameActivity: {

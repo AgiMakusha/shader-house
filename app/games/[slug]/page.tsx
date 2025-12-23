@@ -198,7 +198,7 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                       Screenshots
                     </h2>
                     <div className="grid grid-cols-2 gap-4">
-                      {game.screenshots.map((screenshot, index) => (
+                      {game.screenshots.map((screenshot: string, index: number) => (
                         <div key={index} className="relative aspect-video rounded-lg overflow-hidden">
                           <Image
                             src={screenshot}
@@ -345,7 +345,7 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                       Platforms
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {game.platforms.map((platform) => (
+                      {game.platforms.map((platform: string) => (
                         <span
                           key={platform}
                           className="px-2 py-1 rounded text-xs font-semibold"
@@ -369,7 +369,7 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                       Tags
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {game.gameTags.map(({ tag }) => (
+                      {game.gameTags.map(({ tag }: { tag: { slug: string; name: string } }) => (
                         <Link
                           key={tag.slug}
                           href={isViewOnly ? `/games?tags=${tag.slug}&viewOnly=true` : `/games?tags=${tag.slug}`}

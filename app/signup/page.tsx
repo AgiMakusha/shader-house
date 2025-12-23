@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -20,7 +20,7 @@ type DeveloperType = "INDIE" | "STUDIO";
 type CompanyType = "NONE" | "SOLE_PROP" | "LLC" | "CORP";
 type FundingSource = "SELF" | "CROWDFUND" | "ANGEL" | "VC" | "MAJOR_PUBLISHER";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { play } = useAudio();
@@ -392,7 +392,7 @@ export default function SignupPage() {
                         value={name}
                         onChange={(e) => {
                           setName(e.target.value);
-                          if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
+                          if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                         }}
                         className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                           errors.name ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
@@ -424,7 +424,7 @@ export default function SignupPage() {
                         value={email}
                         onChange={(e) => {
                           setEmail(e.target.value);
-                          if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                          if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
                         }}
                         className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                           errors.email ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
@@ -456,7 +456,7 @@ export default function SignupPage() {
                         value={password}
                         onChange={(e) => {
                           setPassword(e.target.value);
-                          if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                          if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
                         }}
                         className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                           errors.password ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
@@ -489,7 +489,7 @@ export default function SignupPage() {
                         value={confirmPassword}
                         onChange={(e) => {
                           setConfirmPassword(e.target.value);
-                          if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: undefined }));
+                          if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
                         }}
                         className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
                           errors.confirmPassword ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
@@ -535,7 +535,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setDeveloperType("INDIE");
-                            if (errors.developerType) setErrors(prev => ({ ...prev, developerType: undefined }));
+                            if (errors.developerType) setErrors(prev => ({ ...prev, developerType: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -550,7 +550,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setDeveloperType("STUDIO");
-                            if (errors.developerType) setErrors(prev => ({ ...prev, developerType: undefined }));
+                            if (errors.developerType) setErrors(prev => ({ ...prev, developerType: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -588,7 +588,7 @@ export default function SignupPage() {
                         value={teamSize}
                         onChange={(e) => {
                           setTeamSize(e.target.value);
-                          if (errors.teamSize) setErrors(prev => ({ ...prev, teamSize: undefined }));
+                          if (errors.teamSize) setErrors(prev => ({ ...prev, teamSize: '' }));
                         }}
                         className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                           errors.teamSize ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
@@ -620,7 +620,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setHasPublisher(false);
-                            if (errors.hasPublisher) setErrors(prev => ({ ...prev, hasPublisher: undefined }));
+                            if (errors.hasPublisher) setErrors(prev => ({ ...prev, hasPublisher: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -635,7 +635,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setHasPublisher(true);
-                            if (errors.hasPublisher) setErrors(prev => ({ ...prev, hasPublisher: undefined }));
+                            if (errors.hasPublisher) setErrors(prev => ({ ...prev, hasPublisher: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -670,7 +670,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setOwnsIP(true);
-                            if (errors.ownsIP) setErrors(prev => ({ ...prev, ownsIP: undefined }));
+                            if (errors.ownsIP) setErrors(prev => ({ ...prev, ownsIP: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -685,7 +685,7 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => {
                             setOwnsIP(false);
-                            if (errors.ownsIP) setErrors(prev => ({ ...prev, ownsIP: undefined }));
+                            if (errors.ownsIP) setErrors(prev => ({ ...prev, ownsIP: '' }));
                           }}
                           disabled={isLoading}
                           className={`px-4 py-3 rounded-lg font-medium text-sm transition-all ${
@@ -722,7 +722,7 @@ export default function SignupPage() {
                             type="button"
                             onClick={() => {
                               toggleFundingSource(source);
-                              if (errors.fundingSources) setErrors(prev => ({ ...prev, fundingSources: undefined }));
+                              if (errors.fundingSources) setErrors(prev => ({ ...prev, fundingSources: '' }));
                             }}
                             disabled={isLoading}
                             className={`px-3 py-2 rounded-lg font-medium text-xs transition-all ${
@@ -760,7 +760,7 @@ export default function SignupPage() {
                             type="button"
                             onClick={() => {
                               setCompanyType(type);
-                              if (errors.companyType) setErrors(prev => ({ ...prev, companyType: undefined }));
+                              if (errors.companyType) setErrors(prev => ({ ...prev, companyType: '' }));
                             }}
                             disabled={isLoading}
                             className={`px-3 py-2 rounded-lg font-medium text-xs transition-all ${
@@ -799,7 +799,7 @@ export default function SignupPage() {
                               value={link}
                               onChange={(e) => {
                                 updateEvidenceLink(index, e.target.value);
-                                if (errors.evidenceLinks) setErrors(prev => ({ ...prev, evidenceLinks: undefined }));
+                                if (errors.evidenceLinks) setErrors(prev => ({ ...prev, evidenceLinks: '' }));
                               }}
                               className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all backdrop-blur-sm"
                               style={{ color: 'rgba(200, 240, 200, 0.8)' }}
@@ -851,7 +851,7 @@ export default function SignupPage() {
                             checked={attestIndie}
                             onChange={(e) => {
                               setAttestIndie(e.target.checked);
-                              if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: undefined }));
+                              if (errors.attestIndie) setErrors(prev => ({ ...prev, attestIndie: '' }));
                             }}
                             className="peer w-[18px] h-[18px] rounded-md cursor-pointer appearance-none transition-all hover:border-[rgba(150,220,150,0.7)]"
                             style={{
@@ -1080,6 +1080,19 @@ export default function SignupPage() {
         </div>
       </motion.main>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh relative overflow-hidden flex items-center justify-center">
+        <Particles />
+        <div className="text-xl font-semibold text-white">Loading...</div>
+      </div>
+    }>
+      <SignupPageContent />
+    </Suspense>
   );
 }
 
