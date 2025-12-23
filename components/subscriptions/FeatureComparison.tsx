@@ -8,6 +8,8 @@ interface Feature {
   creator: boolean | string;
 }
 
+// UPDATED: Most features now available in FREE tier
+// Creator Support Pass is hidden but comparison logic preserved
 const features: Feature[] = [
   { name: 'Buy games individually', free: true, creator: true },
   { name: 'Community access & reviews', free: true, creator: true },
@@ -15,14 +17,15 @@ const features: Feature[] = [
   { name: 'Cloud saves for purchased games', free: true, creator: true },
   { name: 'User profiles & wishlists', free: true, creator: true },
   { name: 'Shader House digest newsletter', free: true, creator: true },
-  { name: 'Unlimited access to entire game library', free: false, creator: true },
-  { name: 'Support developers directly', free: false, creator: true },
-  { name: 'Beta builds access', free: false, creator: 'All betas' },
-  { name: 'Exclusive in-game cosmetics', free: false, creator: true },
-  { name: 'Game test access', free: false, creator: true },
-  { name: 'Voting power on updates & features', free: false, creator: true },
-  { name: 'Direct dev community access', free: false, creator: true },
-  { name: 'Achievements & badges', free: false, creator: true },
+  { name: 'Beta builds access', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Game test access', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Support developers directly', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Exclusive in-game cosmetics', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Voting power on updates & features', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Direct dev community access', free: true, creator: true }, // MOVED TO FREE
+  { name: 'Achievements & badges', free: true, creator: true }, // MOVED TO FREE
+  // Only paid feature remaining:
+  // { name: 'Unlimited access to entire game library', free: false, creator: true },
 ];
 
 function FeatureValue({ value }: { value: boolean | string }) {

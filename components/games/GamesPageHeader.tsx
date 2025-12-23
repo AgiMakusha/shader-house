@@ -45,7 +45,7 @@ export function GamesPageHeader({ isMyGames }: GamesPageHeaderProps) {
               className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
               style={{ color: "rgba(200, 240, 200, 0.75)" }}
             >
-              ← Back to Profile
+              ← {userRole === 'DEVELOPER' ? 'Back to Developer Hub' : 'Back to Gamer Hub'}
             </Link>
           )}
         </div>

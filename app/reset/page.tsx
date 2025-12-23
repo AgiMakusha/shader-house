@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { Mail, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import { GameIcon } from "@/components/game/GameIcon";
 import { GameHouse } from "@/components/icons";
@@ -37,11 +38,32 @@ export default function ResetPasswordPage() {
     
     setIsLoading(true);
     
-    // TODO: Add actual password reset logic here
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsLoading(false);
-    setIsSubmitted(true);
+    try {
+      const response = await fetch('/api/auth/reset-password/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle rate limiting
+        if (response.status === 429) {
+          throw new Error(data.error || 'Too many requests. Please try again later.');
+        }
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error('Password reset request error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -114,21 +136,61 @@ export default function ResetPasswordPage() {
               <GameCardContent className="p-8">
                 {isSubmitted ? (
                   <div className="text-center space-y-4">
+                    <div className="flex justify-center mb-4">
+                      <div 
+                        className="w-16 h-16 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'rgba(100, 200, 100, 0.2)',
+                          border: '2px solid rgba(150, 240, 150, 0.4)',
+                        }}
+                      >
+                        <CheckCircle 
+                          size={32} 
+                          style={{ color: 'rgba(150, 250, 150, 0.9)' }} 
+                        />
+                      </div>
+                    </div>
                     <p style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
-                      We've sent a password reset link to <strong>{email}</strong>
+                      If an account exists for <strong>{email}</strong>, you&apos;ll receive a password reset link shortly.
                     </p>
                     <p className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.7)' }}>
-                      Check your inbox and follow the instructions to reset your password.
+                      Check your inbox and spam folder. The link will expire in 1 hour.
                     </p>
+                    
+                    <div 
+                      className="mt-4 p-3 rounded-lg text-sm"
+                      style={{
+                        background: 'rgba(100, 200, 100, 0.1)',
+                        border: '1px solid rgba(150, 240, 150, 0.2)',
+                        color: 'rgba(200, 240, 200, 0.8)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 justify-center">
+                        <Mail size={16} />
+                        <span>Didn&apos;t receive the email?</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setIsSubmitted(false);
+                          setError('');
+                        }}
+                        className="mt-2 text-sm font-semibold hover:underline"
+                        style={{ color: 'rgba(150, 250, 150, 0.9)' }}
+                      >
+                        Try again with a different email
+                      </button>
+                    </div>
+
                     <Link 
                       href="/login"
-                      className="inline-block mt-4 px-6 py-2 rounded-lg font-semibold uppercase tracking-wider transition-all"
+                      className="inline-flex items-center gap-2 mt-4 px-6 py-2 rounded-lg font-semibold uppercase tracking-wider transition-all"
                       style={{
                         background: 'linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)',
                         border: '1px solid rgba(200, 240, 200, 0.3)',
                         color: 'rgba(200, 240, 200, 0.95)',
                       }}
                     >
+                      <ArrowLeft size={16} />
                       Back to Login
                     </Link>
                   </div>
@@ -143,43 +205,62 @@ export default function ResetPasswordPage() {
                       >
                         Email
                       </label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => {
-                          setEmail(e.target.value);
-                          if (error) setError("");
-                        }}
-                        className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
-                          error 
-                            ? 'border-red-500/50 focus:ring-red-500/40' 
-                            : 'border-white/20 focus:ring-white/40'
-                        }`}
-                        style={{ color: 'rgba(200, 240, 200, 0.8)' }}
-                        placeholder="your@email.com"
-                        disabled={isLoading}
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Mail size={18} style={{ color: 'rgba(200, 240, 200, 0.5)' }} />
+                        </div>
+                        <input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            if (error) setError("");
+                          }}
+                          className={`w-full pl-10 pr-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                            error 
+                              ? 'border-red-500/50 focus:ring-red-500/40' 
+                              : 'border-white/20 focus:ring-white/40'
+                          }`}
+                          style={{ color: 'rgba(200, 240, 200, 0.8)' }}
+                          placeholder="your@email.com"
+                          disabled={isLoading}
+                          autoComplete="email"
+                        />
+                      </div>
                       {error && (
-                        <motion.p 
+                        <motion.div 
                           initial={{ opacity: 0, y: -4 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="text-xs mt-1.5 px-1"
+                          className="flex items-center gap-2 text-xs mt-1.5 px-1"
                           style={{ 
                             color: 'rgba(255, 180, 180, 0.9)',
                             textShadow: '0 1px 2px rgba(0, 0, 0, 0.6)'
                           }}
                         >
+                          <AlertTriangle size={14} />
                           {error}
-                        </motion.p>
+                        </motion.div>
                       )}
+                    </div>
+
+                    {/* Security Notice */}
+                    <div 
+                      className="p-3 rounded-lg text-xs"
+                      style={{
+                        background: 'rgba(100, 200, 100, 0.08)',
+                        border: '1px solid rgba(150, 240, 150, 0.15)',
+                        color: 'rgba(200, 240, 200, 0.7)',
+                      }}
+                    >
+                      For security, we&apos;ll send a password reset link to your email. The link expires in 1 hour.
                     </div>
 
                     {/* Submit Button */}
                     <motion.button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full py-3 rounded-lg font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 rounded-lg font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       style={{
                         background: 'linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)',
                         border: '1px solid rgba(200, 240, 200, 0.3)',
@@ -189,7 +270,17 @@ export default function ResetPasswordPage() {
                       whileHover={!isLoading ? { scale: 1.02 } : {}}
                       whileTap={!isLoading ? { scale: 0.98 } : {}}
                     >
-                      {isLoading ? 'Sending...' : 'Send Reset Link'}
+                      {isLoading ? (
+                        <>
+                          <span className="animate-spin">⟳</span>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Mail size={18} />
+                          Send Reset Link
+                        </>
+                      )}
                     </motion.button>
                   </form>
                 )}
@@ -207,10 +298,11 @@ export default function ResetPasswordPage() {
             >
               <Link 
                 href="/login" 
-                className="text-sm hover:underline transition-all"
+                className="inline-flex items-center gap-2 text-sm hover:underline transition-all"
                 style={{ color: 'rgba(200, 240, 200, 0.7)' }}
               >
-                ← Back to login
+                <ArrowLeft size={14} />
+                Back to login
               </Link>
             </motion.div>
           )}

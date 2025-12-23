@@ -125,7 +125,7 @@ export default function MyProjectsPage() {
             className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
             style={{ color: "rgba(200, 240, 200, 0.75)" }}
           >
-            ← Back to Profile
+            ← Back to Developer Hub
           </Link>
         </motion.div>
 

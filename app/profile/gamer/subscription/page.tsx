@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Particles from '@/components/fx/Particles';
 import { SubscriptionBadge } from '@/components/subscriptions/SubscriptionBadge';
-import { Crown, Calendar, CreditCard, AlertCircle, CheckCircle } from 'lucide-react';
+import { Crown, Calendar, CreditCard, AlertCircle, CheckCircle, TrendingUp, Coins } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SubscriptionManagementPage() {
@@ -109,13 +109,36 @@ export default function SubscriptionManagementPage() {
                 Subscription
               </h1>
             </div>
-            <Link
-              href="/profile/gamer"
-              className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all pixelized"
-              style={{ color: "rgba(200, 240, 200, 0.75)" }}
-            >
-              ← Back to Profile
-            </Link>
+            <div className="flex flex-col items-end gap-3">
+              {/* Level & Points */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={14} style={{ color: "rgba(180, 240, 180, 0.7)" }} />
+                  <span
+                    className="text-sm font-bold pixelized"
+                    style={{ color: "rgba(180, 240, 180, 0.9)" }}
+                  >
+                    Lv. {user?.level || 1}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Coins size={14} style={{ color: "rgba(240, 220, 140, 0.7)" }} />
+                  <span
+                    className="text-sm font-bold pixelized"
+                    style={{ color: "rgba(240, 220, 140, 0.9)" }}
+                  >
+                    {user?.points || 0}
+                  </span>
+                </div>
+              </div>
+              <Link
+                href="/profile/gamer"
+                className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all pixelized"
+                style={{ color: "rgba(200, 240, 200, 0.75)" }}
+              >
+                ← Back to Gamer Hub
+              </Link>
+            </div>
           </div>
           <p
             className="text-sm pixelized"
@@ -194,41 +217,29 @@ export default function SubscriptionManagementPage() {
               <div
                 className="border rounded-lg p-6"
                 style={{
-                  background: "linear-gradient(145deg, rgba(60, 50, 30, 0.3) 0%, rgba(50, 40, 20, 0.4) 100%)",
-                  borderColor: "rgba(220, 200, 120, 0.4)",
-                  boxShadow: "0 4px 16px rgba(150, 120, 50, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.05)",
+                  background: "linear-gradient(145deg, rgba(30, 50, 40, 0.3) 0%, rgba(20, 40, 30, 0.4) 100%)",
+                  borderColor: "rgba(140, 220, 140, 0.4)",
+                  boxShadow: "0 4px 16px rgba(50, 150, 50, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.05)",
                 }}
               >
                 <h3
                   className="text-lg font-bold tracking-wider uppercase pixelized mb-2"
                   style={{
-                    color: "rgba(240, 220, 140, 0.95)",
-                    textShadow: "0 0 8px rgba(220, 180, 80, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                    color: "rgba(180, 240, 180, 0.95)",
+                    textShadow: "0 0 8px rgba(140, 220, 140, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)",
                   }}
                 >
-                  Upgrade to Creator Support Pass
+                  You're All Set!
                 </h3>
                 <p
                   className="pixelized text-sm mb-4"
-                  style={{ color: "rgba(230, 210, 150, 0.85)" }}
+                  style={{ color: "rgba(200, 240, 200, 0.85)" }}
                 >
-                  Get unlimited access to the entire game library, beta builds, exclusive content, and support indie developers directly
+                  You have full access to all platform features including beta testing, achievements, community access, and more!
                 </p>
-                <Link
-                  href="/membership"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold uppercase tracking-wider pixelized text-sm transition-all hover:scale-[1.02]"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(200, 170, 80, 0.4) 0%, rgba(180, 150, 60, 0.3) 100%)",
-                    border: "1px solid rgba(240, 220, 140, 0.5)",
-                    color: "rgba(255, 245, 200, 0.95)",
-                    boxShadow: "0 4px 12px rgba(150, 120, 50, 0.4)",
-                  }}
-                >
-                  <Crown size={20} />
-                  Upgrade for $14.99/month
-                </Link>
               </div>
             ) : (
+              /* COMMENTED OUT - Creator Support Pass upgrade hidden */
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/membership"
@@ -315,8 +326,37 @@ export default function SubscriptionManagementPage() {
                   <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
                   <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Shader House digest newsletter</span>
                 </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Access to all beta builds</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Game test access</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Support developers directly</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Exclusive in-game cosmetics</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Voting power on updates & features</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Direct dev community access</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="mt-1" style={{ color: "rgba(160, 240, 160, 0.75)" }}>✓</span>
+                  <span className="pixelized text-sm" style={{ color: "rgba(200, 255, 200, 0.85)" }}>Achievements & badges</span>
+                </div>
               </div>
             ) : (
+              /* LEGACY: Creator Support Pass features (now in FREE) */
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <span className="mt-1" style={{ color: "rgba(240, 210, 120, 0.85)" }}>✓</span>

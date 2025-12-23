@@ -2,7 +2,16 @@
 
 ## Current Status
 - ✅ **Demo Mode**: Fully functional without Stripe (for testing)
-- ✅ **Production Ready**: Code is ready, just needs Stripe API keys
+- ✅ **Production Ready**: Code is ready, just needs Stripe API keys and Connect
+
+## Revenue Model
+
+| Revenue Source | Developer Gets | Platform Gets |
+|----------------|----------------|---------------|
+| **Direct Game Sales** | **85%** | **15%** |
+| **Tips/Donations** | **80%** | **20%** |
+| **Subscriptions** | Split (after 15% fee) | **15%** |
+| **Game Publishing** | — | **$50 one-time** |
 
 ## Environment Variables Required
 
@@ -15,9 +24,14 @@ STRIPE_PUBLISHABLE_KEY=pk_live_...  # or pk_test_... for testing
 
 # Stripe Product/Price IDs (create in Stripe Dashboard)
 STRIPE_CREATOR_SUPPORT_PRICE_ID=price_...  # Price ID for $14.99/month Creator Support Pass
+STRIPE_PUBLISHING_FEE_PRICE_ID=price_...   # Price ID for $50 game publishing fee
 
-# Stripe Webhook Secret (get from Stripe Dashboard > Webhooks)
-STRIPE_WEBHOOK_SECRET=whsec_...
+# Stripe Webhook Secrets (get from Stripe Dashboard > Webhooks)
+STRIPE_WEBHOOK_SECRET=whsec_...            # For subscription webhooks
+STRIPE_GAME_WEBHOOK_SECRET=whsec_...       # For game purchase webhooks
+
+# Stripe Connect (for developer payouts)
+STRIPE_CONNECT_CLIENT_ID=ca_...            # For Connect OAuth
 
 # App URL
 NEXT_PUBLIC_BASE_URL=https://yourdomain.com  # or http://localhost:3000 for testing
@@ -165,6 +179,207 @@ Stripe webhooks keep your database in sync automatically:
 - [ ] Verify user retains access until period end
 - [ ] Test failed payment scenario
 
+---
+
+## Game Purchase Flow
+
+### How Game Purchases Work
+
+1. **Gamer clicks "Buy" on a game**
+2. **API creates Stripe Checkout Session** with Connect split:
+   - `application_fee_amount`: 15% to platform
+   - `transfer_data.destination`: Developer's Stripe account (85%)
+3. **Gamer completes payment on Stripe**
+4. **Webhook confirms purchase** → Game added to library
+
+### API Endpoint
+```
+POST /api/games/[id]/checkout
+```
+
+### Response (Demo Mode)
+```json
+{
+  "success": true,
+  "demo": true,
+  "message": "Purchase successful!",
+  "breakdown": {
+    "totalPaid": "$9.99",
+    "developerReceives": "$8.49",
+    "platformFee": "$1.50"
+  }
+}
+```
+
+### Response (Production Mode)
+```json
+{
+  "success": true,
+  "checkoutUrl": "https://checkout.stripe.com/...",
+  "sessionId": "cs_..."
+}
+```
+
+---
+
+## Stripe Connect (Developer Payouts)
+
+### Setup for Developers
+
+1. **Developer creates Connect account**
+   ```
+   POST /api/payments/connect/create
+   ```
+
+2. **Developer completes Stripe onboarding**
+   ```
+   GET /api/payments/connect/onboarding
+   → Returns onboarding URL
+   ```
+
+3. **Check account status**
+   ```
+   GET /api/payments/connect/status
+   → Returns { hasAccount, status, payoutEnabled }
+   ```
+
+4. **Access Stripe Dashboard**
+   ```
+   GET /api/payments/connect/dashboard
+   → Returns login link to Express Dashboard
+   ```
+
+### Account Statuses
+- `pending` - Account created, onboarding not complete
+- `active` - Fully onboarded, can receive payments
+- `restricted` - Missing information, limited functionality
+- `rejected` - Account rejected by Stripe
+
+---
+
+## Publishing Fee ($50)
+
+### How It Works
+
+Before a game can go live on the marketplace, developers must pay a one-time $50 publishing fee.
+
+### API Endpoint
+```
+POST /api/payments/publishing-fee
+Body: { "gameId": "..." }
+```
+
+### Response (Demo Mode)
+```json
+{
+  "success": true,
+  "demo": true,
+  "message": "Game published successfully!"
+}
+```
+
+### Response (Production Mode)
+```json
+{
+  "success": true,
+  "checkoutUrl": "https://checkout.stripe.com/...",
+  "fee": "$50.00"
+}
+```
+
+---
+
+## Tips/Donations
+
+### How Tips Work
+
+Gamers can tip developers directly. Revenue split:
+- Developer: 80%
+- Platform: 20%
+
+### API Endpoint
+```
+POST /api/payments/tip
+Body: {
+  "developerId": "...",
+  "amount": 10.00,      // In dollars
+  "message": "Great game!"
+}
+```
+
+### Response (Demo Mode)
+```json
+{
+  "success": true,
+  "demo": true,
+  "breakdown": {
+    "totalPaid": "$10.00",
+    "developerReceives": "$8.00",
+    "platformFee": "$2.00"
+  }
+}
+```
+
+### Get Tips Received
+```
+GET /api/payments/tip?developerId=...&limit=10
+```
+
+---
+
+## Webhook Endpoints
+
+### Subscriptions Webhook
+```
+POST /api/subscriptions/webhook
+Events: checkout.session.completed, customer.subscription.*, invoice.payment_failed
+```
+
+### Payments Webhook (Games, Tips, Publishing)
+```
+POST /api/payments/webhook
+Events: checkout.session.completed, charge.refunded, account.updated
+```
+
+### Stripe Dashboard Webhook Setup
+
+Create **two webhooks** in Stripe Dashboard:
+
+1. **Subscriptions Webhook**
+   - URL: `https://yourdomain.com/api/subscriptions/webhook`
+   - Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
+   - Secret → `STRIPE_WEBHOOK_SECRET`
+
+2. **Payments Webhook**
+   - URL: `https://yourdomain.com/api/payments/webhook`
+   - Events: `checkout.session.completed`, `charge.refunded`, `account.updated`
+   - Secret → `STRIPE_PAYMENTS_WEBHOOK_SECRET`
+
+---
+
+## Complete Environment Variables
+
+```env
+# Stripe API Keys
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# Stripe Connect
+STRIPE_CONNECT_CLIENT_ID=ca_...
+
+# Stripe Webhook Secrets
+STRIPE_WEBHOOK_SECRET=whsec_...           # Subscriptions
+STRIPE_PAYMENTS_WEBHOOK_SECRET=whsec_...  # Game purchases, tips, publishing
+
+# Stripe Product IDs (optional - for subscriptions)
+STRIPE_CREATOR_SUPPORT_PRICE_ID=price_...
+
+# App URL
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
+
+---
+
 ## Security Notes
 
 ⚠️ **Never commit `.env.local` to git**
@@ -172,13 +387,44 @@ Stripe webhooks keep your database in sync automatically:
 ⚠️ **Validate webhook signatures in production**
 ⚠️ **Keep webhook secret secure**
 
+---
+
+## Testing Locally
+
+### Using Stripe CLI
+
+1. Install Stripe CLI: https://stripe.com/docs/stripe-cli
+
+2. Login:
+   ```bash
+   stripe login
+   ```
+
+3. Forward webhooks to local server:
+   ```bash
+   # For subscriptions
+   stripe listen --forward-to localhost:3000/api/subscriptions/webhook
+   
+   # For payments (in another terminal)
+   stripe listen --forward-to localhost:3000/api/payments/webhook
+   ```
+
+4. Use the webhook signing secret shown in terminal
+
+### Test Cards
+
+| Card Number | Result |
+|-------------|--------|
+| `4242 4242 4242 4242` | Success |
+| `4000 0000 0000 0002` | Decline |
+| `4000 0025 0000 3155` | Requires 3D Secure |
+
+---
+
 ## Support
 
 For Stripe issues:
 - Stripe Documentation: https://stripe.com/docs
+- Stripe Connect Guide: https://stripe.com/docs/connect
 - Stripe Support: https://support.stripe.com
-
-For webhook testing:
-- Use Stripe CLI: https://stripe.com/docs/stripe-cli
-- Test webhooks locally: `stripe listen --forward-to localhost:3000/api/subscriptions/webhook`
 

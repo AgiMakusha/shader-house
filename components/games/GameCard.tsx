@@ -29,17 +29,20 @@ interface GameCardProps {
     };
   };
   userTier?: SubscriptionTier | null;
+  viewOnly?: boolean;
 }
 
-export function GameCard({ game, userTier }: GameCardProps) {
+export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
   const price = game.priceCents === 0 ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
   const isFree = game.priceCents === 0;
   const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
   const showCrown = hasUnlimitedAccess && !isFree; // Show crown for premium users on paid games
   const isBeta = game.releaseStatus === 'BETA';
 
+  const gameUrl = viewOnly ? `/games/${game.slug}?viewOnly=true` : `/games/${game.slug}`;
+
   return (
-    <Link href={`/games/${game.slug}`}>
+    <Link href={gameUrl}>
       <motion.div
         className="group relative overflow-hidden rounded-2xl transition-all duration-300"
         style={{

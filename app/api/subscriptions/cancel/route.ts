@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
+import { notifySubscriptionChanged } from '@/lib/notifications/triggers';
 
 /**
  * Cancel Subscription Endpoint
@@ -84,6 +85,18 @@ export async function POST(req: NextRequest) {
         endDate: new Date(),
       },
     });
+
+    // Send notification about subscription cancellation
+    try {
+      await notifySubscriptionChanged(
+        session.user.id,
+        'CANCELED',
+        user?.subscriptionTier || 'FREE'
+      );
+    } catch (notificationError) {
+      console.error('Error sending subscription cancellation notification:', notificationError);
+      // Don't fail the request if notification fails
+    }
 
     // Determine appropriate message based on environment
     const message = process.env.STRIPE_SECRET_KEY && user?.stripeSubscriptionId

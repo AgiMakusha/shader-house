@@ -110,7 +110,7 @@ export default function GamerBetaDashboard() {
             onMouseEnter={() => play("hover")}
           >
             <ChevronLeft className="w-4 h-4" />
-            Back to Profile
+            Back to Gamer Hub
           </Link>
 
           <div className="flex items-center gap-4 mb-2">
@@ -219,15 +219,16 @@ export default function GamerBetaDashboard() {
                       </div>
 
                       {/* Game Info */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                          <div className="min-w-0 flex-1">
                             <h3
-                              className="text-xl font-bold mb-1 pixelized"
+                              className="text-xl font-bold mb-1 pixelized truncate"
                               style={{
                                 color: "rgba(180, 220, 180, 0.95)",
                                 textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
                               }}
+                              title={test.game.title}
                             >
                               {test.game.title}
                             </h3>
@@ -237,7 +238,7 @@ export default function GamerBetaDashboard() {
                           </div>
                           <Link
                             href={`/profile/gamer/beta/${test.gameId}`}
-                            className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all"
+                            className="px-4 py-2 rounded-lg font-semibold text-xs uppercase tracking-wider transition-all flex-shrink-0 text-center"
                             style={{
                               background: "rgba(100, 150, 255, 0.2)",
                               border: "1px solid rgba(150, 180, 255, 0.4)",
@@ -304,4 +305,8 @@ export default function GamerBetaDashboard() {
     </div>
   );
 }
+
+
+
+
 

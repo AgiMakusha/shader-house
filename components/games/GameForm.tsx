@@ -7,7 +7,7 @@ import { Platform, ReleaseStatus } from "@prisma/client";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { ImageUpload } from "./ImageUpload";
 import { GameFileUpload } from "./GameFileUpload";
-import { FlaskConical, Rocket, Lightbulb, Sparkles } from "lucide-react";
+import { FlaskConical, Rocket, Lightbulb, Sparkles, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 
 interface GameFormProps {
   initialData?: {
@@ -135,6 +135,17 @@ export function GameForm({ initialData, mode }: GameFormProps) {
   const handleGameFileChange = (url: string) => {
     handleChange('gameFileUrl', url);
     
+    // Clear the gameFileUrl error if a file is uploaded or if externalUrl is filled
+    if ((url && url.trim() !== '') || (formData.externalUrl && formData.externalUrl.trim() !== '')) {
+      if (errors.gameFileUrl) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.gameFileUrl;
+          return newErrors;
+        });
+      }
+    }
+    
     // Optional: Clear external URL when uploading a file
     // Uncomment if you want to enforce single distribution method
     // if (url && formData.externalUrl) {
@@ -150,6 +161,17 @@ export function GameForm({ initialData, mode }: GameFormProps) {
 
   const handleExternalUrlChange = (url: string) => {
     handleChange('externalUrl', url);
+    
+    // Clear the gameFileUrl error if externalUrl is filled or if gameFileUrl is filled
+    if ((url && url.trim() !== '') || (formData.gameFileUrl && formData.gameFileUrl.trim() !== '')) {
+      if (errors.gameFileUrl) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors.gameFileUrl;
+          return newErrors;
+        });
+      }
+    }
     
     // Optional: Clear game file when adding external URL
     // Uncomment if you want to enforce single distribution method
@@ -207,6 +229,8 @@ export function GameForm({ initialData, mode }: GameFormProps) {
         ...formData,
         screenshots: formData.screenshots.filter(s => s.trim()),
         tags: formData.tags.filter(t => t.trim()),
+        gameFileUrl: formData.gameFileUrl?.trim() || undefined,
+        externalUrl: formData.externalUrl?.trim() || undefined,
       };
 
       const url = mode === 'create' 
@@ -236,16 +260,29 @@ export function GameForm({ initialData, mode }: GameFormProps) {
             }
           });
           setErrors(fieldErrors);
-          throw new Error('Please fix the validation errors');
+          setIsSubmitting(false);
+          play("error");
+          return; // Don't throw, just return to stop execution
         } else if (data.error) {
           setErrors({ general: data.error });
-          throw new Error(data.error);
+          setIsSubmitting(false);
+          play("error");
+          return; // Don't throw, just return to stop execution
         }
-        throw new Error('Failed to save game');
+        setErrors({ general: 'Failed to save game' });
+        setIsSubmitting(false);
+        play("error");
+        return;
       }
 
       play("success");
-      router.push(`/games/${data.slug}`);
+      
+      // For new games, redirect to publishing fee payment
+      if (mode === 'create' && data.id) {
+        router.push(`/dashboard/games/${data.id}/publish`);
+      } else {
+        router.push(`/games/${data.slug}`);
+      }
       router.refresh();
     } catch (error: any) {
       console.error('Error saving game:', error);
@@ -474,25 +511,62 @@ export function GameForm({ initialData, mode }: GameFormProps) {
               border: "1px solid rgba(200, 240, 200, 0.2)",
             }}
           >
-            <p
-              className="text-sm font-semibold mb-2"
-              style={{ color: "rgba(200, 240, 200, 0.9)" }}
-            >
-              Game Distribution {formData.gameFileUrl || formData.externalUrl ? '✓' : '⚠️'}
-            </p>
+            <div className="flex items-center gap-2 mb-2">
+              <p
+                className="text-sm font-semibold"
+                style={{ color: "rgba(200, 240, 200, 0.9)" }}
+              >
+                Game Distribution
+              </p>
+              {formData.gameFileUrl || formData.externalUrl ? (
+                <CheckCircle2 
+                  className="w-4 h-4" 
+                  style={{ color: "rgba(150, 250, 150, 0.9)" }} 
+                />
+              ) : (
+                <AlertTriangle 
+                  className="w-4 h-4" 
+                  style={{ color: "rgba(255, 200, 100, 0.9)" }} 
+                />
+              )}
+            </div>
             <p
               className="text-xs mb-2"
               style={{ color: "rgba(200, 240, 200, 0.6)" }}
             >
               Choose at least one: Upload your game file (.zip) OR provide an external link (itch.io, Steam, web game, etc.)
             </p>
-            {formData.gameFileUrl && formData.externalUrl && (
-              <p
-                className="text-xs font-semibold"
-                style={{ color: "rgba(150, 250, 150, 0.9)" }}
+            {errors.gameFileUrl && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-2 mt-2"
               >
-                ℹ️ Both methods active: Users can download the file OR visit the external link
-              </p>
+                <AlertTriangle 
+                  className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" 
+                  style={{ color: "rgba(255, 180, 180, 0.95)" }} 
+                />
+                <p
+                  className="text-xs font-semibold"
+                  style={{ color: "rgba(255, 180, 180, 0.95)" }}
+                >
+                  {errors.gameFileUrl}
+                </p>
+              </motion.div>
+            )}
+            {formData.gameFileUrl && formData.externalUrl && !errors.gameFileUrl && (
+              <div className="flex items-start gap-2">
+                <Info 
+                  className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" 
+                  style={{ color: "rgba(150, 250, 150, 0.9)" }} 
+                />
+                <p
+                  className="text-xs font-semibold"
+                  style={{ color: "rgba(150, 250, 150, 0.9)" }}
+                >
+                  Both methods active: Users can download the file OR visit the external link
+                </p>
+              </div>
             )}
           </div>
 

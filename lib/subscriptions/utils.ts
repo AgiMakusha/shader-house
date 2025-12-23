@@ -126,6 +126,7 @@ export async function unsupportDeveloper(userId: string, developerId: string) {
 
 /**
  * Check if user can access beta builds
+ * NOTE: Beta access now available to all users (FREE tier included)
  */
 export async function canAccessBeta(userId: string, gameId: string): Promise<boolean> {
   const user = await prisma.user.findUnique({
@@ -136,36 +137,45 @@ export async function canAccessBeta(userId: string, gameId: string): Promise<boo
     },
   });
 
-  if (!user || user.subscriptionStatus !== 'ACTIVE') {
+  if (!user) {
     return false;
   }
 
-  // Gamer Pro has access to all betas
-  if (user.subscriptionTier === 'GAMER_PRO') {
-    return true;
-  }
+  // ALL USERS (including FREE tier) now have access to beta builds
+  // No subscription check needed anymore
+  return true;
 
-  // Creator Support Pass: only for supported developers
-  if (user.subscriptionTier === 'CREATOR_SUPPORT') {
-    const game = await prisma.game.findUnique({
-      where: { id: gameId },
-      select: { developerId: true },
-    });
-
-    if (!game) return false;
-
-    const support = await prisma.developerSupport.findFirst({
-      where: {
-        userId,
-        developerId: game.developerId,
-        isActive: true,
-      },
-    });
-
-    return !!support;
-  }
-
-  return false;
+  // LEGACY CODE (commented out but preserved):
+  // if (user.subscriptionStatus !== 'ACTIVE') {
+  //   return false;
+  // }
+  //
+  // // Gamer Pro has access to all betas
+  // if (user.subscriptionTier === 'GAMER_PRO') {
+  //   return true;
+  // }
+  //
+  // // Creator Support Pass: only for supported developers
+  // if (user.subscriptionTier === 'CREATOR_SUPPORT') {
+  //   const game = await prisma.game.findUnique({
+  //     where: { id: gameId },
+  //     select: { developerId: true },
+  //   });
+  //
+  //   if (!game) return false;
+  //
+  //   const support = await prisma.developerSupport.findFirst({
+  //     where: {
+  //       userId,
+  //       developerId: game.developerId,
+  //       isActive: true,
+  //     },
+  //   });
+  //
+  //   return !!support;
+  // }
+  //
+  // return false;
 }
 
 /**

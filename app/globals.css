@@ -96,3 +96,21 @@ input:-moz-autofill:focus {
   color: rgba(200, 240, 200, 0.8) !important;
   box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important;
 }
+
+/* Custom scrollbar styles for category filters */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(120, 200, 120, 0.3);
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 200, 120, 0.5);
+}

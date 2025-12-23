@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-type SoundName = "door" | "hover";
+export type SoundName = "door" | "hover" | "success" | "error";
 type Ctx = { play: (name: SoundName) => void; muted: boolean; setMuted: (v: boolean) => void };
 
 const AudioCtx = createContext<Ctx>({ play: () => {}, muted: false, setMuted: () => {} });
@@ -30,8 +30,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const getSrc = (name: SoundName) =>
-    name === "door" ? "/audio/placeholder-door-open.mp3" : "/audio/placeholder-hover.mp3";
+  const getSrc = (name: SoundName) => {
+    switch (name) {
+      case "door":
+        return "/audio/placeholder-door-open.mp3";
+      case "hover":
+        return "/audio/placeholder-hover.mp3";
+      case "success":
+        return "/audio/placeholder-hover.mp3"; // Using hover as placeholder
+      case "error":
+        return "/audio/placeholder-door-open.mp3"; // Using door as placeholder
+      default:
+        return "/audio/placeholder-hover.mp3";
+    }
+  };
 
   const play = (name: SoundName) => {
     if (muted || !interacted.current) return;
@@ -51,7 +63,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   return <AudioCtx.Provider value={{ play, muted, setMuted }}>{children}</AudioCtx.Provider>;
 }
 
-export const useAudio = () => useContext(AudioCtx);
+export const useAudio = (): Ctx => useContext(AudioCtx);
 
 export function MuteButton() {
   const { muted, setMuted } = useAudio();

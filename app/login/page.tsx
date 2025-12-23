@@ -70,7 +70,9 @@ export default function LoginPage() {
       
       // Redirect based on user role
       setTimeout(() => {
-        if (data.user.role === "DEVELOPER") {
+        if (data.user.role === "ADMIN") {
+          router.push("/admin");
+        } else if (data.user.role === "DEVELOPER") {
           router.push("/profile/developer");
         } else {
           // Existing gamers go to their profile (login flow)

@@ -33,7 +33,11 @@ export const gameUpsertSchema = z.object({
   releaseStatus: z.nativeEnum(ReleaseStatus).default(ReleaseStatus.BETA), // Beta or Released
   tags: z.array(z.string()).max(8, 'Maximum 8 tags allowed'),
 }).refine(
-  (data) => data.gameFileUrl || data.externalUrl,
+  (data) => {
+    const hasGameFile = data.gameFileUrl && typeof data.gameFileUrl === 'string' && data.gameFileUrl.trim() !== '';
+    const hasExternalUrl = data.externalUrl && typeof data.externalUrl === 'string' && data.externalUrl.trim() !== '';
+    return hasGameFile || hasExternalUrl;
+  },
   {
     message: 'Either upload a game file or provide an external link',
     path: ['gameFileUrl'],

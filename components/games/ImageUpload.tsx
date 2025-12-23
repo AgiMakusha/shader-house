@@ -142,7 +142,7 @@ export function ImageUpload({ value, onChange, label, required = false }: ImageU
             {isUploading ? 'Uploading...' : value ? 'Change Image' : 'Choose Image'}
           </motion.button>
           <p className="text-xs mt-1" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-            Max size: 5MB. Formats: JPEG, PNG, GIF, WebP
+            Max size: 5MB. Formats: JPEG, PNG, GIF, WebP, HEIC, AVIF
           </p>
         </div>
       )}

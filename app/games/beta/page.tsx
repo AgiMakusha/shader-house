@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Particles from "@/components/fx/Particles";
-import { FlaskConical, Lock, Crown, Users } from "lucide-react";
+import { FlaskConical, Lock, Crown, Users, Shield } from "lucide-react";
 import { FeatureFlag, hasFeatureAccess, SubscriptionTier } from "@/lib/subscriptions/types";
 import { FeatureGuard } from "@/components/subscriptions/FeatureGuard";
 import { useToast } from "@/hooks/useToast";
+import NdaModal from "@/components/beta/NdaModal";
 
 interface BetaGame {
   id: string;
@@ -22,6 +23,12 @@ interface BetaGame {
   externalUrl: string | null;
 }
 
+interface NdaStatus {
+  hasAccepted: boolean;
+  gameTitle: string;
+  developerName: string;
+}
+
 export default function BetaAccessPage() {
   const router = useRouter();
   const { success, error, ToastComponent } = useToast();
@@ -30,13 +37,20 @@ export default function BetaAccessPage() {
   const [betaGames, setBetaGames] = useState<BetaGame[]>([]);
   const [joinedTests, setJoinedTests] = useState<Set<string>>(new Set());
   const [joiningGame, setJoiningGame] = useState<string | null>(null);
+  
+  // NDA Modal State
+  const [ndaModalOpen, setNdaModalOpen] = useState(false);
+  const [ndaGameId, setNdaGameId] = useState<string | null>(null);
+  const [ndaStatus, setNdaStatus] = useState<NdaStatus | null>(null);
+  const [ndaAccepted, setNdaAccepted] = useState<Set<string>>(new Set());
+  const [checkingNda, setCheckingNda] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const response = await fetch("/api/auth/me");
         if (!response.ok) {
-          router.push("/auth/login");
+          router.push("/login");
           return;
         }
         const data = await response.json();
@@ -44,9 +58,11 @@ export default function BetaAccessPage() {
 
         // Fetch real beta games from API
         const gamesResponse = await fetch("/api/games/beta");
+        let games: BetaGame[] = [];
         if (gamesResponse.ok) {
           const gamesData = await gamesResponse.json();
-          setBetaGames(gamesData.games || []);
+          games = gamesData.games || [];
+          setBetaGames(games);
         }
 
         // Fetch joined tests to show status
@@ -56,9 +72,33 @@ export default function BetaAccessPage() {
           const joined = new Set(testsData.tests.map((t: any) => t.gameId));
           setJoinedTests(joined);
         }
+        
+        // Check NDA status for all beta games
+        if (games.length > 0) {
+          // Check NDA for each game in parallel
+          const ndaChecks = await Promise.all(
+            games.map(async (game: BetaGame) => {
+              try {
+                const ndaRes = await fetch(`/api/beta/nda/${game.id}`);
+                if (ndaRes.ok) {
+                  const ndaData = await ndaRes.json();
+                  return { gameId: game.id, hasAccepted: ndaData.hasAccepted };
+                }
+              } catch {
+                return { gameId: game.id, hasAccepted: false };
+              }
+              return { gameId: game.id, hasAccepted: false };
+            })
+          );
+          
+          const acceptedNdas = new Set(
+            ndaChecks.filter(c => c.hasAccepted).map(c => c.gameId)
+          );
+          setNdaAccepted(acceptedNdas);
+        }
       } catch (error) {
         console.error("Error fetching profile:", error);
-        router.push("/auth/login");
+        router.push("/login");
       } finally {
         setIsLoading(false);
       }
@@ -67,7 +107,57 @@ export default function BetaAccessPage() {
     checkAuth();
   }, [router]);
 
-  const handleJoinBeta = async (gameId: string, gameTitle: string) => {
+  // Check NDA status for a game
+  const checkNdaStatus = async (gameId: string): Promise<NdaStatus | null> => {
+    try {
+      const response = await fetch(`/api/beta/nda/${gameId}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (err) {
+      console.error("Error checking NDA status:", err);
+      return null;
+    }
+  };
+
+  // Handle NDA acceptance
+  const handleNdaAccept = async () => {
+    if (!ndaGameId) return;
+    
+    try {
+      const response = await fetch(`/api/beta/nda/${ndaGameId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmed: true }),
+      });
+
+      if (response.ok) {
+        // NDA accepted, update state and close modal
+        setNdaAccepted(prev => new Set([...prev, ndaGameId]));
+        setNdaModalOpen(false);
+        
+        // Now automatically join the beta
+        const game = betaGames.find(g => g.id === ndaGameId);
+        if (game) {
+          success(`NDA accepted! Joining beta test for "${game.title}"...`);
+          // Slight delay for better UX
+          setTimeout(() => {
+            completeJoinBeta(ndaGameId, game.title);
+          }, 500);
+        }
+      } else {
+        const data = await response.json();
+        error(data.error || "Failed to accept NDA");
+      }
+    } catch (err) {
+      console.error("Error accepting NDA:", err);
+      error("An error occurred while accepting the NDA");
+    }
+  };
+
+  // Complete the beta join after NDA is accepted
+  const completeJoinBeta = async (gameId: string, gameTitle: string) => {
     setJoiningGame(gameId);
 
     try {
@@ -78,7 +168,6 @@ export default function BetaAccessPage() {
       });
 
       if (response.ok) {
-        // Success! Update joined tests
         setJoinedTests(prev => new Set([...prev, gameId]));
         success(`Successfully joined beta test for "${gameTitle}"! Go to "My Beta Tests" to start testing.`);
       } else {
@@ -90,6 +179,41 @@ export default function BetaAccessPage() {
       error("An error occurred while joining the beta test");
     } finally {
       setJoiningGame(null);
+    }
+  };
+
+  const handleJoinBeta = async (gameId: string, gameTitle: string) => {
+    setJoiningGame(gameId);
+    setCheckingNda(true);
+
+    try {
+      // First check if NDA is already accepted
+      if (ndaAccepted.has(gameId)) {
+        // Already accepted in this session, proceed to join
+        await completeJoinBeta(gameId, gameTitle);
+        return;
+      }
+
+      // Check NDA status from API
+      const status = await checkNdaStatus(gameId);
+      
+      if (status?.hasAccepted) {
+        // NDA already accepted, proceed to join
+        setNdaAccepted(prev => new Set([...prev, gameId]));
+        await completeJoinBeta(gameId, gameTitle);
+      } else {
+        // Need to show NDA modal
+        setNdaGameId(gameId);
+        setNdaStatus(status);
+        setNdaModalOpen(true);
+        setJoiningGame(null);
+      }
+    } catch (err) {
+      console.error("Error checking NDA:", err);
+      error("An error occurred while checking NDA status");
+      setJoiningGame(null);
+    } finally {
+      setCheckingNda(false);
     }
   };
 
@@ -160,7 +284,7 @@ export default function BetaAccessPage() {
                 e.currentTarget.style.color = "rgba(200, 240, 200, 0.75)";
               }}
             >
-              ← Back to Profile
+              ← Back to Gamer Hub
             </Link>
             <Link
               href="/profile/gamer/beta"
@@ -387,6 +511,39 @@ export default function BetaAccessPage() {
                         </div>
                       </div>
 
+                      {/* NDA Required Badge */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          marginBottom: "12px",
+                          padding: "8px 12px",
+                          background: ndaAccepted.has(game.id)
+                            ? "rgba(100, 200, 100, 0.1)"
+                            : "rgba(100, 180, 200, 0.1)",
+                          border: `1px solid ${ndaAccepted.has(game.id) ? "rgba(150, 250, 150, 0.3)" : "rgba(100, 180, 200, 0.3)"}`,
+                          borderRadius: "6px",
+                        }}
+                      >
+                        <Shield size={12} style={{ 
+                          color: ndaAccepted.has(game.id) 
+                            ? "rgba(150, 250, 150, 0.8)" 
+                            : "rgba(100, 180, 200, 0.7)" 
+                        }} />
+                        <span
+                          style={{
+                            fontSize: "8px",
+                            color: ndaAccepted.has(game.id)
+                              ? "rgba(150, 250, 150, 0.9)"
+                              : "rgba(150, 200, 220, 0.8)",
+                            fontFamily: '"Press Start 2P", monospace',
+                          }}
+                        >
+                          {ndaAccepted.has(game.id) ? "NDA Accepted" : "NDA Required"}
+                        </span>
+                      </div>
+
                       {/* Join Beta Button */}
                       {joinedTests.has(game.id) ? (
                         <Link
@@ -414,16 +571,16 @@ export default function BetaAccessPage() {
                             e.currentTarget.style.transform = "translateY(0)";
                           }}
                         >
-                          ✓ Joined • Go to Dashboard →
+                          Joined • Go to Dashboard
                         </Link>
                       ) : (
                         <button
                           onClick={() => handleJoinBeta(game.id, game.title)}
-                          disabled={joiningGame === game.id}
+                          disabled={joiningGame === game.id || checkingNda}
                           style={{
                             width: "100%",
                             padding: "12px",
-                            background: joiningGame === game.id
+                            background: joiningGame === game.id || checkingNda
                               ? "linear-gradient(135deg, rgba(150, 200, 255, 0.2) 0%, rgba(100, 150, 200, 0.3) 100%)"
                               : "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)",
                             border: "1px solid rgba(180, 220, 255, 0.5)",
@@ -432,24 +589,39 @@ export default function BetaAccessPage() {
                             fontSize: "10px",
                             fontFamily: '"Press Start 2P", monospace',
                             textAlign: "center",
-                            cursor: joiningGame === game.id ? "not-allowed" : "pointer",
+                            cursor: joiningGame === game.id || checkingNda ? "not-allowed" : "pointer",
                             transition: "all 0.3s ease",
-                            opacity: joiningGame === game.id ? 0.6 : 1,
+                            opacity: joiningGame === game.id || checkingNda ? 0.6 : 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
                           }}
                           onMouseEnter={(e) => {
-                            if (joiningGame !== game.id) {
+                            if (joiningGame !== game.id && !checkingNda) {
                               e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.4) 0%, rgba(100, 150, 200, 0.5) 100%)";
                               e.currentTarget.style.transform = "translateY(-2px)";
                             }
                           }}
                           onMouseLeave={(e) => {
-                            if (joiningGame !== game.id) {
+                            if (joiningGame !== game.id && !checkingNda) {
                               e.currentTarget.style.background = "linear-gradient(135deg, rgba(150, 200, 255, 0.3) 0%, rgba(100, 150, 200, 0.4) 100%)";
                               e.currentTarget.style.transform = "translateY(0)";
                             }
                           }}
                         >
-                          {joiningGame === game.id ? "Joining..." : "Join Beta Test →"}
+                          {joiningGame === game.id ? (
+                            "Joining..."
+                          ) : checkingNda ? (
+                            "Checking..."
+                          ) : ndaAccepted.has(game.id) ? (
+                            <>Join Beta Test</>
+                          ) : (
+                            <>
+                              <Shield size={12} />
+                              Review NDA & Join
+                            </>
+                          )}
                         </button>
                       )}
                     </div>
@@ -497,6 +669,20 @@ export default function BetaAccessPage() {
 
       {/* Toast Notifications */}
       <ToastComponent />
+
+      {/* NDA Modal */}
+      <NdaModal
+        isOpen={ndaModalOpen}
+        onClose={() => {
+          setNdaModalOpen(false);
+          setNdaGameId(null);
+          setNdaStatus(null);
+        }}
+        onAccept={handleNdaAccept}
+        gameTitle={ndaStatus?.gameTitle || betaGames.find(g => g.id === ndaGameId)?.title || "Unknown Game"}
+        developerName={ndaStatus?.developerName || betaGames.find(g => g.id === ndaGameId)?.developer || "Unknown Developer"}
+        isLoading={joiningGame === ndaGameId}
+      />
     </div>
   );
 }

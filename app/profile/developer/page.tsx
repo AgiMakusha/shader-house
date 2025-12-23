@@ -7,12 +7,16 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { useRouter } from "next/navigation";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { HeaderReportButton } from "@/components/reports/HeaderReportButton";
 
 const QUICK_ACTIONS = [
   { title: "My Games", description: "View all your published games", href: "/games?developer=me" },
+  { title: "Devlogs", description: "Share your dev journey", href: "/profile/developer/devlogs" },
   { title: "Analytics", description: "View your game stats", href: "/profile/developer/analytics" },
+  { title: "Revenue & Tips", description: "Track earnings and tips", href: "/profile/developer/revenue" },
   { title: "Beta Access", description: "Manage beta games", href: "/profile/developer/beta" },
-  { title: "Community", description: "Connect with gamers", href: "/community" },
+  { title: "Notifications", description: "View all notifications", href: "/profile/developer/notifications" },
 ];
 
 export default function DeveloperProfilePage() {
@@ -107,20 +111,24 @@ export default function DeveloperProfilePage() {
             </p>
           </div>
 
-          <motion.button
-            onClick={handleLogout}
-            className="px-6 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
-            style={{
-              background: "linear-gradient(135deg, rgba(200, 100, 100, 0.3) 0%, rgba(180, 80, 80, 0.2) 100%)",
-              border: "1px solid rgba(240, 200, 200, 0.3)",
-              color: "rgba(240, 200, 200, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Logout
-          </motion.button>
+          <div className="flex items-center gap-4">
+            <HeaderReportButton />
+            <NotificationCenter />
+            <motion.button
+              onClick={handleLogout}
+              className="px-6 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
+              style={{
+                background: "linear-gradient(135deg, rgba(200, 100, 100, 0.3) 0%, rgba(180, 80, 80, 0.2) 100%)",
+                border: "1px solid rgba(240, 200, 200, 0.3)",
+                color: "rgba(240, 200, 200, 0.95)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Logout
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Create New Game CTA */}

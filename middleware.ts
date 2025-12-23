@@ -9,6 +9,7 @@ const protectedRoutes = [
   "/membership",
   "/dashboard",
   "/settings",
+  "/admin",
 ];
 
 // Define which routes are auth-only (redirect if already authenticated)
@@ -25,12 +26,15 @@ export async function middleware(request: NextRequest) {
   const userRole = session?.user?.role?.toUpperCase();
   const isDeveloper = userRole === "DEVELOPER";
   const isGamer = userRole === "GAMER";
+  const isAdmin = userRole === "ADMIN";
 
   // Redirect authenticated users away from auth pages
   if (isAuthenticated && authRoutes.includes(pathname)) {
-    const redirectUrl = isDeveloper
-      ? "/profile/developer" 
-      : "/profile/gamer"; // Existing gamers go to their profile
+    const redirectUrl = isAdmin
+      ? "/admin"
+      : isDeveloper
+        ? "/profile/developer" 
+        : "/profile/gamer"; // Existing gamers go to their profile
     return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
@@ -42,6 +46,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Admin routes - restrict to admin users only
+  if (pathname.startsWith("/admin")) {
+    if (!isAuthenticated) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("from", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (!isAdmin) {
+      // Non-admin users get redirected to home
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   // Dashboard routes are developer-only
   if (isAuthenticated && pathname.startsWith("/dashboard")) {
     if (!isDeveloper) {
@@ -51,10 +68,10 @@ export async function middleware(request: NextRequest) {
 
   // Profile routes - redirect to correct profile based on role
   if (isAuthenticated) {
-    if (pathname.startsWith("/profile/developer") && !isDeveloper) {
+    if (pathname.startsWith("/profile/developer") && !isDeveloper && !isAdmin) {
       return NextResponse.redirect(new URL("/profile/gamer", request.url));
     }
-    if (pathname.startsWith("/profile/gamer") && !isGamer) {
+    if (pathname.startsWith("/profile/gamer") && !isGamer && !isAdmin) {
       return NextResponse.redirect(new URL("/profile/developer", request.url));
     }
   }

@@ -7,8 +7,22 @@ async function main() {
   console.log('🌱 Starting seed...');
 
   // Create users
+  const adminPassword = await hash('Admin123!', 10);
   const developerPassword = await hash('developer123', 10);
   const gamerPassword = await hash('gamer123', 10);
+
+  // Create admin user
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@shaderhouse.com' },
+    update: {},
+    create: {
+      email: 'admin@shaderhouse.com',
+      name: 'Platform Admin',
+      password: adminPassword,
+      role: Role.ADMIN,
+      emailVerified: new Date(),
+    },
+  });
 
   const developer = await prisma.user.upsert({
     where: { email: 'developer@shaderhouse.com' },
@@ -317,6 +331,7 @@ async function main() {
 
   console.log('🎉 Seed completed successfully!');
   console.log('\n📝 Test accounts:');
+  console.log('Admin: admin@shaderhouse.com / Admin123!');
   console.log('Developer: developer@shaderhouse.com / developer123');
   console.log('Gamer 1: gamer1@shaderhouse.com / gamer123');
   console.log('Gamer 2: gamer2@shaderhouse.com / gamer123');

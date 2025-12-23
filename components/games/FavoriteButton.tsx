@@ -47,23 +47,24 @@ export function FavoriteButton({ gameId, initialFavorited, initialCount }: Favor
     <motion.button
       onClick={handleToggle}
       disabled={isLoading}
-      className="w-full px-6 py-3 rounded-lg font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+      className="w-full px-5 py-3 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
       style={{
         background: isFavorited
-          ? "linear-gradient(135deg, rgba(250, 100, 100, 0.3) 0%, rgba(230, 80, 80, 0.2) 100%)"
-          : "linear-gradient(135deg, rgba(100, 200, 100, 0.2) 0%, rgba(80, 180, 80, 0.1) 100%)",
-        border: `1px solid ${isFavorited ? "rgba(250, 200, 200, 0.3)" : "rgba(200, 240, 200, 0.3)"}`,
+          ? "linear-gradient(135deg, rgba(250, 100, 100, 0.2) 0%, rgba(230, 80, 80, 0.15) 100%)"
+          : "linear-gradient(135deg, rgba(100, 180, 100, 0.15) 0%, rgba(80, 160, 80, 0.1) 100%)",
+        border: `1px solid ${isFavorited ? "rgba(250, 180, 180, 0.35)" : "rgba(180, 240, 180, 0.3)"}`,
         color: "rgba(200, 240, 200, 0.95)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
       }}
       whileHover={!isLoading ? { scale: 1.02 } : {}}
       whileTap={!isLoading ? { scale: 0.98 } : {}}
     >
       <svg
-        className="w-5 h-5"
+        className="w-4 h-4"
         fill={isFavorited ? "currentColor" : "none"}
         stroke="currentColor"
         viewBox="0 0 24 24"
-        style={{ color: isFavorited ? "rgba(250, 100, 100, 0.9)" : "rgba(200, 240, 200, 0.7)" }}
+        style={{ color: isFavorited ? "rgba(250, 120, 120, 0.95)" : "rgba(200, 240, 200, 0.7)" }}
       >
         <path
           strokeLinecap="round"

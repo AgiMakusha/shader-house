@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Star, Heart, ShoppingCart } from "lucide-react";
+import { Star, Heart, ShoppingCart, BarChart3, Eye, Download, DollarSign } from "lucide-react";
 
 import Particles from "@/components/fx/Particles";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
@@ -28,9 +28,10 @@ export default function AnalyticsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userResponse, gamesResponse] = await Promise.all([
+        const [userResponse, gamesResponse, revenueResponse] = await Promise.all([
           fetch("/api/auth/me"),
           fetch("/api/games?developer=me"),
+          fetch("/api/developer/revenue"),
         ]);
 
         if (!userResponse.ok) {
@@ -41,6 +42,14 @@ export default function AnalyticsPage() {
         const userData = await userResponse.json();
         setUser(userData.user);
 
+        // Get actual revenue from the revenue endpoint
+        let totalRevenueInCents = 0;
+        if (revenueResponse.ok) {
+          const revenueData = await revenueResponse.json();
+          // Use all-time totals (actual amounts earned)
+          totalRevenueInCents = revenueData.allTimeRevenue?.total || 0;
+        }
+
         if (gamesResponse.ok) {
           const gamesData = await gamesResponse.json();
           setGames(gamesData.items || []);
@@ -49,14 +58,13 @@ export default function AnalyticsPage() {
           const totalGames = gamesData.items?.length || 0;
           const totalRatings = gamesData.items?.reduce((sum: number, game: any) => sum + (game._count?.ratings || 0), 0) || 0;
           const totalFavorites = gamesData.items?.reduce((sum: number, game: any) => sum + (game._count?.favorites || 0), 0) || 0;
-          const totalRevenue = gamesData.items?.reduce((sum: number, game: any) => sum + ((game._count?.purchases || 0) * (game.priceCents || 0)), 0) || 0;
           const avgRating = gamesData.items?.reduce((sum: number, game: any) => sum + (game.avgRating || 0), 0) / (totalGames || 1);
 
           setStats({
             totalGames,
             totalRatings,
             totalFavorites,
-            totalRevenue: totalRevenue / 100, // Convert cents to dollars
+            totalRevenue: totalRevenueInCents / 100, // Convert cents to dollars
             avgRating: Math.round(avgRating * 10) / 10,
           });
         }
@@ -134,7 +142,7 @@ export default function AnalyticsPage() {
             className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
             style={{ color: "rgba(200, 240, 200, 0.75)" }}
           >
-            ← Back to Profile
+            ← Back to Developer Hub
           </Link>
         </motion.div>
 
@@ -182,11 +190,11 @@ export default function AnalyticsPage() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {[
-              { label: "Published Games", value: stats.totalGames.toString(), type: "number" },
-              { label: "Total Ratings", value: stats.totalRatings.toString(), type: "number" },
-              { label: "Total Favorites", value: stats.totalFavorites.toString(), type: "number" },
-              { label: "Avg Rating", value: stats.avgRating, type: "rating" },
-              { label: "Revenue", value: `$${stats.totalRevenue.toFixed(2)}`, type: "number" },
+              { label: "Published Games", value: stats.totalGames.toString(), type: "number", link: null },
+              { label: "Total Ratings", value: stats.totalRatings.toString(), type: "number", link: null },
+              { label: "Total Favorites", value: stats.totalFavorites.toString(), type: "number", link: null },
+              { label: "Avg Rating", value: stats.avgRating, type: "rating", link: null },
+              { label: "Revenue & Tips", value: `$${stats.totalRevenue.toFixed(2)}`, type: "number", link: "/profile/developer/revenue" },
             ].map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -194,6 +202,29 @@ export default function AnalyticsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.35 + index * 0.05 }}
               >
+                {stat.link ? (
+                  <Link href={stat.link} className="block hover:scale-105 transition-transform">
+                    <GameCard>
+                      <GameCardContent className="p-6">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                            {stat.label}
+                          </p>
+                          <DollarSign size={16} style={{ color: "rgba(150, 250, 150, 0.7)" }} />
+                        </div>
+                        <p
+                          className="text-3xl font-bold mb-1 pixelized"
+                          style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(150, 250, 150, 0.95)" }}
+                        >
+                          {stat.value}
+                        </p>
+                        <p className="text-xs mt-2" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
+                          Click for details →
+                        </p>
+                      </GameCardContent>
+                    </GameCard>
+                  </Link>
+                ) : (
                 <GameCard>
                   <GameCardContent className="p-6">
                     <p className="text-sm font-medium mb-2" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
@@ -263,6 +294,7 @@ export default function AnalyticsPage() {
                     )}
                   </GameCardContent>
                 </GameCard>
+                )}
               </motion.div>
             ))}
           </div>
@@ -278,7 +310,7 @@ export default function AnalyticsPage() {
         >
           <GameCard>
             <GameCardContent className="p-8">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6 gap-6">
                 <h2
                   className="text-2xl font-bold pixelized"
                   style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
@@ -287,7 +319,7 @@ export default function AnalyticsPage() {
                 </h2>
                 <Link
                   href="/games?developer=me"
-                  className="text-sm font-semibold uppercase tracking-wider hover:underline transition-all"
+                  className="flex-shrink-0 text-xs font-semibold uppercase tracking-wider hover:underline transition-all"
                   style={{ color: "rgba(200, 240, 200, 0.75)" }}
                 >
                   View All →
@@ -316,10 +348,9 @@ export default function AnalyticsPage() {
               ) : (
                 <div className="space-y-4">
                   {games.slice(0, 5).map((game: any) => (
-                    <Link
+                    <div
                       key={game.id}
-                      href={`/games/${game.slug}`}
-                      className="block p-4 rounded-lg transition-all hover:scale-[1.02]"
+                      className="p-4 rounded-lg"
                       style={{
                         background: "linear-gradient(135deg, rgba(100, 200, 100, 0.1) 0%, rgba(80, 180, 80, 0.05) 100%)",
                         border: "1px solid rgba(200, 240, 200, 0.2)",
@@ -327,12 +358,26 @@ export default function AnalyticsPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3
-                            className="text-lg font-bold mb-1"
-                            style={{ color: "rgba(200, 240, 200, 0.9)" }}
-                          >
-                            {game.title}
-                          </h3>
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3
+                              className="text-lg font-bold"
+                              style={{ color: "rgba(200, 240, 200, 0.9)" }}
+                            >
+                              {game.title}
+                            </h3>
+                            <Link
+                              href={`/profile/developer/analytics/${game.id}`}
+                              className="px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 hover:scale-105 transition-transform"
+                              style={{
+                                background: "linear-gradient(135deg, rgba(100, 200, 250, 0.3) 0%, rgba(80, 180, 250, 0.2) 100%)",
+                                border: "1px solid rgba(150, 220, 250, 0.4)",
+                                color: "rgba(150, 220, 250, 0.95)",
+                              }}
+                            >
+                              <BarChart3 size={12} />
+                              Analytics
+                            </Link>
+                          </div>
                           <p
                             className="text-sm mb-2"
                             style={{ color: "rgba(200, 240, 200, 0.6)" }}
@@ -340,6 +385,20 @@ export default function AnalyticsPage() {
                             {game.tagline}
                           </p>
                           <div className="flex items-center gap-4 text-xs">
+                            <span 
+                              className="flex items-center gap-1" 
+                              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                            >
+                              <Eye size={14} style={{ color: "rgba(200, 240, 200, 0.7)" }} />
+                              {game.views?.toLocaleString() || 0} views
+                            </span>
+                            <span 
+                              className="flex items-center gap-1" 
+                              style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                            >
+                              <Download size={14} style={{ color: "rgba(200, 240, 200, 0.7)" }} />
+                              {game.downloads?.toLocaleString() || 0} downloads
+                            </span>
                             <span 
                               className="flex items-center gap-1" 
                               style={{ color: "rgba(200, 240, 200, 0.7)" }}
@@ -352,7 +411,7 @@ export default function AnalyticsPage() {
                                   filter: "drop-shadow(0 0 4px rgba(250, 220, 100, 0.5))"
                                 }} 
                               />
-                              {game.avgRating?.toFixed(1) || "N/A"} ({game._count?.ratings || 0} ratings)
+                              {game.avgRating?.toFixed(1) || "N/A"} ({game._count?.ratings || 0})
                             </span>
                             <span 
                               className="flex items-center gap-1" 
@@ -366,7 +425,7 @@ export default function AnalyticsPage() {
                                   filter: "drop-shadow(0 0 4px rgba(250, 150, 150, 0.5))"
                                 }} 
                               />
-                              {game._count?.favorites || 0} favorites
+                              {game._count?.favorites || 0}
                             </span>
                             <span 
                               className="flex items-center gap-1" 
@@ -379,7 +438,7 @@ export default function AnalyticsPage() {
                                   filter: "drop-shadow(0 0 4px rgba(150, 250, 150, 0.5))"
                                 }} 
                               />
-                              {game._count?.purchases || 0} purchases
+                              {game._count?.purchases || 0}
                             </span>
                           </div>
                         </div>
@@ -390,9 +449,16 @@ export default function AnalyticsPage() {
                           >
                             {game.priceCents === 0 ? "Free" : `$${(game.priceCents / 100).toFixed(2)}`}
                           </p>
+                          <Link
+                            href={`/games/${game.slug}`}
+                            className="text-xs font-semibold hover:underline"
+                            style={{ color: "rgba(200, 240, 200, 0.6)" }}
+                          >
+                            View Page →
+                          </Link>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               )}

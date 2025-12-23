@@ -10,3 +10,4 @@ export { default as LibraryStack } from './LibraryStack';
 export { default as UploadCloud } from './UploadCloud';
 export { default as AnalyticsEye } from './AnalyticsEye';
 export { default as GearSettings } from './GearSettings';
+export { default as AvatarIcon } from './AvatarIcon';

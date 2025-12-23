@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { notifyFeedbackResponse } from '@/lib/notifications/triggers';
 
 const updateStatusSchema = z.object({
   feedbackId: z.string().min(1, 'Feedback ID is required'),
@@ -29,7 +30,14 @@ export async function PATCH(request: NextRequest) {
       include: {
         game: {
           select: {
+            id: true,
+            title: true,
             developerId: true,
+          },
+        },
+        tester: {
+          select: {
+            userId: true,
           },
         },
       },
@@ -49,6 +57,9 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Get old status to check if it changed to RESOLVED
+    const oldStatus = feedback.status;
+
     // Update feedback status
     const updatedFeedback = await prisma.betaFeedback.update({
       where: { id: validated.feedbackId },
@@ -56,6 +67,25 @@ export async function PATCH(request: NextRequest) {
         status: validated.status,
       },
     });
+
+    // Notify user when developer resolves their feedback
+    if (oldStatus !== 'RESOLVED' && validated.status === 'RESOLVED' && feedback.tester.userId) {
+      try {
+        console.log(`🔔 Attempting to send feedback response notification for user ${feedback.tester.userId}, feedback ${validated.feedbackId}`);
+        const result = await notifyFeedbackResponse(
+          feedback.tester.userId,
+          feedback.gameId,
+          feedback.game.title,
+          validated.feedbackId
+        );
+        console.log(`✅ Feedback response notification result:`, result);
+      } catch (notificationError) {
+        console.error('❌ Error sending feedback response notification:', notificationError);
+        // Don't fail the request if notification fails
+      }
+    } else {
+      console.log(`⏭️  Feedback notification skipped: oldStatus=${oldStatus}, newStatus=${validated.status}, userId=${feedback.tester.userId}`);
+    }
 
     return NextResponse.json({
       message: 'Feedback status updated successfully',
@@ -80,4 +110,8 @@ export async function PATCH(request: NextRequest) {
     );
   }
 }
+
+
+
+
 

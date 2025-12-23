@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import Particles from "@/components/fx/Particles";
-import { Trophy, Star, Medal, Award, Sparkles, Lock, Gamepad2, Heart, FlaskConical, MessageSquare, Crown, Target, Users, Zap } from "lucide-react";
+import { Trophy, Star, Medal, Award, Sparkles, Lock, Gamepad2, Heart, FlaskConical, MessageSquare, Crown, Target, Users, Zap, TrendingUp, Coins } from "lucide-react";
 import { FeatureFlag, hasFeatureAccess, SubscriptionTier } from "@/lib/subscriptions/types";
 import { FeatureGuard } from "@/components/subscriptions/FeatureGuard";
+import { getXPProgress, getTotalXPForLevel } from "@/lib/rewards/types";
 
 type IconType = 'gamepad' | 'heart' | 'flask' | 'message' | 'crown';
 
@@ -38,6 +40,11 @@ export default function AchievementsPage() {
           return;
         }
         const data = await response.json();
+        console.log('👤 User data loaded:', {
+          xp: data.user.xp,
+          level: data.user.level,
+          points: data.user.points,
+        });
         setUser(data.user);
         
         // Fetch beta testing stats
@@ -45,6 +52,11 @@ export default function AchievementsPage() {
           const statsResponse = await fetch("/api/beta/stats");
           if (statsResponse.ok) {
             const statsData = await statsResponse.json();
+            console.log('🧪 Beta stats loaded:', {
+              totalXP: statsData.stats?.totalXP,
+              totalPoints: statsData.stats?.totalPoints,
+              totalTasksCompleted: statsData.stats?.totalTasksCompleted,
+            });
             setBetaStats(statsData.stats);
           }
         } catch (error) {
@@ -57,6 +69,25 @@ export default function AchievementsPage() {
           if (achievementsResponse.ok) {
             const achievementsData = await achievementsResponse.json();
             setAchievements(achievementsData.achievements || []);
+            
+            // Sync unlocked achievements to badges
+            try {
+              const syncResponse = await fetch("/api/achievements/sync", {
+                method: 'POST',
+              });
+              if (syncResponse.ok) {
+                const syncData = await syncResponse.json();
+                console.log('🏆 Badges synced:', syncData.badges);
+                // Refresh user data to get updated badges
+                const userResponse = await fetch("/api/auth/me");
+                if (userResponse.ok) {
+                  const userData = await userResponse.json();
+                  setUser(userData.user);
+                }
+              }
+            } catch (error) {
+              console.error("Error syncing badges:", error);
+            }
           }
         } catch (error) {
           console.error("Error fetching achievements:", error);
@@ -83,8 +114,12 @@ export default function AchievementsPage() {
     );
   }
 
-  const getAchievementIcon = (iconType: IconType, unlocked: boolean, rarity: string) => {
-    const colors = getRarityColor(rarity);
+  const getAchievementIcon = (iconType: IconType, unlocked: boolean, rarity: string, achievementName?: string) => {
+    // Use Bugs Found colors for Collector achievement
+    const isCollector = achievementName === 'Collector';
+    const colors = isCollector 
+      ? { bg: 'rgba(250, 150, 150, 0.1)', border: 'rgba(250, 150, 150, 0.3)', text: 'rgba(250, 150, 150, 0.95)' }
+      : getRarityColor(rarity);
     
     // Base style for all icons
     const baseColor = unlocked ? colors.text : 'rgba(150, 150, 150, 0.4)';
@@ -267,7 +302,7 @@ export default function AchievementsPage() {
                 e.currentTarget.style.color = "rgba(200, 240, 200, 0.75)";
               }}
             >
-              ← Back to Profile
+              ← Back to Gamer Hub
             </Link>
             <Link
               href="/games"
@@ -304,6 +339,223 @@ export default function AchievementsPage() {
             Achievements
           </h1>
         </div>
+
+        {/* Stats Card */}
+        <motion.div
+          className="w-full max-w-4xl mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div
+            style={{
+              background: "linear-gradient(145deg, rgba(40, 60, 40, 0.45) 0%, rgba(30, 50, 30, 0.55) 100%)",
+              border: "1px solid rgba(100, 200, 100, 0.35)",
+              borderRadius: "12px",
+              padding: "24px",
+            }}
+          >
+            {/* Title */}
+            <div className="flex items-center gap-3 mb-6">
+              <TrendingUp size={32} style={{ color: "rgba(100, 200, 100, 0.9)" }} />
+              <div>
+                <h2
+                  style={{
+                    fontSize: "16px",
+                    color: "rgba(200, 240, 200, 0.95)",
+                    fontFamily: '"Press Start 2P", monospace',
+                    marginBottom: "4px",
+                  }}
+                >
+                  Progression Stats
+                </h2>
+                <p
+                  style={{
+                    fontSize: "10px",
+                    color: "rgba(200, 240, 200, 0.7)",
+                    fontFamily: '"Press Start 2P", monospace',
+                  }}
+                >
+                  Total progress across all activities
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Level & XP Progress */}
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div>
+                    <h3
+                      className="text-3xl font-bold pixelized"
+                      style={{
+                        color: "rgba(180, 240, 180, 0.95)",
+                        textShadow: "0 0 8px rgba(120, 200, 120, 0.6)",
+                      }}
+                    >
+                      Level {user?.level || 1}
+                    </h3>
+                    <p
+                      style={{
+                        color: "rgba(180, 220, 180, 0.7)",
+                        fontSize: "12px",
+                        fontFamily: '"Press Start 2P", monospace',
+                        marginTop: "4px",
+                      }}
+                    >
+                      {(() => {
+                        const progress = getXPProgress(user?.xp || 0, user?.level || 1);
+                        return `${progress.current} / ${progress.needed} XP`;
+                      })()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* XP Progress Bar */}
+                <div>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "12px",
+                      background: "rgba(20, 30, 20, 0.6)",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                      border: "1px solid rgba(140, 220, 140, 0.3)",
+                    }}
+                  >
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${(() => {
+                          const progress = getXPProgress(user?.xp || 0, user?.level || 1);
+                          return progress.percentage;
+                        })()}%`,
+                      }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      style={{
+                        height: "100%",
+                        background: "linear-gradient(90deg, rgba(150, 240, 150, 0.8) 0%, rgba(100, 200, 100, 0.9) 100%)",
+                        transition: "width 0.5s ease",
+                      }}
+                    />
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "10px",
+                      marginTop: "8px",
+                      textAlign: "center",
+                      color: "rgba(150, 180, 150, 0.7)",
+                      fontFamily: '"Press Start 2P", monospace',
+                    }}
+                  >
+                    {(() => {
+                      const progress = getXPProgress(user?.xp || 0, user?.level || 1);
+                      return `${progress.remaining} XP to Level ${(user?.level || 1) + 1}`;
+                    })()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Points */}
+              <div className="flex flex-col justify-center">
+                <div
+                  style={{
+                    background: "rgba(250, 220, 100, 0.1)",
+                    border: "1px solid rgba(250, 220, 100, 0.3)",
+                    borderRadius: "8px",
+                    padding: "16px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Coins
+                      size={24}
+                      style={{
+                        color: "rgba(250, 220, 100, 0.9)",
+                        filter: "drop-shadow(0 0 4px rgba(250, 220, 100, 0.6))",
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "bold",
+                        fontFamily: '"Press Start 2P", monospace',
+                        color: "rgba(250, 220, 100, 0.95)",
+                      }}
+                    >
+                      {user?.points || 0}
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "9px",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      fontFamily: '"Press Start 2P", monospace',
+                      color: "rgba(250, 220, 100, 0.7)",
+                    }}
+                  >
+                    Points
+                  </p>
+                  <Link
+                    href="/shop"
+                    style={{
+                      fontSize: "8px",
+                      marginTop: "8px",
+                      display: "inline-block",
+                      color: "rgba(250, 220, 100, 0.6)",
+                      fontFamily: '"Press Start 2P", monospace',
+                    }}
+                    className="hover:underline"
+                  >
+                    Spend in Shop →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Badges */}
+            {user?.badges && user.badges.length > 0 && (
+              <div className="mt-6 pt-6" style={{ borderTop: "1px solid rgba(100, 150, 100, 0.2)" }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <Award size={16} style={{ color: "rgba(180, 240, 180, 0.7)" }} />
+                  <h3
+                    style={{
+                      fontSize: "12px",
+                      fontFamily: '"Press Start 2P", monospace',
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      color: "rgba(180, 220, 180, 0.9)",
+                    }}
+                  >
+                    Badges
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {user.badges.map((badge: string, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: "4px",
+                        fontSize: "9px",
+                        fontFamily: '"Press Start 2P", monospace',
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        background: "rgba(180, 240, 180, 0.2)",
+                        border: "1px solid rgba(180, 240, 180, 0.4)",
+                        color: "rgba(180, 240, 180, 0.9)",
+                      }}
+                    >
+                      {badge}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
 
         <div className="w-full max-w-4xl">
           {/* Beta Testing Stats - Available to all users */}
@@ -620,7 +872,11 @@ export default function AchievementsPage() {
             {/* Achievements Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {achievements.map((achievement) => {
-                const colors = getRarityColor(achievement.rarity);
+                // Use Bugs Found colors for Collector achievement
+                const isCollector = achievement.name === 'Collector';
+                const colors = isCollector 
+                  ? { bg: 'rgba(250, 150, 150, 0.1)', border: 'rgba(250, 150, 150, 0.3)', text: 'rgba(250, 150, 150, 0.95)' }
+                  : getRarityColor(achievement.rarity);
                 return (
                   <div
                     key={achievement.id}
@@ -655,7 +911,7 @@ export default function AchievementsPage() {
 
                     <div className="flex items-start gap-4">
                       <div>
-                        {getAchievementIcon(achievement.icon, achievement.unlocked, achievement.rarity)}
+                        {getAchievementIcon(achievement.icon, achievement.unlocked, achievement.rarity, achievement.name)}
                       </div>
 
                       <div className="flex-1">

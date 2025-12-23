@@ -5,6 +5,16 @@ import { prisma } from '@/lib/db/prisma';
 /**
  * GET /api/beta/stats
  * Get beta testing statistics for the current user
+ * 
+ * Returns:
+ * - totalXP: XP earned ONLY from verified beta task completions
+ * - totalPoints: Points earned ONLY from verified beta task completions
+ * - totalTasksCompleted: Count of verified beta tasks
+ * - totalBugsReported: Count of bug reports submitted
+ * - totalGamesTested: Count of beta games participated in
+ * - activeTests: Count of currently active beta tests
+ * 
+ * Note: This does NOT include XP/Points from discussions, achievements, or other sources.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -13,15 +23,6 @@ export async function GET(request: NextRequest) {
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    // Get user's XP and points directly from User model
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        xp: true,
-        points: true,
-      },
-    });
 
     // Get all beta tester records for this user
     const betaTesters = await prisma.betaTester.findMany({
@@ -39,13 +40,31 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Count verified task completions
-    const verifiedCompletions = await prisma.betaTaskCompletion.count({
+    // Get all VERIFIED task completions with their rewards
+    const verifiedCompletions = await prisma.betaTaskCompletion.findMany({
       where: {
         userId: session.user.id,
         status: 'VERIFIED',
       },
+      include: {
+        task: {
+          select: {
+            xpReward: true,
+            rewardPoints: true,
+          },
+        },
+      },
     });
+
+    // Calculate XP and Points ONLY from beta testing
+    const betaXP = verifiedCompletions.reduce(
+      (sum, completion) => sum + (completion.task.xpReward || 0),
+      0
+    );
+    const betaPoints = verifiedCompletions.reduce(
+      (sum, completion) => sum + (completion.task.rewardPoints || 0),
+      0
+    );
 
     // Count bugs reported (feedback with type BUG)
     const bugsReported = await prisma.betaFeedback.count({
@@ -58,9 +77,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate totals
-    const totalXP = user?.xp || 0;
-    const totalPoints = user?.points || 0;
-    const totalTasksCompleted = verifiedCompletions;
+    const totalXP = betaXP;
+    const totalPoints = betaPoints;
+    const totalTasksCompleted = verifiedCompletions.length;
     const totalBugsReported = bugsReported;
     const totalGamesTested = betaTesters.length;
 

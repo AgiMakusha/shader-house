@@ -11,14 +11,14 @@ Create a `.env` file in the root directory with the following variables:
 DATABASE_URL="postgresql://postgres:password@localhost:5432/shader_house?schema=public"
 ```
 
-### JWT Secret
-Generate a secure secret key:
+### Auth Secret
+Generate a secure secret key (minimum 32 characters):
 ```bash
 openssl rand -base64 32
 ```
 
 ```env
-JWT_SECRET="your-generated-secret-key"
+AUTH_SECRET="your-generated-secret-key"
 ```
 
 ### App URL

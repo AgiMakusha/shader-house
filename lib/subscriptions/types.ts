@@ -40,7 +40,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 0,
     currency: 'USD',
     interval: 'month',
-    description: 'Perfect for casual gamers',
+    description: 'Full platform access for indie game lovers',
     features: [
       'Buy games individually',
       'Access to community & reviews',
@@ -48,28 +48,36 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Cloud saves for purchased games',
       'User profiles & wishlists',
       'Shader House digest newsletter',
-    ],
-  },
-  {
-    id: 'CREATOR_SUPPORT',
-    name: 'Creator Support Pass',
-    price: 14.99,
-    currency: 'USD',
-    interval: 'month',
-    description: 'Support indie developers and game community',
-    features: [
-      'Free Access subscription',
-      'Unlimited access to the entire game library',
-      'Support developers directly',
-      'Access to all beta builds from supported devs',
-      'Exclusive in-game cosmetics',
+      'Access to all beta builds',
       'Game test access',
+      'Support developers directly',
+      'Exclusive in-game cosmetics',
       'Voting power on updates & features',
       'Direct dev community access',
       'Achievements & badges',
     ],
-    highlighted: true,
   },
+  // COMMENTED OUT - Creator Support Pass (may be used in future)
+  // {
+  //   id: 'CREATOR_SUPPORT',
+  //   name: 'Creator Support Pass',
+  //   price: 14.99,
+  //   currency: 'USD',
+  //   interval: 'month',
+  //   description: 'Support indie developers and game community',
+  //   features: [
+  //     'Free Access subscription',
+  //     'Unlimited access to the entire game library',
+  //     'Support developers directly',
+  //     'Access to all beta builds from supported devs',
+  //     'Exclusive in-game cosmetics',
+  //     'Game test access',
+  //     'Voting power on updates & features',
+  //     'Direct dev community access',
+  //     'Achievements & badges',
+  //   ],
+  //   highlighted: true,
+  // },
 ];
 
 export function getSubscriptionPlan(tier: SubscriptionTier): SubscriptionPlan {
@@ -90,6 +98,7 @@ export function canAccessFeature(
 }
 
 // Feature access mapping
+// NOTE: Most features now available to FREE tier. Creator Support Pass commented out but logic preserved.
 const FEATURE_ACCESS: Record<FeatureFlag, SubscriptionTier[]> = {
   // Free Access Features (available to all)
   [FeatureFlag.BUY_GAMES]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
@@ -99,15 +108,17 @@ const FEATURE_ACCESS: Record<FeatureFlag, SubscriptionTier[]> = {
   [FeatureFlag.USER_PROFILES]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
   [FeatureFlag.NEWSLETTER]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
   
-  // Pro Features (Creator Support Pass & Gamer Pro)
+  // MOVED TO FREE: Beta Access, Testing, Achievements, Community Features
+  [FeatureFlag.BETA_ACCESS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.GAME_TEST_ACCESS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.ACHIEVEMENTS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.SUPPORT_DEVELOPERS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.EXCLUSIVE_COSMETICS]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.VOTING_POWER]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  [FeatureFlag.DEV_COMMUNITY]: ['FREE', 'CREATOR_SUPPORT', 'GAMER_PRO'],
+  
+  // Pro Features (Creator Support Pass & Gamer Pro) - Only unlimited library access
   [FeatureFlag.UNLIMITED_LIBRARY]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.SUPPORT_DEVELOPERS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.BETA_ACCESS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.EXCLUSIVE_COSMETICS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.GAME_TEST_ACCESS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.VOTING_POWER]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.DEV_COMMUNITY]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
-  [FeatureFlag.ACHIEVEMENTS]: ['CREATOR_SUPPORT', 'GAMER_PRO'],
 };
 
 export function hasFeatureAccess(

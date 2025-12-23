@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { notifySubscriptionChanged } from '@/lib/notifications/triggers';
 
 /**
  * Stripe Webhook Handler
@@ -100,6 +101,18 @@ export async function POST(req: NextRequest) {
             startDate: new Date(),
           },
         });
+
+        // Send notification about subscription change
+        try {
+          await notifySubscriptionChanged(
+            session.metadata.userId,
+            'CHANGED',
+            session.metadata.tier
+          );
+        } catch (notificationError) {
+          console.error('Error sending subscription notification:', notificationError);
+          // Don't fail the webhook if notification fails
+        }
         break;
       }
 
@@ -114,6 +127,12 @@ export async function POST(req: NextRequest) {
           : subscription.status === 'canceled' ? 'CANCELED'
           : 'INACTIVE';
 
+        // Get user before update to check if status changed
+        const users = await prisma.user.findMany({
+          where: { stripeSubscriptionId: subscription.id },
+          select: { id: true, subscriptionTier: true, subscriptionStatus: true },
+        });
+
         await prisma.user.updateMany({
           where: { stripeSubscriptionId: subscription.id },
           data: {
@@ -127,6 +146,24 @@ export async function POST(req: NextRequest) {
             status: status as any,
           },
         });
+
+        // Send notifications for status changes
+        for (const user of users) {
+          try {
+            if (user.subscriptionStatus !== status) {
+              if (status === 'ACTIVE' && user.subscriptionStatus !== 'ACTIVE') {
+                await notifySubscriptionChanged(user.id, 'RENEWED', user.subscriptionTier || 'FREE');
+              } else if (status === 'CANCELED') {
+                await notifySubscriptionChanged(user.id, 'CANCELED', user.subscriptionTier || 'FREE');
+              } else {
+                await notifySubscriptionChanged(user.id, 'CHANGED', user.subscriptionTier || 'FREE');
+              }
+            }
+          } catch (notificationError) {
+            console.error('Error sending subscription notification:', notificationError);
+            // Don't fail the webhook if notification fails
+          }
+        }
         break;
       }
 
@@ -135,6 +172,12 @@ export async function POST(req: NextRequest) {
         
         console.log(`Subscription deleted: ${subscription.id}`);
         
+        // Get users before update to send notifications
+        const users = await prisma.user.findMany({
+          where: { stripeSubscriptionId: subscription.id },
+          select: { id: true, subscriptionTier: true },
+        });
+
         // User loses access immediately
         await prisma.user.updateMany({
           where: { stripeSubscriptionId: subscription.id },
@@ -153,6 +196,16 @@ export async function POST(req: NextRequest) {
             endDate: new Date(),
           },
         });
+
+        // Send notifications for subscription cancellation
+        for (const user of users) {
+          try {
+            await notifySubscriptionChanged(user.id, 'CANCELED', user.subscriptionTier || 'FREE');
+          } catch (notificationError) {
+            console.error('Error sending subscription cancellation notification:', notificationError);
+            // Don't fail the webhook if notification fails
+          }
+        }
         break;
       }
 

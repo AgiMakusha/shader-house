@@ -16,6 +16,7 @@ interface GamesContentClientProps {
   page: number;
   totalPages: number;
   activeTags: string[];
+  viewOnly?: boolean;
 }
 
 export function GamesContentClient({
@@ -25,6 +26,7 @@ export function GamesContentClient({
   page,
   totalPages,
   activeTags,
+  viewOnly = false,
 }: GamesContentClientProps) {
   const [userTier, setUserTier] = useState<SubscriptionTier | null>(null);
 
@@ -67,7 +69,7 @@ export function GamesContentClient({
         <>
           <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {games.map((game) => (
-              <GameCard key={game.id} game={game} userTier={userTier} />
+              <GameCard key={game.id} game={game} userTier={userTier} viewOnly={viewOnly} />
             ))}
           </div>
 

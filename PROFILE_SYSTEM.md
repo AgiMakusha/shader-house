@@ -436,3 +436,8 @@ This creates a personalized gaming identity while keeping account credentials pr
 
 **Test it now at: http://localhost:3000/profile/gamer/settings**
 
+
+
+
+
+

@@ -6,6 +6,9 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
   const { q, tags, platform, priceFilter, sort, page, pageSize, developer } = query;
 
   const where: Prisma.GameWhereInput = {};
+  
+  // Check if this is a public marketplace view (not developer viewing own games)
+  const isPublicView = developer !== 'me';
 
   // Handle release status filtering
   if (statusFilter === 'beta') {
@@ -14,7 +17,7 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
   } else if (statusFilter === 'released') {
     // Explicitly filter for RELEASED games only
     where.releaseStatus = ReleaseStatus.RELEASED;
-  } else if (developer !== 'me') {
+  } else if (isPublicView) {
     // By default, only show RELEASED games in public marketplace
     // Unless developer is viewing their own games (developer=me shows all)
     where.releaseStatus = ReleaseStatus.RELEASED;
@@ -36,6 +39,7 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
       console.log('⚠️ Developer=me but no userId provided!');
     }
   }
+
 
   // Search query
   if (q) {
@@ -96,41 +100,66 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
 
   const skip = (page - 1) * pageSize;
 
-  const [items, total] = await Promise.all([
-    prisma.game.findMany({
-      where,
-      orderBy,
-      skip,
-      take: pageSize,
-      include: {
-        developer: {
-          select: {
-            id: true,
-            name: true,
-            image: true,
-          },
-        },
-        gameTags: {
-          include: {
-            tag: true,
-          },
-        },
-        _count: {
-          select: {
-            ratings: true,
-            favorites: true,
-            purchases: true,
-            betaFeedback: true,
-            betaTesters: true,
-          },
+  // For public views, we need to filter by publishing fee status
+  // Fetch more items than needed so we can filter, then trim to pageSize
+  const fetchLimit = isPublicView ? pageSize * 3 : pageSize;
+
+  const rawItems = await prisma.game.findMany({
+    where,
+    orderBy,
+    skip: isPublicView ? 0 : skip, // For public views, we need to handle pagination after filtering
+    take: isPublicView ? undefined : pageSize, // Fetch all for public views, then paginate
+    include: {
+      developer: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
         },
       },
-    }),
-    prisma.game.count({ where }),
-  ]);
+      gameTags: {
+        include: {
+          tag: true,
+        },
+      },
+      publishingFee: {
+        select: {
+          paymentStatus: true,
+        },
+      },
+      _count: {
+        select: {
+          ratings: true,
+          favorites: true,
+          purchases: true,
+          betaFeedback: true,
+          betaTesters: true,
+        },
+      },
+    } as any, // Type assertion to bypass stale Prisma types
+  }) as any[];
+
+  // Filter games: for public views, only show games with publishing fee paid
+  let filteredItems = rawItems;
+  if (isPublicView) {
+    filteredItems = rawItems.filter(
+      (game) => game.publishingFee?.paymentStatus === 'completed'
+    );
+  }
+
+  // Calculate actual total
+  const total = filteredItems.length;
+
+  // Apply pagination for public views
+  const items = isPublicView 
+    ? filteredItems.slice(skip, skip + pageSize)
+    : filteredItems;
+
+  // Remove publishingFee from returned items (not needed by client)
+  const cleanItems = items.map(({ publishingFee, ...game }) => game);
 
   return {
-    items,
+    items: cleanItems,
     total,
     page,
     pageSize,
@@ -170,22 +199,51 @@ export async function getGameBySlug(slug: string, userId?: string) {
         },
         take: 10,
       },
+      versions: {
+        orderBy: {
+          releasedAt: 'desc',
+        },
+        take: 5,
+        select: {
+          id: true,
+          version: true,
+          title: true,
+          changelog: true,
+          releaseType: true,
+          releasedAt: true,
+        },
+      },
+      publishingFee: {
+        select: {
+          paymentStatus: true,
+        },
+      },
       _count: {
         select: {
           ratings: true,
           favorites: true,
         },
       },
-    },
-  });
+    } as any, // Type assertion to bypass stale Prisma types
+  }) as any;
 
   if (!game) return null;
 
-  // Increment views
-  await prisma.game.update({
-    where: { id: game.id },
-    data: { views: { increment: 1 } },
-  });
+  const publishingFeePaid = game.publishingFee?.paymentStatus === 'completed';
+  const isDeveloper = userId && game.developerId === userId;
+  
+  // If publishing fee not paid and user is not the developer, don't show the game
+  if (!publishingFeePaid && !isDeveloper) {
+    return null;
+  }
+
+  // Increment views (only for public views)
+  if (!isDeveloper) {
+    await prisma.game.update({
+      where: { id: game.id },
+      data: { views: { increment: 1 } },
+    });
+  }
 
   // Check if user has favorited, rated, or purchased
   let isFavorited = false;
@@ -243,6 +301,7 @@ export async function getGameBySlug(slug: string, userId?: string) {
     userRating,
     isPurchased,
     ratingDistribution: distribution,
+    publishingFeePaid,
   };
 }
 
@@ -255,6 +314,7 @@ export async function getTags() {
 /**
  * Get beta games (only games with releaseStatus = BETA)
  * Used for /games/beta page (Pro subscribers only)
+ * Only shows games with publishing fee paid
  */
 export async function getBetaGames() {
   const games = await prisma.game.findMany({
@@ -274,6 +334,11 @@ export async function getBetaGames() {
           tag: true,
         },
       },
+      publishingFee: {
+        select: {
+          paymentStatus: true,
+        },
+      },
       _count: {
         select: {
           ratings: true,
@@ -283,13 +348,14 @@ export async function getBetaGames() {
           betaFeedback: true,
         },
       },
-    },
+    } as any, // Type assertion to bypass stale Prisma types
     orderBy: {
       createdAt: 'desc',
     },
-  });
+  }) as any[];
 
-  return games;
+  // Only return games with publishing fee paid
+  return games.filter((game: any) => game.publishingFee?.paymentStatus === 'completed');
 }
 
 export async function createGame(data: GameUpsert, developerId: string) {
@@ -475,11 +541,19 @@ export async function toggleFavorite(gameId: string, userId: string) {
     });
     favorited = false;
   } else {
-    // Add favorite
+    // Get current game price to track for sale notifications
+    const game = await prisma.game.findUnique({
+      where: { id: gameId },
+      select: { priceCents: true },
+    });
+
+    // Add favorite with current price
     await prisma.favorite.create({
       data: {
         gameId,
         userId,
+        priceAtFavorite: game?.priceCents || 0,
+        notifiedForSale: false,
       },
     });
     await prisma.game.update({

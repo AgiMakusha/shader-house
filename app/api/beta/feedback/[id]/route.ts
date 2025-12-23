@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { notifyFeedbackResponse } from '@/lib/notifications/triggers';
 
 const updateSchema = z.object({
   status: z.enum(['NEW', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']).optional(),
@@ -32,7 +33,14 @@ export async function PATCH(
       include: {
         game: {
           select: {
+            id: true,
+            title: true,
             developerId: true,
+          },
+        },
+        tester: {
+          select: {
+            userId: true,
           },
         },
       },
@@ -49,11 +57,31 @@ export async function PATCH(
       );
     }
 
+    // Get old status to check if it changed to RESOLVED
+    const oldStatus = feedback.status;
+
     // Update feedback
     const updated = await prisma.betaFeedback.update({
       where: { id },
       data: validated,
     });
+
+    // Notify user when developer resolves their feedback
+    if (validated.status && oldStatus !== 'RESOLVED' && validated.status === 'RESOLVED' && feedback.tester.userId) {
+      try {
+        console.log(`🔔 Attempting to send feedback response notification for user ${feedback.tester.userId}, feedback ${id}`);
+        const result = await notifyFeedbackResponse(
+          feedback.tester.userId,
+          feedback.gameId,
+          feedback.game.title,
+          id
+        );
+        console.log(`✅ Feedback response notification result:`, result);
+      } catch (notificationError) {
+        console.error('❌ Error sending feedback response notification:', notificationError);
+        // Don't fail the request if notification fails
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -75,4 +103,8 @@ export async function PATCH(
     );
   }
 }
+
+
+
+
 

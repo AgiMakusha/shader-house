@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { notifyBetaTaskCreated } from '@/lib/notifications/triggers';
 
 /**
  * POST /api/beta/tasks
@@ -30,10 +31,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createTaskSchema.parse(body);
 
-    // Verify game ownership
+    // Verify game ownership and get game details
     const game = await prisma.game.findUnique({
       where: { id: validated.gameId },
-      select: { id: true, developerId: true },
+      select: { id: true, title: true, slug: true, developerId: true },
     });
 
     if (!game) {
@@ -70,6 +71,69 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Notify all beta testers of this game about the new task
+    if (game) {
+      try {
+        console.log(`🔔 New beta task created: ${validated.title} for game ${game.title} (${validated.gameId})`);
+        
+        // Get all beta testers for this game with user details for debugging
+        const betaTesters = await prisma.betaTester.findMany({
+          where: { gameId: validated.gameId },
+          select: { 
+            userId: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                inAppNotifications: true,
+                notifyGameUpdates: true,
+              }
+            }
+          },
+        });
+
+        console.log(`📢 Found ${betaTesters.length} beta testers for game ${game.title}:`, 
+          betaTesters.map(t => ({ userId: t.userId, email: t.user.email, name: t.user.name }))
+        );
+
+        if (betaTesters.length === 0) {
+          console.log(`⚠️ No beta testers found for game ${game.title} (${validated.gameId})`);
+        }
+
+        // Notify all beta testers
+        const notificationResults = await Promise.allSettled(
+          betaTesters.map((tester) =>
+            notifyBetaTaskCreated(
+              tester.userId,
+              validated.gameId,
+              game.title,
+              validated.title,
+              task.id
+            )
+          )
+        );
+
+        // Log results
+        const successful = notificationResults.filter(r => r.status === 'fulfilled').length;
+        const failed = notificationResults.filter(r => r.status === 'rejected').length;
+        
+        notificationResults.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`❌ Error notifying beta tester ${betaTesters[index].userId} (${betaTesters[index].user.email}):`, result.reason);
+          } else {
+            console.log(`✅ Successfully notified ${betaTesters[index].user.email} (${betaTesters[index].userId})`);
+          }
+        });
+
+        console.log(`✅ Notification summary: ${successful} successful, ${failed} failed out of ${betaTesters.length} beta testers`);
+      } catch (notificationError) {
+        console.error('❌ Error sending beta task notifications:', notificationError);
+        console.error('Error stack:', notificationError instanceof Error ? notificationError.stack : 'No stack trace');
+        // Don't fail the request if notifications fail
+      }
+    }
+
     return NextResponse.json({ task }, { status: 201 });
   } catch (error: any) {
     console.error('POST /api/beta/tasks error:', error);
@@ -87,4 +151,8 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+
+
 

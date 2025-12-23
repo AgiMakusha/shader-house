@@ -590,7 +590,7 @@ export default function SignupPage() {
                           setTeamSize(e.target.value);
                           if (errors.teamSize) setErrors(prev => ({ ...prev, teamSize: undefined }));
                         }}
-                        className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm ${
+                        className={`w-full px-4 py-3 rounded-lg bg-white/10 border placeholder-white/40 focus:outline-none focus:ring-2 focus:border-transparent transition-all backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                           errors.teamSize ? 'border-red-500/50 focus:ring-red-500/40' : 'border-white/20 focus:ring-white/40'
                         }`}
                         style={{ color: 'rgba(200, 240, 200, 0.8)' }}

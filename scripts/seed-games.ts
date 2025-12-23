@@ -33,12 +33,14 @@ async function seedGames() {
     await prisma.developerProfile.create({
       data: {
         userId: developer.id,
-        developerType: 'SOLO',
+        developerType: 'INDIE',
         teamSize: 1,
         hasPublisher: false,
         ownsIP: true,
+        fundingSources: ['SELF'],
+        companyType: 'NONE',
         attestIndie: true,
-        verificationStatus: 'VERIFIED',
+        verificationStatus: 'APPROVED',
         isIndieEligible: true,
       },
     });

@@ -305,3 +305,8 @@ model Subscription {
 6. **Monitor**: Watch Stripe dashboard for activity
 
 
+
+
+
+
+

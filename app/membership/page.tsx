@@ -334,8 +334,8 @@ export default function MembershipPage() {
           </motion.div>
         )}
 
-        {/* Downgrade Confirmation Modal */}
-        {showDowngradeConfirm && (
+        {/* COMMENTED OUT - Downgrade Confirmation Modal (Creator Support Pass hidden) */}
+        {/* {showDowngradeConfirm && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-6"
             style={{ background: 'rgba(0, 0, 0, 0.8)' }}
@@ -396,10 +396,10 @@ export default function MembershipPage() {
               </div>
             </motion.div>
           </div>
-        )}
+        )} */}
 
-        {/* Upgrade Confirmation Modal */}
-        {showUpgradeConfirm && (
+        {/* COMMENTED OUT - Upgrade Confirmation Modal (Creator Support Pass hidden) */}
+        {/* {showUpgradeConfirm && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-6"
             style={{ background: 'rgba(0, 0, 0, 0.8)' }}
@@ -481,7 +481,7 @@ export default function MembershipPage() {
               </div>
             </motion.div>
           </div>
-        )}
+        )} */}
 
         {/* Success Modal */}
         {showSuccess && (
@@ -649,7 +649,7 @@ export default function MembershipPage() {
                 className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all pixelized"
                 style={{ color: "rgba(200, 240, 200, 0.75)" }}
               >
-                ← Back to {user ? 'Profile' : 'Home'}
+                ← Back to {user ? (user.role === 'DEVELOPER' ? 'Developer Hub' : 'Gamer Hub') : 'Home'}
               </Link>
             </div>
           )}
@@ -665,23 +665,15 @@ export default function MembershipPage() {
                 color: "rgba(180, 220, 180, 0.95)",
               }}
             >
-              Choose Your Plan
+              Welcome to Shader House
             </h1>
             <p
               className="text-base font-semibold tracking-wide uppercase pixelized mb-4"
               style={{ textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(200, 240, 200, 0.7)" }}
             >
-              {user && user.subscriptionTier !== 'FREE' 
-                ? `Welcome back, ${user.name}!` 
-                : user 
-                  ? `Welcome, ${user.name}!` 
-                  : 'Join our community of indie game lovers'}
-            </p>
-            <p
-              className="text-sm pixelized"
-              style={{ color: "rgba(200, 240, 200, 0.65)", textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)" }}
-            >
-              Support indie developers and get access to amazing games
+              {user 
+                ? `Welcome, ${user.name}!` 
+                : 'Join our community of indie game lovers'}
             </p>
           </div>
         </motion.div>
@@ -726,10 +718,10 @@ export default function MembershipPage() {
                     className="text-sm mb-3"
                     style={{ color: "rgba(200, 240, 200, 0.85)" }}
                   >
-                    Choose your plan to get started. You can always upgrade later!
+                    Enjoy full access to all platform features!
                   </p>
                   
-                  {/* Onboarding Hints */}
+                  {/* Features Overview */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div
@@ -742,10 +734,10 @@ export default function MembershipPage() {
                         <Gamepad2 className="w-4 h-4" style={{ color: "rgba(150, 250, 150, 0.9)" }} />
                       </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold" style={{ color: "rgba(150, 250, 150, 0.95)" }}>Start with FREE</span> to explore our game library and community
+                        <span className="font-bold" style={{ color: "rgba(150, 250, 150, 0.95)" }}>Beta Access</span> - Test games before they launch
                       </p>
                     </div>
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3">
                       <div
                         className="p-2 rounded-lg flex-shrink-0"
                         style={{
@@ -756,7 +748,7 @@ export default function MembershipPage() {
                         <Crown className="w-4 h-4" style={{ color: "rgba(240, 220, 140, 0.9)" }} />
                       </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold" style={{ color: "rgba(240, 220, 140, 0.95)" }}>Upgrade to Creator Support Pass</span> for beta access, exclusive games & support indie developers
+                        <span className="font-bold" style={{ color: "rgba(240, 220, 140, 0.95)" }}>Achievements & Badges</span> - Earn rewards for your contributions
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -770,18 +762,35 @@ export default function MembershipPage() {
                         <Shield className="w-4 h-4" style={{ color: "rgba(150, 200, 250, 0.9)" }} />
                       </div>
                       <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        <span className="font-bold" style={{ color: "rgba(150, 200, 250, 0.95)" }}>Cancel anytime</span> - no long-term commitments, full control over your subscription
+                        <span className="font-bold" style={{ color: "rgba(150, 200, 250, 0.95)" }}>Community Access</span> - Connect with developers and other gamers
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Go to Profile Button */}
+                  <button
+                    onClick={() => {
+                      const userRole = user?.role?.toUpperCase();
+                      router.push(userRole === 'DEVELOPER' ? '/profile/developer' : '/profile/gamer');
+                    }}
+                    className="mt-6 w-full px-6 py-3 rounded-lg font-bold uppercase tracking-wider pixelized text-sm transition-all hover:scale-[1.02]"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(120, 200, 120, 0.35) 0%, rgba(100, 180, 100, 0.25) 100%)",
+                      border: "1px solid rgba(140, 220, 140, 0.4)",
+                      color: "rgba(200, 255, 200, 0.95)",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
+                    Go to Profile
+                  </button>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* Pricing Cards */}
-        <motion.div 
+        {/* COMMENTED OUT - Pricing Cards (only FREE tier shown) */}
+        {/* <motion.div 
           className="grid md:grid-cols-2 gap-8 max-w-4xl w-full mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -796,10 +805,10 @@ export default function MembershipPage() {
               isLoading={isProcessing}
             />
           ))}
-        </motion.div>
+        </motion.div> */}
 
-        {/* Comparison Toggle */}
-        <motion.div
+        {/* COMMENTED OUT - Comparison Toggle (Creator Support Pass hidden) */}
+        {/* <motion.div
           className="mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -817,10 +826,10 @@ export default function MembershipPage() {
           >
             {showComparison ? 'Hide' : 'Show'} Detailed Comparison
           </button>
-        </motion.div>
+        </motion.div> */}
 
-        {/* Feature Comparison Table */}
-        {showComparison && (
+        {/* COMMENTED OUT - Feature Comparison Table */}
+        {/* {showComparison && (
           <motion.div
             className="max-w-6xl w-full rounded-lg p-8 border"
             style={{
@@ -844,7 +853,7 @@ export default function MembershipPage() {
             </h2>
             <FeatureComparison />
           </motion.div>
-        )}
+        )} */}
 
         {/* Footer */}
         <motion.p
@@ -854,7 +863,7 @@ export default function MembershipPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          All plans can be canceled anytime. No hidden fees. Secure payment processing via Stripe.
+          Free access to all platform features. Join the indie game community today!
         </motion.p>
       </motion.main>
     </div>

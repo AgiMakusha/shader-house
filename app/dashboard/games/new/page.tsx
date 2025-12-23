@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { DollarSign, Info } from "lucide-react";
 
 import { getSession } from "@/lib/auth/session";
 import Particles from "@/components/fx/Particles";
@@ -62,8 +63,41 @@ export default async function NewGamePage() {
             className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
             style={{ color: "rgba(200, 240, 200, 0.75)" }}
           >
-            ← Back to Profile
+            ← Back to Developer Hub
           </Link>
+        </div>
+
+        {/* Publishing Fee Notice */}
+        <div className="w-full max-w-4xl mb-6">
+          <div
+            className="p-4 rounded-lg flex items-start gap-3"
+            style={{
+              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.1) 0%, rgba(220, 180, 100, 0.08) 100%)",
+              border: "1px solid rgba(240, 220, 140, 0.3)",
+            }}
+          >
+            <DollarSign
+              className="w-5 h-5 flex-shrink-0 mt-0.5"
+              style={{ color: "rgba(240, 220, 140, 0.95)" }}
+            />
+            <div>
+              <p
+                className="text-sm font-semibold mb-1"
+                style={{
+                  color: "rgba(240, 220, 140, 0.95)",
+                  textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
+                }}
+              >
+                One-Time Publishing Fee: $50 USD
+              </p>
+              <p
+                className="text-xs"
+                style={{ color: "rgba(200, 240, 200, 0.7)" }}
+              >
+                A one-time fee is required to publish your game on Shader House. This helps us maintain quality and covers platform infrastructure. After payment, you'll earn <strong style={{ color: "rgba(150, 255, 150, 0.95)" }}>85%</strong> of all game sales.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Form */}

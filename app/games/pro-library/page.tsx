@@ -92,7 +92,7 @@ export default function ProLibraryPage() {
               href="/profile/gamer"
               className="text-sm font-semibold uppercase tracking-wider text-white/70 hover:text-white transition-all hover:underline"
             >
-              ← Back to Profile
+              ← Back to Gamer Hub
             </Link>
             <Link
               href="/games"

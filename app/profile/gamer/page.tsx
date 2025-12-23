@@ -7,13 +7,17 @@ import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
 import { useAudio } from "@/components/audio/AudioProvider";
 import { useRouter } from "next/navigation";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { HeaderReportButton } from "@/components/reports/HeaderReportButton";
 
 const QUICK_ACTIONS = [
+  { title: "My Library", description: "Purchased & favorite games", href: "/profile/gamer/library" },
   { title: "Browse Games", description: "Discover new games", href: "/games" },
+  { title: "Devlogs", description: "Behind-the-scenes stories", href: "/devlogs" },
   { title: "My Beta Tests", description: "Active beta tests & tasks", href: "/profile/gamer/beta" },
   { title: "Beta Games", description: "Join new beta tests", href: "/games/beta" },
   { title: "Achievements", description: "View your trophies", href: "/profile/gamer/achievements" },
-  { title: "Subscription", description: "Manage your plan", href: "/profile/gamer/subscription" },
+  { title: "Notifications", description: "View all notifications", href: "/profile/gamer/notifications" },
   { title: "Community", description: "Chat with friends", href: "/community" },
 ];
 
@@ -82,7 +86,7 @@ export default function GamerProfilePage() {
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="w-full max-w-5xl mb-8 flex justify-between items-center"
+          className="w-full max-w-5xl mb-8 flex justify-between items-center relative z-20"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -109,20 +113,24 @@ export default function GamerProfilePage() {
             </p>
           </div>
 
-          <motion.button
-            onClick={handleLogout}
-            className="px-6 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
-            style={{
-              background: "linear-gradient(135deg, rgba(200, 100, 100, 0.3) 0%, rgba(180, 80, 80, 0.2) 100%)",
-              border: "1px solid rgba(240, 200, 200, 0.3)",
-              color: "rgba(240, 200, 200, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Logout
-          </motion.button>
+          <div className="flex items-center gap-3">
+            <HeaderReportButton />
+            <NotificationCenter />
+            <motion.button
+              onClick={handleLogout}
+              className="px-6 py-2 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all"
+              style={{
+                background: "linear-gradient(135deg, rgba(200, 100, 100, 0.3) 0%, rgba(180, 80, 80, 0.2) 100%)",
+                border: "1px solid rgba(240, 200, 200, 0.3)",
+                color: "rgba(240, 200, 200, 0.95)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Logout
+            </motion.button>
+          </div>
         </motion.div>
 
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -179,6 +187,7 @@ export default function GamerProfilePage() {
               </GameCard>
             </Link>
           </motion.div>
+
         </div>
       </motion.main>
     </div>

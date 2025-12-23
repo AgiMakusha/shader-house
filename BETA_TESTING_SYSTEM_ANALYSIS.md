@@ -498,3 +498,8 @@ Given the massive scope, I suggest we:
 
 **Should we proceed with Phase 1 MVP, or do you want to tackle the full system?**
 
+
+
+
+
+

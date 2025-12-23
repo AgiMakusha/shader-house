@@ -34,18 +34,59 @@ model User {
   stripeSubscriptionId String?            @unique
 
   // Gamification
-  xp     Int      @default(0)
-  level  Int      @default(1)
-  points Int      @default(0) // Reward points from beta testing
-  badges String[] // Badge IDs
+  xp              Int      @default(0)
+  level           Int      @default(1)
+  points          Int      @default(0) // Spendable currency
+  badges          String[] @default([]) // Badge IDs
+  
+  // XP/Points tracking (optional, for analytics)
+  xpFromGames     Int      @default(0)
+  xpFromBeta      Int      @default(0)
+  xpFromCommunity Int      @default(0)
+  pointsEarned    Int      @default(0) // Total earned
+  pointsSpent     Int      @default(0) // Total spent
+  
+  // Cosmetics
+  ownedThemes     String[] @default(["classic"])
+  activeTheme     String   @default("classic")
+  ownedReactions  String[] @default([])
+  avatarFrame     String?
 
   // Public Profile
   displayName String? // Public display name (shown on reviews, etc.)
   publicEmail String? // Optional public contact email
   bio         String? @db.Text // Profile bio/description
 
+  // User Preferences
+  wantsNewsletter         Boolean @default(true)  // Email when new membership rewards available
+  wantsDigestNewsletter   Boolean @default(false) // Shader House digest newsletter
+  showOnlineStatus        Boolean @default(true)  // Allow friends to see when online
+  statusMessage           String?                 // User's current status message
+
+  // Developer Communication Preferences (only for developers)
+  acceptCollabRequests    Boolean @default(true)  // Allow collaboration requests
+  receiveLaunchUpdates    Boolean @default(true)  // Receive product updates/announcements
+  preferredContactNotes   String? @db.Text        // Notes about preferred contact method
+
+  // Notification Preferences
+  emailNotifications      Boolean @default(true)   // Receive email notifications
+  inAppNotifications      Boolean @default(true)  // Receive in-app notifications
+  notifyBetaAccess        Boolean @default(true)  // Notify when beta access granted
+  notifyFeedbackResponse  Boolean @default(true)  // Notify when developer responds to feedback
+  notifyGameUpdates       Boolean @default(true)  // Notify when owned games are updated
+  notifyAchievements      Boolean @default(true)  // Notify when achievements unlocked
+  notifySubscription      Boolean @default(true)  // Notify about subscription changes
+  notifyWishlistSales     Boolean @default(true)  // Notify when wishlisted games go on sale
+  notifyDevlogs           Boolean @default(true)  // Notify about new devlogs from followed devs/games
+
+  // Two-Factor Authentication
+  twoFactorEnabled   Boolean  @default(false)
+  twoFactorSecret    String?  // Encrypted TOTP secret
+  twoFactorBackups   String[] @default([]) // Encrypted backup codes
+
   // Relations
   developerProfile    DeveloperProfile?
+  sessions            Session[]
   accounts            Account[]
   verificationTokens  VerificationToken[]
   games               Game[]
@@ -59,6 +100,31 @@ model User {
   claimedGames        ClaimedGame[]
   betaTester          BetaTester[]
   taskCompletions     BetaTaskCompletion[]
+  ndaAcceptances      NdaAcceptance[]
+  
+  // Discussion Board Relations
+  threads             DiscussionThread[]
+  posts               DiscussionPost[]
+  votes               DiscussionVote[]
+  rewards             RewardHistory[]
+  notifications       Notification[]
+  
+  // Report Relations
+  reportsMade         Report[] @relation("ReportedBy")
+  reportsAgainst      Report[] @relation("ReportedUser")
+  
+  // Payment Relations
+  tipsGiven           Tip[] @relation("TipsGiven")
+  tipsReceived        Tip[] @relation("TipsReceived")
+  publishingFees      PublishingFee[]
+  reportsResolved     Report[] @relation("ResolvedReports")
+  
+  // Devlog Relations
+  devlogs             Devlog[]             @relation("DevlogAuthor")
+  devlogComments      DevlogComment[]      @relation("DevlogCommentAuthor")
+  devlogLikes         DevlogLike[]
+  devlogSubscriptions DevlogSubscription[] @relation("DevlogSubscriber")
+  devlogSubscribers   DevlogSubscription[] @relation("DevlogSubscribedTo")
 
   @@index([email])
   @@index([subscriptionTier])
@@ -106,6 +172,36 @@ model VerificationToken {
 enum TokenType {
   EMAIL_VERIFICATION
   PASSWORD_RESET
+  EMAIL_CHANGE
+  TWO_FACTOR_SETUP
+}
+
+// User Sessions - Track active login sessions
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  // Session details
+  token     String   @unique // JWT or session token hash
+  device    String?  // Device name/type
+  browser   String?  // Browser name
+  os        String?  // Operating system
+  ip        String?  // IP address at login
+  location  String?  // Approximate location (city, country)
+  
+  // Status
+  isActive  Boolean  @default(true)
+  lastActiveAt DateTime @default(now())
+  expiresAt DateTime
+  
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([isActive])
+  @@map("sessions")
 }
 
 // Developer verification profile
@@ -136,6 +232,18 @@ model DeveloperProfile {
 
   // Indie eligibility (auto-calculated)
   isIndieEligible Boolean @default(false)
+
+  // Studio Profile (public-facing, separate from verification)
+  studioName      String? // Public studio/team name
+  tools           String? @db.Text // Primary engines/tools (e.g., "Unreal Engine, Blender")
+  portfolioUrl    String? // Studio website/portfolio URL
+  studioBio       String? @db.Text // Elevator pitch/studio description
+
+  // Stripe Connect (for receiving payments)
+  stripeAccountId     String?   @unique // Stripe Connect account ID
+  stripeAccountStatus String?   // "pending" | "active" | "restricted" | "rejected"
+  stripeOnboardedAt   DateTime? // When onboarding was completed
+  payoutEnabled       Boolean   @default(false) // Can receive payouts
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -201,15 +309,27 @@ model Game {
 
   // Release status for beta testing workflow
   releaseStatus ReleaseStatus @default(BETA)
+  
+  // Versioning
+  currentVersion String @default("1.0.0")
 
   // Relations
   developerId String
   developer   User   @relation(fields: [developerId], references: [id], onDelete: Cascade)
 
   // Stats
-  views     Int   @default(0)
-  avgRating Float @default(0)
-  favCount  Int   @default(0)
+  views       Int   @default(0)
+  downloads   Int   @default(0) // Track download count
+  avgRating   Float @default(0)
+  favCount    Int   @default(0)
+  
+  // Trending score (calculated from recent activity)
+  trendingScore Float    @default(0)
+  trendingUpdatedAt DateTime?
+  
+  // Featured status
+  isFeatured  Boolean  @default(false)
+  featuredAt  DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -223,17 +343,68 @@ model Game {
   proLibrary   ProLibraryGame?
   playtime     PlaytimeEntry[]
   claimedGames ClaimedGame[]
-  betaAccess   BetaAccess[]
-  betaTesters  BetaTester[]
-  betaTasks    BetaTask[]
-  betaFeedback BetaFeedback[]
+  betaAccess     BetaAccess[]
+  betaTesters    BetaTester[]
+  betaTasks      BetaTask[]
+  betaFeedback   BetaFeedback[]
+  versions       GameVersion[]
+  ndaAcceptances NdaAcceptance[]
+  
+  // Discussion Board
+  threads      DiscussionThread[]
+  
+  // Devlogs
+  devlogs      Devlog[]
+  
+  // Reports
+  reports      Report[]
+  
+  // Payment
+  publishingFee PublishingFee?
 
   @@index([slug])
   @@index([developerId])
   @@index([avgRating])
   @@index([createdAt])
   @@index([releaseStatus])
+  @@index([trendingScore])
+  @@index([isFeatured])
   @@map("games")
+}
+
+// Game Version - Track updates and changelogs
+model GameVersion {
+  id        String   @id @default(cuid())
+  gameId    String
+  
+  // Version info
+  version   String   // e.g., "1.0.0", "1.1.0", "2.0.0"
+  title     String?  // Optional title for the update (e.g., "Winter Update")
+  changelog String   @db.Text // What changed in this version
+  
+  // Associated file (optional - for downloadable games)
+  gameFileUrl String?
+  
+  // Release type
+  releaseType VersionReleaseType @default(PATCH)
+  
+  // Timestamps
+  releasedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, version])
+  @@index([gameId])
+  @@index([releasedAt])
+  @@map("game_versions")
+}
+
+enum VersionReleaseType {
+  MAJOR    // Breaking changes, major features
+  MINOR    // New features, improvements
+  PATCH    // Bug fixes, small updates
+  HOTFIX   // Critical bug fixes
 }
 
 // Tag model
@@ -274,8 +445,9 @@ model Rating {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game    Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports Report[]
 
   @@unique([gameId, userId])
   @@index([gameId])
@@ -283,12 +455,16 @@ model Rating {
   @@map("ratings")
 }
 
-// Favorite model
+// Favorite model (also used as Wishlist)
 model Favorite {
   id        String   @id @default(cuid())
   gameId    String
   userId    String
   createdAt DateTime @default(now())
+  
+  // Track price when favorited (for sale notifications)
+  priceAtFavorite   Int?     // Price in cents when added to wishlist
+  notifiedForSale   Boolean  @default(false) // Prevent duplicate notifications
 
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -296,6 +472,7 @@ model Favorite {
   @@unique([gameId, userId])
   @@index([gameId])
   @@index([userId])
+  @@index([notifiedForSale])
   @@map("favorites")
 }
 
@@ -322,13 +499,67 @@ model Purchase {
   pricePaid Int // Price paid in cents at time of purchase
   createdAt DateTime @default(now())
 
+  // Stripe payment info
+  stripePaymentId   String? @unique // Stripe Payment Intent ID
+  stripeSessionId   String? @unique // Stripe Checkout Session ID
+  platformFee       Int?    // Platform fee in cents
+  developerAmount   Int?    // Amount developer receives in cents
+  paymentStatus     String  @default("completed") // "pending" | "completed" | "refunded" | "failed"
+  refundedAt        DateTime?
+
   game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([gameId, userId])
   @@index([gameId])
   @@index([userId])
+  @@index([stripePaymentId])
   @@map("purchases")
+}
+
+// Tips/Donations from gamers to developers
+model Tip {
+  id          String   @id @default(cuid())
+  fromUserId  String   // Gamer giving the tip
+  toUserId    String   // Developer receiving the tip
+  amountCents Int      // Total tip amount in cents
+  platformFee Int      // Platform fee (20%)
+  developerAmount Int  // Amount developer receives (80%)
+  message     String?  @db.Text // Optional message with tip
+  createdAt   DateTime @default(now())
+
+  // Stripe payment info
+  stripePaymentId String? @unique
+  paymentStatus   String  @default("completed") // "pending" | "completed" | "refunded" | "failed"
+
+  fromUser User @relation("TipsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("TipsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([stripePaymentId])
+  @@map("tips")
+}
+
+// Game Publishing Fees ($50 per game)
+model PublishingFee {
+  id          String   @id @default(cuid())
+  gameId      String   @unique // One-time fee per game
+  developerId String
+  amountCents Int      @default(5000) // $50.00
+  paidAt      DateTime @default(now())
+
+  // Stripe payment info
+  stripePaymentId String? @unique
+  stripeSessionId String? @unique
+  paymentStatus   String  @default("completed") // "pending" | "completed" | "refunded" | "failed"
+
+  game      Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  developer User @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@index([developerId])
+  @@index([stripePaymentId])
+  @@map("publishing_fees")
 }
 
 // Track when users access/play games (for achievements and analytics)
@@ -506,6 +737,34 @@ model BetaAccess {
   @@map("beta_access")
 }
 
+// NDA Acceptance - tracks when users accept NDAs for beta access
+model NdaAcceptance {
+  id     String @id @default(cuid())
+  userId String
+  gameId String
+
+  // NDA details
+  version       String   @default("1.0") // NDA version accepted
+  acceptedAt    DateTime @default(now())
+  ipAddress     String?  // IP address at time of acceptance
+  userAgent     String?  @db.Text // Browser/device info
+
+  // Revocation (if needed)
+  revokedAt     DateTime?
+  revokedReason String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
+  @@map("nda_acceptances")
+}
+
 // Beta Tester - tracks user participation in beta testing
 model BetaTester {
   id     String @id @default(cuid())
@@ -675,4 +934,499 @@ model DeveloperRevenue {
   @@index([developerId])
   @@index([month])
   @@map("developer_revenue")
+}
+
+// ============================================
+// DISCUSSION BOARD MODELS
+// ============================================
+
+// Discussion Thread (main post in a category)
+model DiscussionThread {
+  id     String @id @default(cuid())
+  gameId String
+  userId String
+
+  // Thread details
+  title      String
+  content    String             @db.Text
+  category   ThreadCategory
+  gameName   String?            // Name of the game when thread was created
+  mediaUrls  String[]           @default([]) // URLs for images/videos uploaded in Showcase threads
+  
+  // Status flags
+  isPinned   Boolean            @default(false)
+  isLocked   Boolean            @default(false)
+  isSolved   Boolean            @default(false)
+  
+  // Stats
+  views      Int                @default(0)
+  replyCount Int                @default(0)
+  
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  
+  // Relations
+  game       Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  author     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  posts      DiscussionPost[]
+  votes      DiscussionVote[]
+  reports    Report[]
+
+  @@index([gameId])
+  @@index([userId])
+  @@index([category])
+  @@index([isPinned])
+  @@index([createdAt])
+  @@map("discussion_threads")
+}
+
+// Discussion Post (reply in a thread)
+model DiscussionPost {
+  id       String @id @default(cuid())
+  threadId String
+  userId   String
+  
+  // Post details
+  content     String    @db.Text
+  isDevPost   Boolean   @default(false) // Author is game developer
+  isHelpful   Boolean   @default(false) // Marked as helpful answer
+  
+  // Nested replies
+  parentId    String?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  thread      DiscussionThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent      DiscussionPost?  @relation("PostReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     DiscussionPost[] @relation("PostReplies")
+  votes       DiscussionVote[]
+  reports     Report[]
+
+  @@index([threadId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@map("discussion_posts")
+}
+
+// Voting system for threads and posts
+model DiscussionVote {
+  id     String @id @default(cuid())
+  userId String
+  
+  // Target (either thread or post)
+  threadId String?
+  postId   String?
+  
+  // Vote value (-1 downvote, +1 upvote)
+  value      Int      @default(1)
+  
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread     DiscussionThread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  post       DiscussionPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([threadId])
+  @@index([postId])
+  @@map("discussion_votes")
+}
+
+// Thread categories
+enum ThreadCategory {
+  GENERAL
+  BUG_REPORT
+  SUGGESTION
+  SHOWCASE
+  ANNOUNCEMENT
+}
+
+// Reward history tracking
+model RewardHistory {
+  id     String @id @default(cuid())
+  userId String
+  
+  // Reward details
+  type        RewardType
+  xpEarned    Int        @default(0)
+  pointsEarned Int       @default(0)
+  reason      String
+  
+  // Source reference (optional)
+  threadId    String?
+  postId      String?
+  
+  createdAt   DateTime   @default(now())
+  
+  // Relations
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("reward_history")
+}
+
+// Reward types
+enum RewardType {
+  THREAD_CREATED
+  POST_CREATED
+  UPVOTE_RECEIVED
+  HELPFUL_MARKED
+  DEV_LIKED
+  BETA_TEST
+  ACHIEVEMENT
+  DAILY_LOGIN
+  LEVEL_UP_BONUS
+}
+
+// ============================================
+// NOTIFICATION SYSTEM MODELS
+// ============================================
+
+// Notification model
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  // Notification details
+  type      NotificationType
+  title     String
+  message   String   @db.Text
+  link      String?  // Optional link to related page
+  
+  // Status
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  // Metadata (optional JSON for additional data)
+  metadata  Json?
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Notification types
+enum NotificationType {
+  // Gamer notifications
+  BETA_ACCESS_GRANTED      // New beta access granted
+  FEEDBACK_RESPONSE        // Developer responded to feedback
+  GAME_UPDATE              // Game update/changelog
+  ACHIEVEMENT_UNLOCKED     // Achievement unlocked
+  SUBSCRIPTION_CHANGED     // Subscription status changed
+  SUBSCRIPTION_RENEWED     // Subscription renewed
+  SUBSCRIPTION_CANCELED    // Subscription canceled
+  NEW_MESSAGE              // New message (future)
+  MENTION                  // Mentioned in discussion (future)
+  SYSTEM                   // System notification
+  WISHLIST_SALE            // Wishlisted game went on sale
+  
+  // Developer notifications (MVP)
+  NEW_BETA_TESTER          // New tester joined developer's beta
+  NEW_FEEDBACK             // Tester submitted feedback/bug report
+  NEW_REVIEW               // Someone reviewed the developer's game
+  GAME_PUBLISHED           // Game was published/promoted to release
+  NEW_COMMUNITY_THREAD     // New bug report or suggestion in game community
+  TIP_RECEIVED             // Developer received a tip from a gamer
+  GAME_PURCHASED           // Someone purchased the developer's game
+  
+  // Report notifications
+  REPORT_RESOLVED          // User's report was resolved
+  REPORT_ACTION_TAKEN      // Action taken against reported content/user
+  
+  // Devlog notifications
+  NEW_DEVLOG               // New devlog from subscribed developer
+  DEVLOG_COMMENT           // New comment on developer's devlog
+  DEVLOG_LIKE              // Someone liked the developer's devlog
+}
+
+// ============================================
+// CONTENT REPORTING SYSTEM
+// ============================================
+
+// Report model for content moderation
+model Report {
+  id            String       @id @default(cuid())
+  
+  // Report type and target
+  type          ReportType
+  reason        ReportReason
+  description   String?      @db.Text // Additional details from reporter
+  
+  // Status tracking
+  status        ReportStatus @default(PENDING)
+  
+  // Who reported it
+  reporterId    String
+  reporter      User         @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: Cascade)
+  
+  // What was reported (one of these will be set based on type)
+  gameId        String?
+  game          Game?        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  
+  reportedUserId String?
+  reportedUser   User?       @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  
+  ratingId      String?      // For reported reviews/comments
+  rating        Rating?      @relation(fields: [ratingId], references: [id], onDelete: Cascade)
+  
+  threadId      String?      // For reported discussion threads
+  thread        DiscussionThread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  
+  postId        String?      // For reported discussion posts
+  post          DiscussionPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  devlogId      String?      // For reported devlogs
+  devlog        Devlog?      @relation("DevlogReports", fields: [devlogId], references: [id], onDelete: Cascade)
+  
+  devlogCommentId String?    // For reported devlog comments
+  devlogComment   DevlogComment? @relation("DevlogCommentReports", fields: [devlogCommentId], references: [id], onDelete: Cascade)
+  
+  // Screenshots (URLs)
+  screenshots   String[]     @default([])
+  
+  // Resolution details
+  resolvedById  String?
+  resolvedBy    User?        @relation("ResolvedReports", fields: [resolvedById], references: [id])
+  resolvedAt    DateTime?
+  resolution    String?      @db.Text // Admin notes on resolution
+  actionTaken   ReportAction?
+  
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([reporterId])
+  @@index([status])
+  @@index([type])
+  @@index([gameId])
+  @@index([reportedUserId])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+// Report types
+enum ReportType {
+  GAME           // Reported game content
+  USER           // Reported user behavior
+  REVIEW         // Reported review/rating
+  THREAD         // Reported discussion thread
+  POST           // Reported discussion post
+  PLATFORM_BUG   // Platform bug report
+  DEVLOG         // Reported devlog post
+  DEVLOG_COMMENT // Reported devlog comment
+}
+
+// ============================================
+// DEVLOG SYSTEM MODELS
+// ============================================
+
+// Developer Devlog post
+model Devlog {
+  id          String   @id @default(cuid())
+  developerId String
+  gameId      String?  // Optional: associate with a specific game
+  
+  // Content
+  title       String
+  slug        String   @unique
+  content     String   @db.Text // Rich text content (HTML/Markdown)
+  excerpt     String?  @db.Text // Short preview text
+  coverImage  String?  // Cover image URL
+  mediaUrls   String[] @default([]) // Additional images/videos in the post
+  
+  // Categories/Tags
+  category    DevlogCategory @default(BEHIND_THE_SCENES)
+  tags        String[]       @default([])
+  
+  // Status
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  isFeatured  Boolean  @default(false)
+  
+  // Stats
+  views       Int      @default(0)
+  likeCount   Int      @default(0)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  developer   User           @relation("DevlogAuthor", fields: [developerId], references: [id], onDelete: Cascade)
+  game        Game?          @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  comments    DevlogComment[]
+  likes       DevlogLike[]
+  reports     Report[]       @relation("DevlogReports")
+
+  @@index([developerId])
+  @@index([gameId])
+  @@index([slug])
+  @@index([isPublished])
+  @@index([publishedAt])
+  @@index([category])
+  @@map("devlogs")
+}
+
+// Devlog categories
+enum DevlogCategory {
+  BEHIND_THE_SCENES  // Making-of content
+  DEVELOPMENT_UPDATE // Progress updates
+  ANNOUNCEMENT       // Major announcements
+  TUTORIAL           // How-to content
+  POSTMORTEM         // Project retrospectives
+  TIPS_AND_TRICKS    // Development tips
+}
+
+// Comment on a devlog
+model DevlogComment {
+  id        String   @id @default(cuid())
+  devlogId  String
+  userId    String
+  
+  content   String   @db.Text
+  
+  // Nested replies
+  parentId  String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  devlog    Devlog          @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  author    User            @relation("DevlogCommentAuthor", fields: [userId], references: [id], onDelete: Cascade)
+  parent    DevlogComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   DevlogComment[] @relation("CommentReplies")
+  reports   Report[]        @relation("DevlogCommentReports")
+
+  @@index([devlogId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("devlog_comments")
+}
+
+// Like on a devlog
+model DevlogLike {
+  id        String   @id @default(cuid())
+  devlogId  String
+  userId    String
+  createdAt DateTime @default(now())
+  
+  devlog    Devlog   @relation(fields: [devlogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([devlogId, userId])
+  @@index([devlogId])
+  @@index([userId])
+  @@map("devlog_likes")
+}
+
+// Subscription to a developer's devlogs
+model DevlogSubscription {
+  id          String   @id @default(cuid())
+  userId      String   // The subscriber
+  developerId String   // The developer being followed
+  
+  // Notification preferences for this subscription
+  notifyNewPost Boolean @default(true)
+  
+  createdAt   DateTime @default(now())
+  
+  subscriber  User     @relation("DevlogSubscriber", fields: [userId], references: [id], onDelete: Cascade)
+  developer   User     @relation("DevlogSubscribedTo", fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, developerId])
+  @@index([userId])
+  @@index([developerId])
+  @@map("devlog_subscriptions")
+}
+
+// Report reasons
+enum ReportReason {
+  SPAM                    // Spam or misleading content
+  INAPPROPRIATE           // Inappropriate/offensive content
+  HARASSMENT              // Harassment or bullying
+  MALICIOUS               // Malicious software/links
+  COPYRIGHT               // Copyright/IP violation
+  MISINFORMATION          // False or misleading information
+  IMPERSONATION           // Impersonating someone else
+  OTHER                   // Other (requires description)
+}
+
+// Report status
+enum ReportStatus {
+  PENDING     // Awaiting review
+  REVIEWING   // Under review by admin
+  RESOLVED    // Action taken or determined not to violate
+  DISMISSED   // Dismissed as false report
+}
+
+// Actions taken on reports
+enum ReportAction {
+  WARNING_ISSUED      // Warning sent to user
+  CONTENT_REMOVED     // Content was removed
+  CONTENT_HIDDEN      // Content was hidden/unlisted
+  USER_SUSPENDED      // User temporarily suspended
+  USER_BANNED         // User permanently banned
+  NO_ACTION           // Reviewed, no action needed
+}
+
+// ============================================
+// PLATFORM SETTINGS SYSTEM
+// ============================================
+
+// Platform-wide settings (key-value store)
+model PlatformSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique // Setting key identifier
+  value     String   @db.Text // JSON-encoded value
+  type      SettingType @default(STRING)
+  category  SettingCategory @default(GENERAL)
+  
+  // Metadata
+  label       String?  // Human-readable label
+  description String?  @db.Text // Description of the setting
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String?  // User ID who last updated
+
+  @@index([category])
+  @@index([key])
+  @@map("platform_settings")
+}
+
+// Setting value types
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+  JSON
+  SELECT
+}
+
+// Setting categories
+enum SettingCategory {
+  GENERAL        // Site name, tagline, etc.
+  REGISTRATION   // User registration settings
+  MODERATION     // Content moderation settings
+  NOTIFICATIONS  // Email & notification settings
+  PAYMENTS       // Payment & fee settings
+  SECURITY       // Security-related settings
 }

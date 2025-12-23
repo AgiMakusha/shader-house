@@ -81,7 +81,7 @@ A comprehensive 3-tier subscription system has been implemented for the indie ga
 ### 3. Developer Revenue Dashboard (`/profile/developer/revenue`)
 - Real-time revenue tracking
 - Revenue breakdown by source:
-  - Direct sales (70% of purchase price)
+  - Direct sales (85% of purchase price, 15% platform fee)
   - Creator Support subscriptions
   - Pro playtime revenue
   - Tips & donations
@@ -154,25 +154,34 @@ A comprehensive 3-tier subscription system has been implemented for the indie ga
 
 ## Revenue Distribution Model
 
-### Direct Sales
-- 70% to developer
-- 30% platform fee
+### Direct Game Sales
+- **85% to developer**
+- **15% platform fee**
+- Example: $9.99 game → Developer gets $8.49, Platform gets $1.50
 
-### Creator Support Pass (€5/month)
+### Game Publishing Fee
+- **$50 USD one-time fee** per game published on the platform
+- Covers listing, hosting, and discovery features
+- Break-even after ~4 sales at $9.99
+
+### Creator Support Pass ($14.99/month)
 - Split equally among supported developers (up to 3)
-- Example: €5 ÷ 3 = €1.67 per developer per subscriber
+- **15% platform fee** before split
+- Example: $14.99 - 15% = $12.74 ÷ 3 = $4.25 per developer per subscriber
 - Monthly recurring revenue
 - Direct fan-to-creator relationship
 
-### Gamer Pro Pass (€12/month)
+### Gamer Pro Pass ($12/month)
 - Revenue distributed based on playtime
-- Formula: (Game Playtime / Total Platform Playtime) × Monthly Revenue Pool
+- **15% platform fee** on the revenue pool
+- Formula: (Game Playtime / Total Platform Playtime) × Revenue Pool
 - Encourages quality game development
 - Rewards engagement
 
 ### Tips & Donations
-- 100% to developer
-- No platform fee
+- **80% to developer**
+- **20% platform fee**
+- Example: $20 tip → Developer gets $16, Platform gets $4
 
 ## Next Steps for Production
 
@@ -259,4 +268,9 @@ For questions or issues:
 ---
 
 **Implementation Complete**: All core subscription features are implemented and ready for Stripe integration and production deployment.
+
+
+
+
+
 

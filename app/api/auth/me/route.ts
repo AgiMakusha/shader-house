@@ -14,11 +14,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch user from database with developer profile if applicable
+    // Fetch user from database with developer profile and accounts if applicable
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       include: {
         developerProfile: true,
+        accounts: {
+          select: {
+            id: true,
+            provider: true,
+            type: true,
+          },
+        },
       },
     });
 
@@ -37,6 +44,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         role: user.role,
         emailVerified: user.emailVerified,
+        image: user.image,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         developerProfile: user.developerProfile,
@@ -45,13 +53,39 @@ export async function GET(request: NextRequest) {
         subscriptionStatus: user.subscriptionStatus,
         subscriptionStart: user.subscriptionStart,
         subscriptionEnd: user.subscriptionEnd,
+        // Progression fields
         xp: user.xp,
         level: user.level,
+        points: user.points,
         badges: user.badges,
         // Public profile fields
         displayName: user.displayName,
         publicEmail: user.publicEmail,
         bio: user.bio,
+        // User preferences
+        wantsNewsletter: user.wantsNewsletter,
+        wantsDigestNewsletter: user.wantsDigestNewsletter,
+        showOnlineStatus: user.showOnlineStatus,
+        statusMessage: user.statusMessage,
+        // Developer communication preferences
+        acceptCollabRequests: user.acceptCollabRequests,
+        receiveLaunchUpdates: user.receiveLaunchUpdates,
+        preferredContactNotes: user.preferredContactNotes,
+        // Notification preferences
+        emailNotifications: user.emailNotifications,
+        inAppNotifications: user.inAppNotifications,
+        notifyBetaAccess: user.notifyBetaAccess,
+        notifyFeedbackResponse: user.notifyFeedbackResponse,
+        notifyGameUpdates: user.notifyGameUpdates,
+        notifyAchievements: user.notifyAchievements,
+        notifySubscription: user.notifySubscription,
+        notifyDevlogs: user.notifyDevlogs,
+        // Two-Factor Authentication
+        twoFactorEnabled: user.twoFactorEnabled,
+        // Linked accounts (OAuth)
+        accounts: user.accounts,
+        // Has password (for account security display)
+        hasPassword: !!user.password,
       },
     });
 

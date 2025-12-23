@@ -1,312 +1,337 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { TrendingUp, MessageCircle, Flame, Clock } from 'lucide-react';
+import { ThreadCard } from '@/components/discussions/ThreadCard';
+import Particles from '@/components/fx/Particles';
 
-import Particles from "@/components/fx/Particles";
-import { GameCard, GameCardContent } from "@/components/game/GameCard";
-import { useAudio } from "@/components/audio/AudioProvider";
-
-const COMMUNITY_CHANNELS = [
-  { id: "general", name: "General Discussion", description: "Talk about anything gaming related", members: 0 },
-  { id: "developers", name: "Developer Hub", description: "Connect with game developers", members: 0 },
-  { id: "feedback", name: "Game Feedback", description: "Share your thoughts on games", members: 0 },
-  { id: "showcase", name: "Project Showcase", description: "Show off your latest work", members: 0 },
-];
-
-export default function CommunityPage() {
-  const router = useRouter();
-  const { play } = useAudio();
-  const [user, setUser] = useState<any>(null);
+export default function CommunityHubPage() {
+  const [threads, setThreads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedChannel, setSelectedChannel] = useState("general");
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<any[]>([]);
+  const [filter, setFilter] = useState<'all' | 'hot' | 'recent' | 'trending'>('all');
+  const [user, setUser] = useState<any>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 1,
+  });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        if (!response.ok) {
-          router.push("/login");
-          return;
-        }
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    loadAllThreads();
+  }, [filter, pagination.page]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
         const data = await response.json();
         setUser(data.user);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        router.push("/login");
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    fetchUser();
-  }, [router]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
-
-    play("click");
-    
-    // TODO: Implement real-time messaging
-    const newMessage = {
-      id: Date.now(),
-      user: user?.name || "Anonymous",
-      role: user?.role || "GAMER",
-      message: message.trim(),
-      timestamp: new Date().toISOString(),
-      channel: selectedChannel,
-    };
-
-    setMessages([...messages, newMessage]);
-    setMessage("");
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+    }
   };
 
-  const handleChannelSelect = (channelId: string) => {
-    setSelectedChannel(channelId);
-    play("click");
-    // TODO: Load messages for selected channel
-    setMessages([]);
+  const loadAllThreads = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams({
+        filter,
+        page: pagination.page.toString(),
+        limit: '20',
+      });
+
+      const response = await fetch(`/api/discussions/global?${params}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to load discussions. Please try again.');
+      }
+
+      const data = await response.json();
+      setThreads(data.threads);
+      setPagination(data.pagination);
+    } catch (err: any) {
+      console.error('Failed to load threads:', err);
+      setError(err.message || 'Failed to load discussions');
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-dvh relative overflow-hidden flex items-center justify-center">
-        <Particles />
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <div className="text-xl font-semibold pixelized" style={{ color: 'rgba(200, 240, 200, 0.9)' }}>
-            Loading...
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  const backUrl = user?.role === "DEVELOPER" ? "/profile/developer" : "/profile/gamer";
 
   return (
-    <div className="min-h-dvh relative overflow-hidden">
+    <div className="min-h-screen relative" style={{ background: 'rgba(20, 30, 20, 0.95)' }}>
       <Particles />
 
-      <motion.main
-        className="relative z-10 flex min-h-dvh flex-col items-center justify-start p-6 pt-12"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.div
-          className="w-full max-w-6xl mb-8 flex items-center justify-between gap-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] pixelized" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
-              Connect & Collaborate
-            </p>
-            <h1
-              className="text-4xl font-bold tracking-wider uppercase pixelized"
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="mb-8">
+          {user && (
+            <div className="mb-4">
+              <Link
+                href={user.role === 'DEVELOPER' ? '/profile/developer' : '/profile/gamer'}
+                className="text-sm hover:underline inline-block"
+                style={{ color: 'rgba(180, 240, 180, 0.7)' }}
+              >
+                ← {user.role === 'DEVELOPER' ? 'Back to Developer Hub' : 'Back to Gamer Hub'}
+              </Link>
+            </div>
+          )}
+          
+          <h1
+            className="text-4xl font-bold mb-2 pixelized"
+            style={{
+              color: 'rgba(180, 240, 180, 0.95)',
+              textShadow: '0 0 12px rgba(120, 200, 120, 0.6), 2px 2px 0px rgba(0, 0, 0, 0.8)',
+            }}
+          >
+            Community Hub
+          </h1>
+          <p style={{ color: 'rgba(180, 220, 180, 0.7)' }}>
+            Explore discussions across all games
+          </p>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="mb-8 flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => {
+              setFilter('all');
+              setPagination({ ...pagination, page: 1 });
+            }}
+            className="px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all"
+            style={{
+              background:
+                filter === 'all'
+                  ? 'linear-gradient(135deg, rgba(180, 240, 180, 0.4) 0%, rgba(120, 200, 120, 0.3) 100%)'
+                  : 'rgba(40, 50, 40, 0.6)',
+              border:
+                filter === 'all'
+                  ? '1px solid rgba(180, 240, 180, 0.4)'
+                  : '1px solid rgba(100, 150, 100, 0.3)',
+              color:
+                filter === 'all'
+                  ? 'rgba(200, 240, 200, 0.95)'
+                  : 'rgba(180, 220, 180, 0.7)',
+              boxShadow:
+                filter === 'all'
+                  ? '0 4px 12px rgba(120, 200, 120, 0.3)'
+                  : 'none',
+            }}
+          >
+            All Discussions
+          </button>
+          <button
+            onClick={() => {
+              setFilter('trending');
+              setPagination({ ...pagination, page: 1 });
+            }}
+            className="px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all flex items-center gap-2"
+            style={{
+              background:
+                filter === 'trending'
+                  ? 'linear-gradient(135deg, rgba(180, 240, 180, 0.4) 0%, rgba(120, 200, 120, 0.3) 100%)'
+                  : 'rgba(40, 50, 40, 0.6)',
+              border:
+                filter === 'trending'
+                  ? '1px solid rgba(180, 240, 180, 0.4)'
+                  : '1px solid rgba(100, 150, 100, 0.3)',
+              color:
+                filter === 'trending'
+                  ? 'rgba(200, 240, 200, 0.95)'
+                  : 'rgba(180, 220, 180, 0.7)',
+              boxShadow:
+                filter === 'trending'
+                  ? '0 4px 12px rgba(120, 200, 120, 0.3)'
+                  : 'none',
+            }}
+          >
+            <TrendingUp size={16} />
+            Trending
+          </button>
+          <button
+            onClick={() => {
+              setFilter('hot');
+              setPagination({ ...pagination, page: 1 });
+            }}
+            className="px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all flex items-center gap-2"
+            style={{
+              background:
+                filter === 'hot'
+                  ? 'linear-gradient(135deg, rgba(255, 150, 100, 0.4) 0%, rgba(255, 100, 50, 0.3) 100%)'
+                  : 'rgba(40, 50, 40, 0.6)',
+              border:
+                filter === 'hot'
+                  ? '1px solid rgba(255, 150, 100, 0.4)'
+                  : '1px solid rgba(100, 150, 100, 0.3)',
+              color:
+                filter === 'hot'
+                  ? 'rgba(255, 200, 150, 0.95)'
+                  : 'rgba(180, 220, 180, 0.7)',
+              boxShadow:
+                filter === 'hot'
+                  ? '0 4px 12px rgba(255, 100, 50, 0.3)'
+                  : 'none',
+            }}
+          >
+            <Flame size={16} />
+            Hot
+          </button>
+          <button
+            onClick={() => {
+              setFilter('recent');
+              setPagination({ ...pagination, page: 1 });
+            }}
+            className="px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider transition-all flex items-center gap-2"
+            style={{
+              background:
+                filter === 'recent'
+                  ? 'linear-gradient(135deg, rgba(150, 200, 255, 0.4) 0%, rgba(100, 150, 255, 0.3) 100%)'
+                  : 'rgba(40, 50, 40, 0.6)',
+              border:
+                filter === 'recent'
+                  ? '1px solid rgba(150, 200, 255, 0.4)'
+                  : '1px solid rgba(100, 150, 100, 0.3)',
+              color:
+                filter === 'recent'
+                  ? 'rgba(200, 220, 255, 0.95)'
+                  : 'rgba(180, 220, 180, 0.7)',
+              boxShadow:
+                filter === 'recent'
+                  ? '0 4px 12px rgba(100, 150, 255, 0.3)'
+                  : 'none',
+            }}
+          >
+            <Clock size={16} />
+            Recent
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-lg mb-6"
+            style={{
+              background: 'rgba(255, 100, 100, 0.2)',
+              border: '1px solid rgba(255, 150, 150, 0.4)',
+              color: 'rgba(255, 200, 200, 0.9)',
+            }}
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Threads List */}
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+            style={{ color: 'rgba(180, 220, 180, 0.7)' }}
+          >
+            Loading discussions...
+          </motion.div>
+        ) : threads.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-8 rounded-lg text-center"
+            style={{
+              background: 'rgba(40, 50, 40, 0.8)',
+              border: '1px solid rgba(100, 150, 100, 0.3)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <MessageCircle
+              size={64}
               style={{
-                textShadow: `
-                  0 0 12px rgba(120, 200, 120, 0.8),
-                  0 0 24px rgba(100, 180, 100, 0.6),
-                  2px 2px 0px rgba(0, 0, 0, 0.9)
-                `,
-                color: "rgba(180, 220, 180, 0.95)",
+                color: 'rgba(180, 240, 180, 0.5)',
+                margin: '0 auto 24px',
+              }}
+            />
+            <h2
+              className="text-2xl font-bold mb-4 pixelized"
+              style={{
+                color: 'rgba(180, 240, 180, 0.95)',
+                textShadow: '0 0 8px rgba(120, 200, 120, 0.6)',
               }}
             >
-              Community
-            </h1>
+              No discussions yet
+            </h2>
             <p
-              className="mt-2 text-sm pixelized"
-              style={{ color: "rgba(200, 240, 200, 0.65)", textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)" }}
+              className="mb-6"
+              style={{ color: 'rgba(180, 220, 180, 0.8)' }}
             >
-              Join the conversation with gamers and developers
+              Be the first to start a conversation! Visit individual game pages to join discussions.
             </p>
+            <Link
+              href="/games"
+              className="inline-block px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all"
+              style={{
+                background: 'linear-gradient(135deg, rgba(180, 240, 180, 0.4) 0%, rgba(120, 200, 120, 0.3) 100%)',
+                border: '1px solid rgba(180, 240, 180, 0.4)',
+                color: 'rgba(200, 240, 200, 0.95)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+              }}
+            >
+              Browse Games →
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {threads.map((thread) => (
+              <ThreadCard
+                key={thread.id}
+                thread={thread}
+                gameSlug={thread.game.slug}
+              />
+            ))}
           </div>
+        )}
 
-          <Link
-            href={backUrl}
-            className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
-            style={{ color: "rgba(200, 240, 200, 0.75)" }}
-          >
-            ← Back to Profile
-          </Link>
-        </motion.div>
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="mt-8 flex items-center justify-center gap-2">
+            {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+              <button
+                key={p}
+                onClick={() => {
+                  setPagination({ ...pagination, page: p });
+                }}
+                className="px-4 py-2 rounded-lg font-bold transition-all"
+                style={{
+                  background:
+                    p === pagination.page
+                      ? 'linear-gradient(135deg, rgba(180, 240, 180, 0.4) 0%, rgba(120, 200, 120, 0.3) 100%)'
+                      : 'rgba(40, 50, 40, 0.6)',
+                  border:
+                    p === pagination.page
+                      ? '1px solid rgba(180, 240, 180, 0.4)'
+                      : '1px solid rgba(100, 150, 100, 0.3)',
+                  color:
+                    p === pagination.page
+                      ? 'rgba(200, 240, 200, 0.95)'
+                      : 'rgba(180, 220, 180, 0.7)',
+                }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        )}
 
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Channels Sidebar */}
-          <motion.div
-            className="lg:col-span-1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <GameCard>
-              <GameCardContent className="p-6">
-                <h2
-                  className="text-xl font-bold mb-4 pixelized"
-                  style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-                >
-                  Channels
-                </h2>
-                <div className="space-y-2">
-                  {COMMUNITY_CHANNELS.map((channel) => (
-                    <button
-                      key={channel.id}
-                      onClick={() => handleChannelSelect(channel.id)}
-                      className="w-full text-left p-3 rounded-lg transition-all"
-                      style={{
-                        background: selectedChannel === channel.id
-                          ? "linear-gradient(135deg, rgba(100, 200, 100, 0.2) 0%, rgba(80, 180, 80, 0.1) 100%)"
-                          : "transparent",
-                        border: `1px solid ${selectedChannel === channel.id ? "rgba(200, 240, 200, 0.3)" : "transparent"}`,
-                      }}
-                    >
-                      <p
-                        className="font-semibold text-sm mb-1"
-                        style={{ color: "rgba(200, 240, 200, 0.9)" }}
-                      >
-                        # {channel.name}
-                      </p>
-                      <p
-                        className="text-xs"
-                        style={{ color: "rgba(200, 240, 200, 0.6)" }}
-                      >
-                        {channel.description}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </GameCardContent>
-            </GameCard>
-          </motion.div>
-
-          {/* Chat Area */}
-          <motion.div
-            className="lg:col-span-3"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <GameCard>
-              <GameCardContent className="p-6 flex flex-col h-[600px]">
-                {/* Channel Header */}
-                <div className="mb-4 pb-4 border-b" style={{ borderColor: "rgba(200, 240, 200, 0.2)" }}>
-                  <h2
-                    className="text-2xl font-bold pixelized"
-                    style={{ textShadow: "0 0 8px rgba(120, 200, 120, 0.6), 1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(180, 220, 180, 0.95)" }}
-                  >
-                    # {COMMUNITY_CHANNELS.find(c => c.id === selectedChannel)?.name}
-                  </h2>
-                  <p
-                    className="text-sm mt-1"
-                    style={{ color: "rgba(200, 240, 200, 0.6)" }}
-                  >
-                    {COMMUNITY_CHANNELS.find(c => c.id === selectedChannel)?.description}
-                  </p>
-                </div>
-
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                  {messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <p
-                        className="text-base pixelized"
-                        style={{ color: "rgba(200, 240, 200, 0.5)" }}
-                      >
-                        No messages yet. Be the first to start the conversation!
-                      </p>
-                    </div>
-                  ) : (
-                    messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className="p-4 rounded-lg"
-                        style={{
-                          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.05) 0%, rgba(80, 180, 80, 0.02) 100%)",
-                          border: "1px solid rgba(200, 240, 200, 0.1)",
-                        }}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span
-                            className="font-semibold text-sm"
-                            style={{ color: "rgba(200, 240, 200, 0.9)" }}
-                          >
-                            {msg.user}
-                          </span>
-                          <span
-                            className="text-xs px-2 py-0.5 rounded"
-                            style={{
-                              background: msg.role === "DEVELOPER"
-                                ? "rgba(100, 150, 250, 0.2)"
-                                : "rgba(100, 200, 100, 0.2)",
-                              color: msg.role === "DEVELOPER"
-                                ? "rgba(150, 200, 250, 0.9)"
-                                : "rgba(150, 250, 150, 0.9)",
-                            }}
-                          >
-                            {msg.role === "DEVELOPER" ? "Developer" : "Gamer"}
-                          </span>
-                          <span
-                            className="text-xs ml-auto"
-                            style={{ color: "rgba(200, 240, 200, 0.5)" }}
-                          >
-                            {new Date(msg.timestamp).toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p
-                          className="text-sm"
-                          style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                        >
-                          {msg.message}
-                        </p>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Message Input */}
-                <form onSubmit={handleSendMessage} className="flex gap-3">
-                  <input
-                    type="text"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder={`Message #${COMMUNITY_CHANNELS.find(c => c.id === selectedChannel)?.name}`}
-                    className="flex-1 px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/40 transition-all backdrop-blur-sm"
-                    style={{ color: "rgba(200, 240, 200, 0.85)" }}
-                  />
-                  <motion.button
-                    type="submit"
-                    className="px-6 py-3 rounded-lg font-semibold uppercase tracking-wider transition-all"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.2) 100%)",
-                      border: "1px solid rgba(200, 240, 200, 0.3)",
-                      color: "rgba(200, 240, 200, 0.95)",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    }}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Send
-                  </motion.button>
-                </form>
-              </GameCardContent>
-            </GameCard>
-          </motion.div>
-        </div>
-      </motion.main>
+      </div>
     </div>
   );
 }
-
-
-

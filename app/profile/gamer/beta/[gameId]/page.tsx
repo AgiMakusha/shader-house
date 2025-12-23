@@ -24,7 +24,12 @@ import {
   Gamepad2,
   FlaskConical,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Download,
+  ExternalLink,
+  Info,
+  Tag,
+  Monitor
 } from "lucide-react";
 
 interface Task {
@@ -51,6 +56,12 @@ interface BetaTest {
     title: string;
     slug: string;
     coverUrl: string;
+    description: string | null;
+    tagline: string | null;
+    platforms: string[];
+    externalUrl: string | null;
+    gameFileUrl: string | null;
+    releaseStatus: string;
     developer: {
       name: string;
     };
@@ -325,6 +336,156 @@ export default function BetaTestDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Game Info & Access Card */}
+        <motion.div
+          className="w-full max-w-5xl mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <GameCard>
+            <GameCardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Game Details */}
+                <div>
+                  <h2
+                    className="text-lg font-bold mb-3 pixelized flex items-center gap-2"
+                    style={{
+                      color: "rgba(180, 220, 180, 0.95)",
+                      textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                    }}
+                  >
+                    <Info className="w-5 h-5" style={{ color: "rgba(150, 200, 255, 0.9)" }} />
+                    About This Game
+                  </h2>
+                  
+                  {test.game.tagline && (
+                    <p
+                      className="text-sm font-semibold mb-3"
+                      style={{ color: "rgba(200, 240, 200, 0.9)" }}
+                    >
+                      {test.game.tagline}
+                    </p>
+                  )}
+                  
+                  {test.game.description && (
+                    <p
+                      className="text-xs mb-4 leading-relaxed"
+                      style={{ color: "rgba(200, 240, 200, 0.7)" }}
+                    >
+                      {test.game.description.length > 300
+                        ? test.game.description.substring(0, 300) + "..."
+                        : test.game.description}
+                    </p>
+                  )}
+                  
+                  {/* Platforms */}
+                  {test.game.platforms && test.game.platforms.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Monitor className="w-4 h-4" style={{ color: "rgba(150, 200, 255, 0.7)" }} />
+                      {test.game.platforms.map((platform: string) => (
+                        <span
+                          key={platform}
+                          className="px-2 py-1 rounded text-xs font-semibold"
+                          style={{
+                            background: "rgba(100, 150, 255, 0.15)",
+                            color: "rgba(180, 210, 255, 0.95)",
+                            border: "1px solid rgba(150, 180, 255, 0.3)",
+                          }}
+                        >
+                          {platform}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Game Access */}
+                <div>
+                  <h2
+                    className="text-lg font-bold mb-3 pixelized flex items-center gap-2"
+                    style={{
+                      color: "rgba(180, 220, 180, 0.95)",
+                      textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)",
+                    }}
+                  >
+                    <Gamepad2 className="w-5 h-5" style={{ color: "rgba(150, 250, 150, 0.9)" }} />
+                    Play Beta Build
+                  </h2>
+
+                  <div
+                    className="p-4 rounded-lg"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(100, 200, 100, 0.1) 0%, rgba(50, 150, 100, 0.15) 100%)",
+                      border: "1px solid rgba(150, 250, 150, 0.3)",
+                    }}
+                  >
+                    {test.game.externalUrl ? (
+                      <div className="space-y-3">
+                        <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                          Play this beta directly in your browser or on the developer's platform:
+                        </p>
+                        <a
+                          href={test.game.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm transition-all hover:scale-105"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+                            border: "1px solid rgba(150, 250, 150, 0.5)",
+                            color: "rgba(200, 255, 200, 0.95)",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          }}
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                          Play Game Online
+                        </a>
+                      </div>
+                    ) : test.game.gameFileUrl ? (
+                      <div className="space-y-3">
+                        <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                          Download the beta build to test on your device:
+                        </p>
+                        <a
+                          href={test.game.gameFileUrl}
+                          download
+                          className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm transition-all hover:scale-105"
+                          style={{
+                            background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+                            border: "1px solid rgba(150, 250, 150, 0.5)",
+                            color: "rgba(200, 255, 200, 0.95)",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          }}
+                        >
+                          <Download className="w-5 h-5" />
+                          Download Beta Build
+                        </a>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div
+                          className="flex items-center gap-2 py-3 px-4 rounded-lg text-sm"
+                          style={{
+                            background: "rgba(250, 220, 100, 0.1)",
+                            border: "1px solid rgba(250, 220, 100, 0.3)",
+                            color: "rgba(250, 220, 100, 0.9)",
+                          }}
+                        >
+                          <AlertCircle className="w-5 h-5" />
+                          <span>Beta build not yet available</span>
+                        </div>
+                        <p className="text-xs" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                          The developer is preparing the beta build. Check back soon or wait for a notification when it's ready.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </GameCardContent>
+          </GameCard>
+        </motion.div>
 
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Tasks Section */}

@@ -48,7 +48,8 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
     play("activate");
 
     try {
-      const response = await fetch(`/api/games/${gameId}/purchase`, {
+      // Use the new checkout API that supports Stripe
+      const response = await fetch(`/api/games/${gameId}/checkout`, {
         method: 'POST',
       });
 
@@ -58,6 +59,13 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
         throw new Error(data.error || 'Purchase failed');
       }
 
+      // If Stripe returns a checkout URL, redirect to it
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      // Demo mode or free game - purchase completed immediately
       play("success");
       
       // Track game access for achievements
@@ -96,15 +104,13 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
     };
 
     return (
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <div
-          className="w-full px-4 py-2 rounded-lg text-center font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+          className="w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
           style={{
-            background: "linear-gradient(145deg, rgba(60, 50, 30, 0.3) 0%, rgba(50, 40, 20, 0.4) 100%)",
-            border: "1px solid rgba(240, 220, 140, 0.4)",
+            background: "linear-gradient(145deg, rgba(60, 50, 30, 0.25) 0%, rgba(50, 40, 20, 0.35) 100%)",
+            border: "1px solid rgba(240, 220, 140, 0.35)",
             color: "rgba(240, 220, 140, 0.95)",
-            fontSize: "10px",
-            fontFamily: '"Press Start 2P", monospace',
           }}
         >
           <Crown size={14} />
@@ -115,14 +121,12 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
             href={gameFileUrl}
             download
             onClick={handleProAccess}
-            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            className="block w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
-              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
-              border: "1px solid rgba(240, 220, 140, 0.5)",
+              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.25) 0%, rgba(220, 180, 100, 0.35) 100%)",
+              border: "1px solid rgba(240, 220, 140, 0.45)",
               color: "rgba(240, 220, 140, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize: "11px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
             }}
           >
             Download Free →
@@ -133,14 +137,12 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleProAccess}
-            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            className="block w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
-              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.3) 0%, rgba(220, 180, 100, 0.4) 100%)",
-              border: "1px solid rgba(240, 220, 140, 0.5)",
+              background: "linear-gradient(135deg, rgba(240, 220, 140, 0.25) 0%, rgba(220, 180, 100, 0.35) 100%)",
+              border: "1px solid rgba(240, 220, 140, 0.45)",
               color: "rgba(240, 220, 140, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              fontFamily: '"Press Start 2P", monospace',
-              fontSize: "11px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
             }}
           >
             Play Free →
@@ -149,9 +151,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
         <p
           className="text-xs text-center"
           style={{ 
-            color: "rgba(230, 210, 150, 0.7)",
-            fontFamily: '"Press Start 2P", monospace',
-            fontSize: "8px",
+            color: "rgba(230, 210, 150, 0.6)",
           }}
         >
           Full access with your Creator Support Pass
@@ -175,28 +175,31 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
     };
 
     return (
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         <div
-          className="w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider"
+          className="w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm flex items-center justify-center gap-2"
           style={{
-            background: "rgba(100, 200, 100, 0.2)",
-            border: "1px solid rgba(200, 240, 200, 0.4)",
-            color: "rgba(150, 250, 150, 0.9)",
+            background: "rgba(100, 200, 100, 0.15)",
+            border: "1px solid rgba(200, 240, 200, 0.35)",
+            color: "rgba(150, 250, 150, 0.95)",
           }}
         >
-          ✓ In Your Library
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+          In Your Library
         </div>
         {gameFileUrl && (
           <a
             href={gameFileUrl}
             download
             onClick={handlePlayAccess}
-            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            className="block w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
-              background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+              background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.25) 100%)",
               border: "1px solid rgba(200, 240, 200, 0.4)",
               color: "rgba(200, 240, 200, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
             }}
           >
             Download Now →
@@ -208,12 +211,12 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
             target="_blank"
             rel="noopener noreferrer"
             onClick={handlePlayAccess}
-            className="block w-full px-6 py-3 rounded-lg text-center font-bold uppercase tracking-wider transition-all"
+            className="block w-full px-5 py-3 rounded-lg text-center font-semibold uppercase tracking-wider text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
-              background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+              background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.25) 100%)",
               border: "1px solid rgba(200, 240, 200, 0.4)",
               color: "rgba(200, 240, 200, 0.95)",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
             }}
           >
             Play Now →
@@ -227,9 +230,9 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
     return (
       <button
         disabled
-        className="w-full px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all opacity-50 cursor-not-allowed text-center"
+        className="w-full px-5 py-3 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all opacity-60 cursor-not-allowed text-center"
         style={{
-          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.2) 0%, rgba(80, 180, 80, 0.1) 100%)",
+          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.15) 0%, rgba(80, 180, 80, 0.1) 100%)",
           border: "1px solid rgba(200, 240, 200, 0.2)",
           color: "rgba(200, 240, 200, 0.6)",
         }}
@@ -240,16 +243,16 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-2">
       <motion.button
         onClick={handlePurchase}
         disabled={isProcessing}
-        className="w-full px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full px-5 py-3 rounded-lg font-semibold uppercase tracking-wider text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed text-center"
         style={{
-          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.4) 0%, rgba(80, 180, 80, 0.3) 100%)",
+          background: "linear-gradient(135deg, rgba(100, 200, 100, 0.35) 0%, rgba(80, 180, 80, 0.25) 100%)",
           border: "1px solid rgba(200, 240, 200, 0.4)",
           color: "rgba(200, 240, 200, 0.95)",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
         }}
         whileHover={!isProcessing ? { scale: 1.02 } : {}}
         whileTap={!isProcessing ? { scale: 0.98 } : {}}
@@ -264,7 +267,7 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
 
       {error && (
         <p
-          className="text-sm font-semibold text-center"
+          className="text-xs font-semibold text-center"
           style={{ color: "rgba(250, 100, 100, 0.9)" }}
         >
           {error}
@@ -274,9 +277,11 @@ export function PurchaseButton({ gameId, priceCents, gameFileUrl, externalUrl, i
       {!isFree && (
         <p
           className="text-xs text-center"
-          style={{ color: "rgba(200, 240, 200, 0.6)" }}
+          style={{ 
+            color: "rgba(200, 240, 200, 0.45)",
+          }}
         >
-          Demo mode: Purchase will be simulated
+          Developer receives 85% of sale
         </p>
       )}
     </div>

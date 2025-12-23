@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { z } from 'zod';
+import { notifyNewFeedback } from '@/lib/notifications/triggers';
 
 const feedbackSchema = z.object({
   gameId: z.string(),
@@ -135,6 +136,36 @@ export async function POST(request: NextRequest) {
             },
           },
         });
+      }
+    }
+
+    // Notify developer about new feedback
+    const game = await prisma.game.findUnique({
+      where: { id: validated.gameId },
+      select: { developerId: true, title: true, slug: true },
+    });
+
+    const testerUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { name: true, displayName: true },
+    });
+
+    if (game && testerUser) {
+      try {
+        const testerName = testerUser.displayName || testerUser.name || 'A tester';
+        console.log(`🔔 Notifying developer ${game.developerId} about new feedback`);
+        await notifyNewFeedback(
+          game.developerId,
+          validated.gameId,
+          game.title,
+          validated.type,
+          validated.title,
+          testerName,
+          game.slug
+        );
+        console.log(`✅ Developer feedback notification sent`);
+      } catch (notificationError) {
+        console.error('❌ Error sending developer feedback notification:', notificationError);
       }
     }
 
