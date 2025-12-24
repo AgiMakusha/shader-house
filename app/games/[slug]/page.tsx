@@ -522,21 +522,21 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                       </p>
                     </div>
                   )}
+
+                  {/* Report Game Button */}
+                  {session?.user && !isOwner && !isViewOnly && (
+                    <div className="pt-3 border-t border-white/10">
+                      <ReportButton
+                        type="GAME"
+                        targetId={game.id}
+                        targetName={game.title}
+                        variant="full"
+                      />
+                    </div>
+                  )}
                 </div>
               </GameCardContent>
             </GameCard>
-
-            {/* Report Game Button - Outside GameCard */}
-            {session?.user && !isOwner && !isViewOnly && (
-              <div className="flex justify-center">
-                <ReportButton
-                  type="GAME"
-                  targetId={game.id}
-                  targetName={game.title}
-                  variant="full"
-                />
-              </div>
-            )}
 
             {/* Version History */}
             <VersionHistory gameId={game.id} currentVersion={game.currentVersion} />

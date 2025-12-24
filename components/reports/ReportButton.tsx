@@ -112,10 +112,10 @@ export default function ReportButton({
     POST: "comment",
   };
 
-  const handleButtonClick = (e: React.MouseEvent) => {
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Report button clicked');
+    console.log('Report button clicked', { showModal, mounted });
     setShowModal(true);
   };
 
@@ -125,17 +125,18 @@ export default function ReportButton({
       {variant === "icon" ? (
         <button
           onClick={handleButtonClick}
-          className={`p-2 rounded-lg hover:bg-red-500/20 transition-all hover:scale-105 active:scale-95 ${className}`}
+          className={`p-2 rounded-lg hover:bg-red-500/20 transition-all ${className}`}
           title={`Report this ${typeLabels[type]}`}
           type="button"
+          style={{ cursor: 'pointer', position: 'relative', zIndex: 10 }}
         >
           <Flag className="w-4 h-4" style={{ color: "rgba(248, 113, 113, 0.7)" }} />
         </button>
       ) : variant === "text" ? (
         <button
           onClick={handleButtonClick}
-          className={`text-sm flex items-center gap-1 hover:text-red-400 transition-all hover:scale-[1.02] active:scale-98 ${className}`}
-          style={{ color: "rgba(200, 240, 200, 0.6)" }}
+          className={`text-sm flex items-center gap-1 hover:text-red-400 transition-all ${className}`}
+          style={{ color: "rgba(200, 240, 200, 0.6)", cursor: 'pointer', position: 'relative', zIndex: 10 }}
           type="button"
         >
           <Flag className="w-3 h-3" />
@@ -144,11 +145,14 @@ export default function ReportButton({
       ) : (
         <button
           onClick={handleButtonClick}
-          className={`w-full px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all hover:scale-[1.02] active:scale-98 ${className}`}
+          className={`w-full px-4 py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-all ${className}`}
           style={{
-            background: "rgba(248, 113, 113, 0.1)",
-            border: "1px solid rgba(248, 113, 113, 0.3)",
-            color: "rgba(252, 165, 165, 0.9)",
+            background: "rgba(248, 113, 113, 0.15)",
+            border: "1px solid rgba(248, 113, 113, 0.4)",
+            color: "rgba(252, 165, 165, 0.95)",
+            cursor: 'pointer',
+            position: 'relative',
+            zIndex: 10,
           }}
           type="button"
         >
