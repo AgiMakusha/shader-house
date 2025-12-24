@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flag, X, AlertTriangle, Send, Loader2 } from "lucide-react";
 
@@ -31,21 +30,12 @@ export default function ReportButton({
   variant = "icon",
   className = "",
 }: ReportButtonProps) {
-  const [mounted, setMounted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    console.log('showModal state:', showModal, 'mounted:', mounted);
-  }, [showModal, mounted]);
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -62,13 +52,12 @@ export default function ReportButton({
     setError(null);
 
     try {
-      const body: any = {
+      const body: Record<string, unknown> = {
         type,
         reason: selectedReason,
         description: description.trim() || null,
       };
 
-      // Set the appropriate ID field based on type
       if (type === "GAME") body.gameId = targetId;
       else if (type === "USER") body.userId = targetId;
       else if (type === "REVIEW") body.ratingId = targetId;
@@ -89,7 +78,7 @@ export default function ReportButton({
       }
 
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setError("Failed to submit report. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -112,31 +101,23 @@ export default function ReportButton({
     POST: "comment",
   };
 
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Report button clicked', { showModal, mounted });
-    setShowModal(true);
-  };
-
   return (
     <>
       {/* Report Button */}
       {variant === "icon" ? (
         <button
-          onClick={handleButtonClick}
+          onClick={() => setShowModal(true)}
           className={`p-2 rounded-lg hover:bg-red-500/20 transition-all ${className}`}
           title={`Report this ${typeLabels[type]}`}
           type="button"
-          style={{ cursor: 'pointer', position: 'relative', zIndex: 10 }}
         >
           <Flag className="w-4 h-4" style={{ color: "rgba(248, 113, 113, 0.7)" }} />
         </button>
       ) : variant === "text" ? (
         <button
-          onClick={handleButtonClick}
+          onClick={() => setShowModal(true)}
           className={`text-sm flex items-center gap-1 hover:text-red-400 transition-all ${className}`}
-          style={{ color: "rgba(200, 240, 200, 0.6)", cursor: 'pointer', position: 'relative', zIndex: 10 }}
+          style={{ color: "rgba(200, 240, 200, 0.6)" }}
           type="button"
         >
           <Flag className="w-3 h-3" />
@@ -144,15 +125,12 @@ export default function ReportButton({
         </button>
       ) : (
         <button
-          onClick={handleButtonClick}
-          className={`w-full px-4 py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-all ${className}`}
+          onClick={() => setShowModal(true)}
+          className={`w-full px-4 py-3 rounded-lg flex items-center justify-center gap-2 text-sm font-semibold transition-all hover:opacity-90 ${className}`}
           style={{
             background: "rgba(248, 113, 113, 0.15)",
             border: "1px solid rgba(248, 113, 113, 0.4)",
             color: "rgba(252, 165, 165, 0.95)",
-            cursor: 'pointer',
-            position: 'relative',
-            zIndex: 10,
           }}
           type="button"
         >
@@ -161,200 +139,186 @@ export default function ReportButton({
         </button>
       )}
 
-      {/* Report Modal */}
-      {mounted && (
-        <AnimatePresence>
-          {showModal && createPortal(
-            <div
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-              style={{ background: "rgba(0, 0, 0, 0.85)" }}
-              onClick={handleClose}
-            >
+      {/* Report Modal - Same pattern as TipButton */}
+      <AnimatePresence>
+        {showModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0, 0, 0, 0.85)" }}
+            onClick={() => setShowModal(false)}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="rounded-xl w-full max-w-md max-h-[85vh] flex flex-col"
+              className="rounded-xl p-6 max-w-md w-full max-h-[85vh] overflow-y-auto"
               style={{
-                background: "linear-gradient(145deg, rgba(15, 35, 25, 0.98) 0%, rgba(10, 25, 20, 0.98) 100%)",
-                border: "1px solid rgba(200, 240, 200, 0.3)",
-                boxShadow: "0 8px 32px rgba(100, 200, 100, 0.3)",
+                background: "linear-gradient(145deg, rgba(30, 50, 40, 0.98) 0%, rgba(20, 40, 30, 0.98) 100%)",
+                border: "1px solid rgba(248, 113, 113, 0.3)",
+                boxShadow: "0 8px 32px rgba(200, 50, 50, 0.2)",
               }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="p-6 border-b border-white/20 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ background: "rgba(248, 113, 113, 0.25)", border: "1px solid rgba(248, 113, 113, 0.4)" }}
-                  >
-                    <Flag className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-lg font-bold pixelized" 
-                      style={{ 
-                        color: "rgba(220, 255, 220, 0.98)",
-                        textShadow: "0 0 8px rgba(100, 200, 100, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)"
-                      }}
-                    >
-                      Report {typeLabels[type]}
-                    </h3>
-                    {targetName && (
-                      <p className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
-                        {targetName}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={handleClose}
-                  className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className="text-xl font-bold pixelized flex items-center gap-2"
+                  style={{ color: "rgba(252, 165, 165, 0.95)" }}
                 >
-                  <X className="w-5 h-5" style={{ color: "rgba(220, 255, 220, 0.8)" }} />
+                  <Flag size={20} className="text-red-400" />
+                  Report {typeLabels[type]}
+                </h3>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-1 rounded hover:bg-white/10 transition-all"
+                >
+                  <X size={20} style={{ color: "rgba(200, 200, 200, 0.7)" }} />
                 </button>
               </div>
 
-              {/* Body */}
-              <div className="p-6 overflow-y-auto flex-1">
-                {submitted ? (
-                  <div className="text-center py-6">
-                    <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                      style={{ background: "rgba(34, 197, 94, 0.2)" }}
-                    >
-                      <AlertTriangle className="w-8 h-8 text-green-400" />
-                    </div>
-                    <h4 className="text-lg font-bold mb-2" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
-                      Report Submitted
-                    </h4>
-                    <p className="text-sm mb-4" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
-                      Thank you for helping keep Shader House safe. Our team will review your report shortly.
-                    </p>
-                    <motion.button
-                      onClick={handleClose}
-                      className="px-6 py-2 rounded-lg font-medium"
-                      style={{
-                        background: "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)",
-                        border: "1px solid rgba(200, 240, 200, 0.3)",
-                        color: "rgba(200, 240, 200, 0.95)",
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Close
-                    </motion.button>
+              {targetName && (
+                <p className="text-sm mb-4" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                  Reporting: {targetName}
+                </p>
+              )}
+
+              {submitted ? (
+                <div className="text-center py-6">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: "rgba(34, 197, 94, 0.2)" }}
+                  >
+                    <AlertTriangle className="w-8 h-8 text-green-400" />
                   </div>
-                ) : (
-                  <>
-                    {/* Reason Selection */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-bold mb-2 pixelized" style={{ 
-                        color: "rgba(220, 255, 220, 0.95)",
-                        textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
-                      }}>
-                        Why are you reporting this {typeLabels[type]}?
-                      </label>
-                      <div className="space-y-1.5">
-                        {REPORT_REASONS.map((reason) => (
-                          <button
-                            key={reason.value}
-                            onClick={() => { setSelectedReason(reason.value); setError(null); }}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                              selectedReason === reason.value ? "ring-2 ring-green-400/60" : ""
-                            }`}
-                            style={{
-                              background: selectedReason === reason.value 
-                                ? "rgba(100, 200, 100, 0.3)" 
-                                : "rgba(30, 50, 40, 0.8)",
-                              border: selectedReason === reason.value
-                                ? "1px solid rgba(150, 250, 150, 0.6)"
-                                : "1px solid rgba(200, 240, 200, 0.3)",
-                              color: selectedReason === reason.value
-                                ? "rgba(220, 255, 220, 1)"
-                                : "rgba(220, 255, 220, 0.95)",
-                              textShadow: selectedReason === reason.value 
-                                ? "0 0 8px rgba(100, 200, 100, 0.5)" 
-                                : "none",
-                            }}
-                          >
-                            {reason.label}
-                          </button>
-                        ))}
-                      </div>
+                  <h4 className="text-lg font-bold mb-2" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
+                    Report Submitted
+                  </h4>
+                  <p className="text-sm mb-4" style={{ color: "rgba(200, 240, 200, 0.7)" }}>
+                    Thank you for helping keep Shader House safe.
+                  </p>
+                  <button
+                    onClick={handleClose}
+                    className="px-6 py-2 rounded-lg font-medium transition-all hover:scale-[1.02]"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(100, 200, 100, 0.3) 0%, rgba(80, 180, 80, 0.2) 100%)",
+                      border: "1px solid rgba(200, 240, 200, 0.3)",
+                      color: "rgba(200, 240, 200, 0.95)",
+                    }}
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Reason Selection */}
+                  <div className="mb-4">
+                    <label
+                      className="block text-xs mb-2"
+                      style={{ color: "rgba(252, 165, 165, 0.7)" }}
+                    >
+                      Why are you reporting this {typeLabels[type]}?
+                    </label>
+                    <div className="space-y-2">
+                      {REPORT_REASONS.map((reason) => (
+                        <button
+                          key={reason.value}
+                          onClick={() => {
+                            setSelectedReason(reason.value);
+                            setError(null);
+                          }}
+                          className={`w-full text-left py-2 px-3 rounded-lg text-sm transition-all ${
+                            selectedReason === reason.value ? "scale-[1.02]" : ""
+                          }`}
+                          style={{
+                            background:
+                              selectedReason === reason.value
+                                ? "rgba(248, 113, 113, 0.3)"
+                                : "rgba(100, 80, 80, 0.2)",
+                            border:
+                              selectedReason === reason.value
+                                ? "1px solid rgba(248, 113, 113, 0.5)"
+                                : "1px solid rgba(150, 130, 130, 0.2)",
+                            color:
+                              selectedReason === reason.value
+                                ? "rgba(252, 200, 200, 0.95)"
+                                : "rgba(200, 180, 180, 0.8)",
+                          }}
+                        >
+                          {reason.label}
+                        </button>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Description */}
-                    <div className="mb-4">
-                      <label className="block text-sm font-bold mb-2 pixelized" style={{ 
-                        color: "rgba(220, 255, 220, 0.95)",
-                        textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
-                      }}>
-                        Additional details {selectedReason === "OTHER" ? "(required)" : "(optional)"}
-                      </label>
-                      <textarea
-                        value={description}
-                        onChange={(e) => { setDescription(e.target.value); setError(null); }}
-                        placeholder="Provide more context about the issue..."
-                        rows={2}
-                        className="w-full p-3 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50"
-                        style={{
-                          background: "rgba(30, 50, 40, 0.8)",
-                          border: "1px solid rgba(200, 240, 200, 0.3)",
-                          color: "rgba(220, 255, 220, 0.95)",
-                        }}
-                      />
-                    </div>
+                  {/* Description */}
+                  <div className="mb-4">
+                    <label
+                      className="block text-xs mb-1"
+                      style={{ color: "rgba(252, 165, 165, 0.7)" }}
+                    >
+                      Additional details {selectedReason === "OTHER" ? "(required)" : "(optional)"}
+                    </label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                        setError(null);
+                      }}
+                      placeholder="Provide more context about the issue..."
+                      maxLength={500}
+                      rows={2}
+                      className="w-full py-2 px-3 rounded-lg text-sm resize-none"
+                      style={{
+                        background: "rgba(100, 80, 80, 0.2)",
+                        border: "1px solid rgba(150, 130, 130, 0.2)",
+                        color: "rgba(252, 200, 200, 0.95)",
+                      }}
+                    />
+                  </div>
 
-                    {/* Error */}
-                    {error && (
-                      <div className="mb-4 p-3 rounded-lg" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)" }}>
-                        <p className="text-sm" style={{ color: "rgba(252, 165, 165, 0.9)" }}>{error}</p>
-                      </div>
-                    )}
+                  {error && <p className="text-sm text-red-400 mb-3">{error}</p>}
 
-                    {/* Submit Button */}
-                    <motion.button
+                  {/* Buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all hover:bg-white/10"
+                      style={{
+                        background: "rgba(100, 100, 100, 0.2)",
+                        border: "1px solid rgba(150, 150, 150, 0.3)",
+                        color: "rgba(200, 200, 200, 0.9)",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
                       onClick={handleSubmit}
                       disabled={isSubmitting || !selectedReason}
-                      className="w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-1 py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] disabled:opacity-50"
                       style={{
-                        background: "linear-gradient(135deg, rgba(248, 113, 113, 0.3) 0%, rgba(220, 38, 38, 0.2) 100%)",
+                        background: "linear-gradient(135deg, rgba(248, 113, 113, 0.4) 0%, rgba(220, 80, 80, 0.3) 100%)",
                         border: "1px solid rgba(248, 113, 113, 0.5)",
-                        color: "rgba(254, 202, 202, 0.95)",
+                        color: "rgba(252, 200, 200, 0.95)",
                       }}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Submitting...
-                        </>
+                        <Loader2 size={16} className="animate-spin" />
                       ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          Submit Report
-                        </>
+                        <Send size={16} />
                       )}
-                    </motion.button>
+                      Submit
+                    </button>
+                  </div>
 
-                    <p className="text-xs text-center mt-4" style={{ color: "rgba(200, 240, 200, 0.5)" }}>
-                      False reports may result in action against your account.
-                    </p>
-                  </>
-                )}
-              </div>
+                  <p className="text-xs text-center mt-4" style={{ color: "rgba(200, 180, 180, 0.5)" }}>
+                    False reports may result in action against your account.
+                  </p>
+                </>
+              )}
             </motion.div>
-          </div>,
-          document.body
-          )}
-        </AnimatePresence>
-      )}
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
-
-
-
