@@ -43,6 +43,10 @@ export default function ReportButton({
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    console.log('showModal state:', showModal, 'mounted:', mounted);
+  }, [showModal, mounted]);
+
   const handleSubmit = async () => {
     if (!selectedReason) {
       setError("Please select a reason for your report");
@@ -108,45 +112,49 @@ export default function ReportButton({
     POST: "comment",
   };
 
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Report button clicked');
+    setShowModal(true);
+  };
+
   return (
     <>
       {/* Report Button */}
       {variant === "icon" ? (
-        <motion.button
-          onClick={() => setShowModal(true)}
-          className={`p-2 rounded-lg hover:bg-red-500/20 transition-colors ${className}`}
+        <button
+          onClick={handleButtonClick}
+          className={`p-2 rounded-lg hover:bg-red-500/20 transition-all hover:scale-105 active:scale-95 ${className}`}
           title={`Report this ${typeLabels[type]}`}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          type="button"
         >
           <Flag className="w-4 h-4" style={{ color: "rgba(248, 113, 113, 0.7)" }} />
-        </motion.button>
+        </button>
       ) : variant === "text" ? (
-        <motion.button
-          onClick={() => setShowModal(true)}
-          className={`text-sm flex items-center gap-1 hover:text-red-400 transition-colors ${className}`}
+        <button
+          onClick={handleButtonClick}
+          className={`text-sm flex items-center gap-1 hover:text-red-400 transition-all hover:scale-[1.02] active:scale-98 ${className}`}
           style={{ color: "rgba(200, 240, 200, 0.6)" }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          type="button"
         >
           <Flag className="w-3 h-3" />
           Report
-        </motion.button>
+        </button>
       ) : (
-        <motion.button
-          onClick={() => setShowModal(true)}
-          className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors ${className}`}
+        <button
+          onClick={handleButtonClick}
+          className={`w-full px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition-all hover:scale-[1.02] active:scale-98 ${className}`}
           style={{
             background: "rgba(248, 113, 113, 0.1)",
             border: "1px solid rgba(248, 113, 113, 0.3)",
             color: "rgba(252, 165, 165, 0.9)",
           }}
-          whileHover={{ scale: 1.02, background: "rgba(248, 113, 113, 0.2)" }}
-          whileTap={{ scale: 0.98 }}
+          type="button"
         >
           <Flag className="w-4 h-4" />
           Report {typeLabels[type]}
-        </motion.button>
+        </button>
       )}
 
       {/* Report Modal */}
