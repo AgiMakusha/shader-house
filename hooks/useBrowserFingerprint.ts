@@ -407,3 +407,5 @@ export function calculateBrowserBotScore(signals: BrowserSignals): {
   return { score: Math.min(100, score), reasons };
 }
 
+
+

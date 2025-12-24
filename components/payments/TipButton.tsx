@@ -24,7 +24,6 @@ export function TipButton({
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
-  const [breakdown, setBreakdown] = useState<any>(null);
 
   const effectiveAmount = customAmount ? parseFloat(customAmount) : amount;
   const isValidAmount = effectiveAmount >= 1 && effectiveAmount <= 1000;
@@ -59,7 +58,6 @@ export function TipButton({
 
       // Demo mode - show success
       if (data.demo) {
-        setBreakdown(data.breakdown);
         setShowModal(false);
         setShowSuccess(true);
         setTimeout(() => {
@@ -150,13 +148,6 @@ export function TipButton({
                 </button>
               </div>
 
-              <p 
-                className="text-sm mb-4"
-                style={{ color: 'rgba(230, 180, 200, 0.75)' }}
-              >
-                Show your appreciation with a tip. {developerName} will receive <strong>80%</strong> of your tip, and 20% will go to marketing the game.
-              </p>
-
               {/* Preset Amounts */}
               <div className="grid grid-cols-4 gap-2 mb-4">
                 {TIP_PRESETS.map((preset) => (
@@ -240,27 +231,6 @@ export function TipButton({
                 />
               </div>
 
-              {/* Summary */}
-              <div 
-                className="rounded-lg p-3 mb-4"
-                style={{
-                  background: 'rgba(220, 100, 150, 0.1)',
-                  border: '1px solid rgba(220, 100, 150, 0.2)',
-                }}
-              >
-                <div className="flex items-center justify-between text-sm">
-                  <span style={{ color: 'rgba(230, 180, 200, 0.7)' }}>
-                    {developerName} receives
-                  </span>
-                  <span 
-                    className="font-bold pixelized"
-                    style={{ color: 'rgba(255, 180, 200, 0.95)' }}
-                  >
-                    ${(effectiveAmount * 0.8).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-
               {error && (
                 <p className="text-sm text-red-400 mb-3">{error}</p>
               )}
@@ -340,14 +310,6 @@ export function TipButton({
               >
                 Thank you for supporting {developerName}
               </p>
-              {breakdown && (
-                <p 
-                  className="text-xs mt-2"
-                  style={{ color: 'rgba(230, 180, 200, 0.6)' }}
-                >
-                  {developerName} received {breakdown.developerReceives}
-                </p>
-              )}
             </motion.div>
           </div>
         )}

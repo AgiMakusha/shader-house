@@ -17,6 +17,7 @@ interface GamesContentClientProps {
   totalPages: number;
   activeTags: string[];
   viewOnly?: boolean;
+  isMyGames?: boolean;
 }
 
 export function GamesContentClient({
@@ -27,6 +28,7 @@ export function GamesContentClient({
   totalPages,
   activeTags,
   viewOnly = false,
+  isMyGames = false,
 }: GamesContentClientProps) {
   const [userTier, setUserTier] = useState<SubscriptionTier | null>(null);
 
@@ -54,8 +56,8 @@ export function GamesContentClient({
         <GameFilters />
       </div>
 
-      {/* Tags */}
-      <TagsList tags={allTags} activeTags={activeTags} />
+      {/* Tags - Hide on My Games page */}
+      {!isMyGames && <TagsList tags={allTags} activeTags={activeTags} />}
 
       {/* Results Count */}
       <div className="w-full max-w-6xl mb-6">

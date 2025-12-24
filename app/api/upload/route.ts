@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
+import { put } from '@vercel/blob';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { existsSync } from 'fs';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB (increased for showcase)
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB for videos
@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
     const isGameFile = type === 'game';
     const isMediaFile = type === 'media';
     const isVideo = file.type.startsWith('video/');
-    const isImage = file.type.startsWith('image/');
     
     // Only developers can upload game files
     // All authenticated users (developers and gamers) can upload images and videos (for showcase, avatars, etc.)
@@ -109,28 +108,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', subDir);
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-    }
-
-    // Generate unique filename
+    // Generate unique filename with path prefix for organization
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const extension = file.name.split('.').pop();
-    const filename = `${timestamp}-${randomString}.${extension}`;
-    const filepath = join(uploadsDir, filename);
+    const filename = `${subDir}/${timestamp}-${randomString}.${extension}`;
 
-    // Convert file to buffer and save
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
+    // Check if Vercel Blob is configured
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
-    // Return public URL
-    const url = `/uploads/${subDir}/${filename}`;
+    if (blobToken) {
+      // Upload to Vercel Blob (token is read from BLOB_READ_WRITE_TOKEN env var automatically)
+      try {
+        const blob = await put(filename, file, {
+          access: 'public',
+          addRandomSuffix: false, // We already have timestamp + random string
+        });
 
-    return NextResponse.json({ url }, { status: 201 });
+        // Return the Vercel Blob URL
+        return NextResponse.json({ url: blob.url }, { status: 201 });
+      } catch (blobError: any) {
+        console.error('Vercel Blob upload failed, falling back to local storage:', blobError);
+        // Fall through to local storage
+      }
+    }
+
+    // Fallback to local file storage (for development)
+    try {
+      const uploadsDir = join(process.cwd(), 'public', 'uploads', subDir);
+      const filePath = join(uploadsDir, `${timestamp}-${randomString}.${extension}`);
+
+      // Ensure the directory exists
+      await mkdir(uploadsDir, { recursive: true });
+
+      // Convert File to Buffer and write to disk
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      await writeFile(filePath, buffer);
+
+      // Return the public URL path
+      const url = `/uploads/${filename}`;
+      return NextResponse.json({ url }, { status: 201 });
+    } catch (localError: any) {
+      console.error('Local file storage upload failed:', localError);
+      throw new Error('Failed to upload file. Please check server configuration.');
+    }
   } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json(

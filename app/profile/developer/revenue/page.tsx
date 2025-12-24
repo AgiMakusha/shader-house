@@ -301,7 +301,7 @@ export default function DeveloperRevenuePage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <span className="font-semibold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>Tips & Donations</span>
-                        <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(150, 250, 150, 0.2)", color: "rgba(150, 250, 150, 0.95)" }}>80%</span>
+                        <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(150, 250, 150, 0.2)", color: "rgba(150, 250, 150, 0.95)" }}>85%</span>
                       </div>
                       <p className="text-2xl font-bold pixelized mb-2" style={{ color: "rgba(150, 250, 150, 0.95)", textShadow: "0 0 6px rgba(150, 250, 150, 0.3)" }}>
                         {formatCurrency(revenueData?.monthlyRevenue?.tips || 0)}
@@ -357,11 +357,11 @@ export default function DeveloperRevenuePage() {
                       <ShoppingCart size={20} style={{ color: "rgba(150, 200, 250, 0.9)" }} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>Game Sales</span>
                         <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(150, 250, 150, 0.2)", color: "rgba(150, 250, 150, 0.95)" }}>85%</span>
                       </div>
-                      <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
+                      <p className="text-sm text-left" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
                         15% platform fee on each purchase
                       </p>
                     </div>
@@ -373,12 +373,12 @@ export default function DeveloperRevenuePage() {
                       <Gift size={20} style={{ color: "rgba(250, 220, 100, 0.9)" }} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>Tips & Donations</span>
-                        <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(150, 250, 150, 0.2)", color: "rgba(150, 250, 150, 0.95)" }}>80%</span>
+                        <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(150, 250, 150, 0.2)", color: "rgba(150, 250, 150, 0.95)" }}>85%</span>
                       </div>
-                      <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
-                        20% goes to marketing your game
+                      <p className="text-sm text-left" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
+                        15% platform fee on all tips
                       </p>
                     </div>
                   </div>
@@ -389,14 +389,22 @@ export default function DeveloperRevenuePage() {
                       <DollarSign size={20} style={{ color: "rgba(150, 250, 150, 0.9)" }} />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>Publishing Fee</span>
                         <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: "rgba(200, 240, 200, 0.2)", color: "rgba(200, 240, 200, 0.9)" }}>One-time</span>
                       </div>
-                      <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
-                        $50 per game to publish on the platform
+                      <p className="text-sm text-left" style={{ color: "rgba(200, 240, 200, 0.65)" }}>
+                        $50 per game to list on platform
                       </p>
                     </div>
+                  </div>
+
+                  {/* Platform Fee Explanation */}
+                  <div className="mt-4 p-4 rounded-lg" style={{ background: "rgba(100, 180, 100, 0.08)", border: "1px solid rgba(200, 240, 200, 0.15)" }}>
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
+                      <strong style={{ color: "rgba(150, 250, 150, 0.95)" }}>15% platform fee on all transactions.</strong>
+                      {" "}Used for platform development, developer support, and external marketing to grow your audience.
+                    </p>
                   </div>
                 </div>
               </GameCardContent>

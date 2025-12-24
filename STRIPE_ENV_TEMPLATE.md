@@ -90,3 +90,5 @@ Use any future expiry date and any 3-digit CVC.
 1. Go to https://dashboard.stripe.com/settings/connect
 2. Copy the "Client ID" → `STRIPE_CONNECT_CLIENT_ID`
 
+
+

@@ -100,15 +100,23 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
 
   const skip = (page - 1) * pageSize;
 
-  // For public views, we need to filter by publishing fee status
-  // Fetch more items than needed so we can filter, then trim to pageSize
-  const fetchLimit = isPublicView ? pageSize * 3 : pageSize;
+  // PERFORMANCE FIX: Filter by publishing fee status at database level
+  // For public views, only show games with publishing fee paid
+  if (isPublicView) {
+    where.publishingFee = {
+      paymentStatus: 'completed',
+    };
+  }
 
-  const rawItems = await prisma.game.findMany({
+  // Get total count with same filters (faster than fetching all items)
+  const total = await prisma.game.count({ where });
+
+  // Fetch paginated items with all necessary relations
+  const items = await prisma.game.findMany({
     where,
     orderBy,
-    skip: isPublicView ? 0 : skip, // For public views, we need to handle pagination after filtering
-    take: isPublicView ? undefined : pageSize, // Fetch all for public views, then paginate
+    skip,
+    take: pageSize,
     include: {
       developer: {
         select: {
@@ -120,11 +128,6 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
       gameTags: {
         include: {
           tag: true,
-        },
-      },
-      publishingFee: {
-        select: {
-          paymentStatus: true,
         },
       },
       _count: {
@@ -139,24 +142,8 @@ export async function getGames(query: GameQuery, userId?: string, statusFilter?:
     } as any, // Type assertion to bypass stale Prisma types
   }) as any[];
 
-  // Filter games: for public views, only show games with publishing fee paid
-  let filteredItems = rawItems;
-  if (isPublicView) {
-    filteredItems = rawItems.filter(
-      (game) => game.publishingFee?.paymentStatus === 'completed'
-    );
-  }
-
-  // Calculate actual total
-  const total = filteredItems.length;
-
-  // Apply pagination for public views
-  const items = isPublicView 
-    ? filteredItems.slice(skip, skip + pageSize)
-    : filteredItems;
-
-  // Remove publishingFee from returned items (not needed by client)
-  const cleanItems = items.map(({ publishingFee, ...game }) => game);
+  // No need to filter or slice - database already did it
+  const cleanItems = items;
 
   return {
     items: cleanItems,
@@ -317,9 +304,13 @@ export async function getTags() {
  * Only shows games with publishing fee paid
  */
 export async function getBetaGames() {
+  // PERFORMANCE FIX: Filter at database level
   const games = await prisma.game.findMany({
     where: {
       releaseStatus: ReleaseStatus.BETA,
+      publishingFee: {
+        paymentStatus: 'completed',
+      },
     },
     include: {
       developer: {
@@ -332,11 +323,6 @@ export async function getBetaGames() {
       gameTags: {
         include: {
           tag: true,
-        },
-      },
-      publishingFee: {
-        select: {
-          paymentStatus: true,
         },
       },
       _count: {
@@ -354,8 +340,7 @@ export async function getBetaGames() {
     },
   }) as any[];
 
-  // Only return games with publishing fee paid
-  return games.filter((game: any) => game.publishingFee?.paymentStatus === 'completed');
+  return games;
 }
 
 export async function createGame(data: GameUpsert, developerId: string) {

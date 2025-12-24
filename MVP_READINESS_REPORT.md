@@ -153,7 +153,7 @@ Shader House is a comprehensive indie game marketplace platform with a sophistic
 | Feature | Revenue Split | Status |
 |---------|---------------|--------|
 | Game Sales | 85% dev / 15% platform | ✅ |
-| Tips/Donations | 80% dev / 20% platform | ✅ |
+| Tips/Donations | 85% dev / 15% platform | ✅ |
 | Publishing Fee | $50 flat to platform | ✅ |
 | Stripe Connect | Developer payouts | ✅ |
 

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { ReleaseStatus } from '@prisma/client';
+import { apiCache, CACHE_TTL, CACHE_KEYS } from '@/lib/cache/api-cache';
+
+// PERFORMANCE FIX: Added caching for featured games
 
 /**
  * GET /api/games/featured
@@ -12,10 +15,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const limit = Math.min(20, Math.max(1, parseInt(searchParams.get('limit') || '5', 10)));
 
+    // PERFORMANCE FIX: Check cache first
+    const cacheKey = CACHE_KEYS.featuredGames(limit);
+    const cached = apiCache.get(cacheKey);
+    
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'X-Cache-Status': 'HIT',
+        },
+      });
+    }
+
+    // PERFORMANCE FIX: Filter by publishing fee at database level
     const featuredGames = await prisma.game.findMany({
       where: {
         isFeatured: true,
         releaseStatus: ReleaseStatus.RELEASED,
+        publishingFee: {
+          paymentStatus: 'completed',
+        },
       },
       include: {
         developer: {
@@ -44,7 +64,7 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    return NextResponse.json({
+    const response = {
       featured: featuredGames.map(game => ({
         id: game.id,
         slug: game.slug,
@@ -66,6 +86,16 @@ export async function GET(request: NextRequest) {
         })),
         _count: game._count,
       })),
+    };
+
+    // PERFORMANCE FIX: Cache the response
+    apiCache.set(cacheKey, response, CACHE_TTL.FEATURED_GAMES);
+
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'X-Cache-Status': 'MISS',
+      },
     });
   } catch (error: any) {
     console.error('GET /api/games/featured error:', error);

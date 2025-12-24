@@ -43,6 +43,7 @@ export function ImageUpload({ value, onChange, label, required = false }: ImageU
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('type', 'image'); // Explicitly set type for image uploads
 
       const response = await fetch('/api/upload', {
         method: 'POST',

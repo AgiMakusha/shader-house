@@ -559,6 +559,8 @@ model PublishingFee {
 
   @@index([developerId])
   @@index([stripePaymentId])
+  @@index([paymentStatus]) // PERFORMANCE FIX: Index for filtering by payment status
+  @@index([gameId, paymentStatus]) // PERFORMANCE FIX: Composite index for game + status queries
   @@map("publishing_fees")
 }
 

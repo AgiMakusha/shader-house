@@ -9,7 +9,7 @@
 | Revenue Source | Developer Gets | Platform Gets |
 |----------------|----------------|---------------|
 | **Direct Game Sales** | **85%** | **15%** |
-| **Tips/Donations** | **80%** | **20%** |
+| **Tips/Donations** | **85%** | **15%** |
 | **Subscriptions** | Split (after 15% fee) | **15%** |
 | **Game Publishing** | — | **$50 one-time** |
 

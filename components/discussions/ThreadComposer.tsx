@@ -7,6 +7,7 @@ import { ThreadCategory } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { Toast } from './Toast';
 import Image from 'next/image';
+import { Select } from '@/components/ui/Select';
 
 interface ThreadComposerProps {
   gameId: string;
@@ -364,22 +365,15 @@ export function ThreadComposer({
             >
               Category
             </label>
-            <select
+            <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value as ThreadCategory)}
-              className="w-full px-4 py-2 rounded-lg"
-              style={{
-                background: 'rgba(20, 30, 20, 0.8)',
-                border: '1px solid rgba(100, 150, 100, 0.3)',
-                color: 'rgba(200, 240, 200, 0.95)',
-              }}
-            >
-              {availableCategories.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setCategory(value as ThreadCategory)}
+              options={availableCategories.map((cat) => ({
+                value: cat.value,
+                label: cat.label,
+              }))}
+              className="w-full"
+            />
             {/* Category description helper text */}
             <p
               className="text-xs mt-2 p-2 rounded"

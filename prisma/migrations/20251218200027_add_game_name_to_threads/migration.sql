@@ -7,3 +7,5 @@ SET "gameName" = g.title
 FROM "games" g
 WHERE dt."gameId" = g.id;
 
+
+

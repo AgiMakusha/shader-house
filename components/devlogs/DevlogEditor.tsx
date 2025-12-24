@@ -22,6 +22,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { DevlogCategory } from '@prisma/client';
+import { Select } from '@/components/ui/Select';
 
 interface DevlogEditorProps {
   initialData?: {
@@ -106,15 +107,19 @@ export function DevlogEditor({
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('type', 'image'); // Explicitly set type for image uploads
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Upload failed');
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
       const imageUrl = data.url;
 
       if (isCover) {
@@ -122,9 +127,9 @@ export function DevlogEditor({
       } else {
         insertMarkdown(`![${file.name}](${imageUrl})\n`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
-      alert('Failed to upload image');
+      alert(error.message || 'Failed to upload image');
     } finally {
       setIsUploading(false);
     }
@@ -262,22 +267,14 @@ export function DevlogEditor({
           >
             Category
           </label>
-          <select
+          <Select
             value={category}
-            onChange={(e) => setCategory(e.target.value as DevlogCategory)}
-            className="w-full px-4 py-2 rounded-lg"
-            style={{
-              background: 'rgba(40, 50, 40, 0.8)',
-              border: '1px solid rgba(100, 150, 100, 0.3)',
-              color: 'rgba(200, 240, 200, 0.95)',
-            }}
-          >
-            {categories.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setCategory(value as DevlogCategory)}
+            options={categories.map((cat) => ({
+              value: cat.value,
+              label: cat.label,
+            }))}
+          />
         </div>
 
         <div>
@@ -287,23 +284,18 @@ export function DevlogEditor({
           >
             Related Game (Optional)
           </label>
-          <select
+          <Select
             value={gameId}
-            onChange={(e) => setGameId(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg"
-            style={{
-              background: 'rgba(40, 50, 40, 0.8)',
-              border: '1px solid rgba(100, 150, 100, 0.3)',
-              color: 'rgba(200, 240, 200, 0.95)',
-            }}
-          >
-            <option value="">No specific game</option>
-            {games.map((game) => (
-              <option key={game.id} value={game.id}>
-                {game.title}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setGameId(value)}
+            options={[
+              { value: '', label: 'No specific game' },
+              ...games.map((game) => ({
+                value: game.id,
+                label: game.title,
+              })),
+            ]}
+            placeholder="No specific game"
+          />
         </div>
       </div>
 
@@ -593,4 +585,6 @@ export function DevlogEditor({
     </div>
   );
 }
+
+
 

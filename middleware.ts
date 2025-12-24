@@ -17,6 +17,21 @@ const authRoutes = ["/login", "/signup"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // PERFORMANCE FIX: Skip session check for public pages that don't need auth
+  const publicPagesNoAuth = [
+    '/terms',
+    '/privacy',
+    '/icons',
+    '/register',
+  ];
+  
+  const isPublicNoAuth = publicPagesNoAuth.some(route => pathname.startsWith(route));
+  
+  if (isPublicNoAuth) {
+    return NextResponse.next();
+  }
+  
   const session = await getSessionFromRequest(request);
 
   // Check if user is authenticated
@@ -79,6 +94,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// PERFORMANCE FIX: Optimized matcher to skip more static routes
 // Configure which routes to run middleware on
 export const config = {
   matcher: [
@@ -88,9 +104,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - public folder assets (audio, images, video, uploads, fonts)
+     * - manifest files and service workers
+     * - robots.txt and sitemap
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|audio|images|video|anim).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|audio|images|video|anim|uploads|fonts|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.ico|.*\\.webp|.*\\.mp3|.*\\.mp4|.*\\.webm|manifest.json|sw.js|robots.txt|sitemap.xml).*)",
   ],
 };
 

@@ -71,7 +71,43 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // PERFORMANCE FIX: Bundle size optimization
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  
+  // Enable experimental features for better optimization
+  experimental: {
+    optimizeCss: true, // Enable CSS optimization
+    optimizePackageImports: [
+      'lucide-react', // Tree-shake lucide icons
+      'framer-motion', // Tree-shake framer-motion (if still used)
+      '@stripe/stripe-js',
+    ],
+  },
+
+  // PERFORMANCE FIX: Turbopack configuration (Next.js 16+)
+  // Turbopack handles bundle splitting and tree-shaking automatically
+  turbopack: {
+    // Empty config to enable Turbopack without warnings
+    // Turbopack automatically optimizes:
+    // - Code splitting
+    // - Tree shaking
+    // - Bundle optimization
+    // - Fast refresh
+  },
+
   images: {
+    // PERFORMANCE FIX: Proper image optimization configuration
+    formats: ['image/avif', 'image/webp'], // Modern formats with better compression
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Common device sizes
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Common icon/thumb sizes
+    minimumCacheTTL: 86400, // Cache images for 1 day (86400 seconds)
+    dangerouslyAllowSVG: false, // Security: prevent SVG XSS attacks
+    contentDispositionType: 'attachment',
     remotePatterns: [
       {
         protocol: 'https',
@@ -104,6 +140,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '**.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.blob.vercel-storage.com',
       },
     ],
   },

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Crown, Star, ChevronLeft, ChevronRight } from "lucide-react";
+
+// PERFORMANCE FIX: Memoized to prevent unnecessary re-renders
 
 interface FeaturedGame {
   id: string;
@@ -22,13 +24,25 @@ interface FeaturedGame {
   tags: { id: string; name: string; slug: string }[];
 }
 
-export function FeaturedGames() {
-  const [games, setGames] = useState<FeaturedGame[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface FeaturedGamesProps {
+  games?: FeaturedGame[]; // PERFORMANCE FIX: Accept pre-fetched data as prop
+}
+
+export const FeaturedGames = memo(function FeaturedGames({ games: propGames }: FeaturedGamesProps = {}) {
+  const [games, setGames] = useState<FeaturedGame[]>(propGames || []);
+  const [isLoading, setIsLoading] = useState(!propGames);
   const [hasError, setHasError] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // If data was passed as prop, skip fetching
+    if (propGames) {
+      setGames(propGames);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch data (backward compatibility)
     const fetchFeatured = async () => {
       try {
         const res = await fetch("/api/games/featured?limit=5");
@@ -49,7 +63,7 @@ export function FeaturedGames() {
     };
 
     fetchFeatured();
-  }, []);
+  }, [propGames]);
 
   useEffect(() => {
     if (games.length <= 1) return;
@@ -240,5 +254,5 @@ export function FeaturedGames() {
       </div>
     </div>
   );
-}
+});
 

@@ -21,7 +21,7 @@ import {
  * }
  * 
  * Creates a Stripe Checkout session for tipping a developer.
- * Revenue split: 80% to developer, 20% platform fee.
+ * Revenue split: 85% to developer, 15% platform fee.
  * 
  * DEMO MODE: Records tip without payment
  * PRODUCTION MODE: Processes real payment via Stripe Connect

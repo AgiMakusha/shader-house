@@ -2,8 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
-import { motion } from "framer-motion";
 import { useAudio } from "@/components/audio/AudioProvider";
+
+// PERFORMANCE FIX: Removed Framer Motion, using CSS animations instead
 
 type GameCardProps = {
   children: React.ReactNode;
@@ -46,36 +47,20 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
       }
     };
 
-    const cardVariants = {
-      rest: { 
-        scale: 1, 
-        rotateY: 0,
-        transition: { duration: 0.2, ease: "easeOut" as const }
-      },
-      hover: { 
-        scale: 1.02, 
-        rotateY: 2,
-        transition: { duration: 0.2, ease: "easeOut" as const }
-      },
-      tap: { 
-        scale: 0.98,
-        transition: { duration: 0.1, ease: "easeOut" as const }
-      }
-    };
-
     const cardClasses = cn(
       "relative overflow-hidden rounded-lg border border-white/10 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm",
       "shadow-lg shadow-black/20",
-      interactive && "cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40",
+      interactive && "cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 card-interactive-3d",
       className
     );
 
+    // PERFORMANCE FIX: Replaced expensive backdrop-filter with static background
     const cardStyle = {
       background: `
         radial-gradient(circle at top left, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-        rgba(255, 255, 255, 0.08)
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%),
+        rgba(15, 35, 15, 0.85)
       `,
-      backdropFilter: 'blur(12px) saturate(180%)',
       boxShadow: `
         inset 0 1px 0 rgba(255, 255, 255, 0.25),
         0 8px 32px rgba(0, 0, 0, 0.15),
@@ -85,14 +70,10 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
 
     if (asChild) {
       return (
-        <motion.div
+        <div
           ref={ref}
           className={cardClasses}
           style={cardStyle}
-          variants={interactive ? cardVariants : undefined}
-          initial="rest"
-          whileHover={interactive ? "hover" : undefined}
-          whileTap={interactive ? "tap" : undefined}
           onMouseEnter={handleMouseEnter}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -102,19 +83,15 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
           {...props}
         >
           {children}
-        </motion.div>
+        </div>
       );
     }
 
     return (
-      <motion.div
+      <div
         ref={ref}
         className={cardClasses}
         style={cardStyle}
-        variants={interactive ? cardVariants : undefined}
-        initial="rest"
-        whileHover={interactive ? "hover" : undefined}
-        whileTap={interactive ? "tap" : undefined}
         onMouseEnter={handleMouseEnter}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -124,7 +101,7 @@ const GameCard = forwardRef<HTMLDivElement, GameCardProps>(
         {...props}
       >
         {children}
-      </motion.div>
+      </div>
     );
   }
 );

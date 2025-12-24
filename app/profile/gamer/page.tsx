@@ -12,7 +12,7 @@ import { HeaderReportButton } from "@/components/reports/HeaderReportButton";
 
 const QUICK_ACTIONS = [
   { title: "My Library", description: "Purchased & favorite games", href: "/profile/gamer/library" },
-  { title: "Browse Games", description: "Discover new games", href: "/games" },
+  { title: "Marketplace", description: "Discover new games", href: "/games" },
   { title: "Devlogs", description: "Behind-the-scenes stories", href: "/devlogs" },
   { title: "My Beta Tests", description: "Active beta tests & tasks", href: "/profile/gamer/beta" },
   { title: "Beta Games", description: "Join new beta tests", href: "/games/beta" },
@@ -109,7 +109,7 @@ export default function GamerProfilePage() {
               className="text-sm font-semibold tracking-wide uppercase pixelized"
               style={{ textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(200, 240, 200, 0.7)" }}
             >
-              Welcome back, {user?.name}
+              Welcome, {user?.name}
             </p>
           </div>
 

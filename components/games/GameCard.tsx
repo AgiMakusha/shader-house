@@ -1,10 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Crown, FlaskConical } from "lucide-react";
 import { SubscriptionTier, FeatureFlag, hasFeatureAccess } from "@/lib/subscriptions/types";
+
+// PERFORMANCE FIX: Removed Framer Motion, using CSS animations instead
+// PERFORMANCE FIX: Memoized component to prevent unnecessary re-renders
 
 interface GameCardProps {
   game: {
@@ -15,6 +18,7 @@ interface GameCardProps {
     priceCents: number;
     avgRating: number;
     releaseStatus?: string;
+    createdAt?: string | Date;
     developer: {
       name: string;
     };
@@ -32,7 +36,7 @@ interface GameCardProps {
   viewOnly?: boolean;
 }
 
-export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
+export const GameCard = memo(function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
   const price = game.priceCents === 0 ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
   const isFree = game.priceCents === 0;
   const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
@@ -43,8 +47,8 @@ export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
 
   return (
     <Link href={gameUrl}>
-      <motion.div
-        className="group relative overflow-hidden rounded-2xl transition-all duration-300"
+      <div
+        className="group relative overflow-hidden rounded-2xl card-interactive"
         style={{
           background: isBeta
             ? "linear-gradient(135deg, rgba(100, 150, 255, 0.15) 0%, rgba(80, 130, 230, 0.08) 100%)"
@@ -54,8 +58,6 @@ export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
             : "1px solid rgba(200, 240, 200, 0.2)",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
         }}
-        whileHover={{ scale: 1.02, y: -4 }}
-        transition={{ duration: 0.2 }}
       >
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden">
@@ -145,6 +147,20 @@ export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
             by {game.developer.name}
           </p>
 
+          {/* Release Date */}
+          {game.createdAt && (
+            <p
+              className="text-xs"
+              style={{ color: "rgba(200, 240, 200, 0.5)" }}
+            >
+              Released: {new Date(game.createdAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </p>
+          )}
+
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {game.gameTags.slice(0, 3).map(({ tag }) => (
@@ -225,10 +241,10 @@ export function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </Link>
   );
-}
+});
 
 
 

@@ -52,7 +52,6 @@ function SignupPageContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [warnings, setWarnings] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showIndiePolicy, setShowIndiePolicy] = useState(false);
   
   // Track behavioral signals for bot detection
   const behavioralSignals = useBehavioralTracking();
@@ -325,58 +324,32 @@ function SignupPageContent() {
               transition={{ duration: 0.6, delay: 0.35 }}
             >
               <div 
-                className="p-4 rounded-lg border cursor-pointer"
+                className="p-4 rounded-lg border"
                 style={{
                   background: 'rgba(100, 200, 100, 0.1)',
                   borderColor: 'rgba(200, 240, 200, 0.3)',
                 }}
-                onClick={() => setShowIndiePolicy(!showIndiePolicy)}
               >
-              <div className="flex items-center justify-between">
                 <h3 
                   className="text-sm font-semibold"
                   style={{ color: 'rgba(200, 240, 200, 0.95)' }}
                 >
                   {INDIE_POLICY.title}
                 </h3>
-                <motion.svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  style={{ color: 'rgba(200, 240, 200, 0.8)' }}
-                  animate={{ rotate: showIndiePolicy ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </motion.svg>
+                
+                <ul className="mt-3 space-y-1 text-xs" style={{ color: 'rgba(200, 240, 200, 0.8)' }}>
+                  {INDIE_POLICY.criteria.map((criterion, i) => (
+                    <li key={i} className="flex items-start">
+                      <span className="mr-2">✓</span>
+                      <span>{criterion}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs italic" style={{ color: 'rgba(200, 240, 200, 0.7)' }}>
+                  {INDIE_POLICY.note}
+                </p>
               </div>
-              
-              <AnimatePresence>
-                {showIndiePolicy && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <ul className="mt-3 space-y-1 text-xs" style={{ color: 'rgba(200, 240, 200, 0.8)' }}>
-                      {INDIE_POLICY.criteria.map((criterion, i) => (
-                        <li key={i} className="flex items-start">
-                          <span className="mr-2">✓</span>
-                          <span>{criterion}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="mt-3 text-xs italic" style={{ color: 'rgba(200, 240, 200, 0.7)' }}>
-                      {INDIE_POLICY.note}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
+            </motion.div>
           )}
 
           {/* Registration Form Card */}
@@ -600,7 +573,7 @@ function SignupPageContent() {
                               : 'bg-white/5 border border-white/20 text-white/60 hover:bg-white/10'
                           }`}
                         >
-                          Indie
+                          Solo
                         </button>
                         <button
                           type="button"

@@ -43,6 +43,7 @@ export function AvatarUpload({ value, onChange, label = "Avatar", role = "GAMER"
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('type', 'image'); // Explicitly set type for image uploads
 
       const response = await fetch('/api/upload', {
         method: 'POST',

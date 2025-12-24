@@ -12,6 +12,7 @@ import { HeaderReportButton } from "@/components/reports/HeaderReportButton";
 
 const QUICK_ACTIONS = [
   { title: "My Games", description: "View all your published games", href: "/games?developer=me" },
+  { title: "Marketplace", description: "Browse all games", href: "/games" },
   { title: "Devlogs", description: "Share your dev journey", href: "/profile/developer/devlogs" },
   { title: "Analytics", description: "View your game stats", href: "/profile/developer/analytics" },
   { title: "Revenue & Tips", description: "Track earnings and tips", href: "/profile/developer/revenue" },
@@ -107,7 +108,7 @@ export default function DeveloperProfilePage() {
               className="text-sm font-semibold tracking-wide uppercase pixelized"
               style={{ textShadow: "1px 1px 0px rgba(0, 0, 0, 0.8)", color: "rgba(200, 240, 200, 0.7)" }}
             >
-              Welcome back, {user?.name}
+              Welcome, {user?.name}
             </p>
           </div>
 

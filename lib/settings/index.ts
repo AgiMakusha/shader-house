@@ -51,7 +51,7 @@ const DEFAULTS: Record<SettingKey, string> = {
   digest_frequency: "daily",
   // Payments
   game_sale_fee_percent: "15",
-  tip_fee_percent: "20",
+  tip_fee_percent: "15",
   creator_support_fee_percent: "15",
   publishing_fee_cents: "5000",
   // Security
@@ -205,7 +205,7 @@ export async function getPaymentFees(): Promise<{
 
   return {
     gameSaleFee: parseFloat(settings.game_sale_fee_percent) || 15,
-    tipFee: parseFloat(settings.tip_fee_percent) || 20,
+    tipFee: parseFloat(settings.tip_fee_percent) || 15,
     creatorSupportFee: parseFloat(settings.creator_support_fee_percent) || 15,
     publishingFee: parseFloat(settings.publishing_fee_cents) || 5000,
   };
@@ -232,4 +232,6 @@ export async function getSecuritySettings(): Promise<{
     require2faAdmin: settings.require_2fa_admin === "true",
   };
 }
+
+
 

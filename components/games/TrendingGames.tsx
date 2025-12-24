@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TrendingUp, Star, Crown, Flame } from "lucide-react";
+
+// PERFORMANCE FIX: Memoized to prevent unnecessary re-renders
 
 interface TrendingGame {
   rank: number;
@@ -23,16 +25,25 @@ interface TrendingGame {
 }
 
 interface TrendingGamesProps {
+  games?: TrendingGame[]; // PERFORMANCE FIX: Accept pre-fetched data as prop
   limit?: number;
   showTitle?: boolean;
 }
 
-export function TrendingGames({ limit = 5, showTitle = true }: TrendingGamesProps) {
-  const [games, setGames] = useState<TrendingGame[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const TrendingGames = memo(function TrendingGames({ games: propGames, limit = 5, showTitle = true }: TrendingGamesProps) {
+  const [games, setGames] = useState<TrendingGame[]>(propGames || []);
+  const [isLoading, setIsLoading] = useState(!propGames);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
+    // If data was passed as prop, skip fetching
+    if (propGames) {
+      setGames(propGames);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch data (backward compatibility)
     const fetchTrending = async () => {
       try {
         const res = await fetch(`/api/games/trending?limit=${limit}`);
@@ -51,7 +62,7 @@ export function TrendingGames({ limit = 5, showTitle = true }: TrendingGamesProp
     };
 
     fetchTrending();
-  }, [limit]);
+  }, [propGames, limit]);
 
   // Don't show anything if loading, error, or no games
   if (isLoading || hasError || games.length === 0) {
@@ -167,5 +178,5 @@ export function TrendingGames({ limit = 5, showTitle = true }: TrendingGamesProp
       </div>
     </div>
   );
-}
+});
 

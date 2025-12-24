@@ -19,11 +19,11 @@ export const GAME_SALE_DEVELOPER_PERCENT = 100 - GAME_SALE_PLATFORM_FEE_PERCENT;
 
 /**
  * Platform commission on tips and donations
- * Developer receives: 80%
- * Platform receives: 20%
+ * Developer receives: 85%
+ * Platform receives: 15%
  */
-export const DONATION_PLATFORM_FEE_PERCENT = 20;
-export const DONATION_DEVELOPER_PERCENT = 100 - DONATION_PLATFORM_FEE_PERCENT; // 80%
+export const DONATION_PLATFORM_FEE_PERCENT = 15;
+export const DONATION_DEVELOPER_PERCENT = 100 - DONATION_PLATFORM_FEE_PERCENT; // 85%
 
 /**
  * Platform commission on Creator Support subscription revenue
@@ -186,4 +186,6 @@ export interface RevenueBreakdown {
 }
 
 export type PaymentType = 'GAME_SALE' | 'DONATION' | 'CREATOR_SUPPORT' | 'PRO_PLAYTIME';
+
+
 

@@ -14,7 +14,7 @@ import { TrendingGames } from "@/components/games/TrendingGames";
 
 function GamesPageContent() {
   const searchParams = useSearchParams();
-  const [gamesData, setGamesData] = useState<any>(null);
+  const [pageData, setPageData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
   const isMyGames = searchParams.get('developer') === 'me';
@@ -30,12 +30,13 @@ function GamesPageContent() {
           params.append(key, value);
         });
 
-        const response = await fetch(`/api/games?${params.toString()}`);
+        // PERFORMANCE FIX: Use combined endpoint for all page data in one request
+        const response = await fetch(`/api/games/page-data?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch games');
         }
         const data = await response.json();
-        setGamesData(data);
+        setPageData(data);
       } catch (error) {
         console.error('Error fetching games:', error);
       } finally {
@@ -75,19 +76,6 @@ function GamesPageContent() {
         </div>
       )}
 
-      {/* Featured & Trending - Only show on main games page without search/filters */}
-      {!isMyGames && !searchParams.get('q') && !searchParams.get('tags') && (
-        <div className="w-full max-w-6xl mb-8">
-          {/* Featured Games Carousel */}
-          <FeaturedGames />
-
-          {/* Trending Games Sidebar - Only show on desktop */}
-          <div className="hidden lg:block mt-8">
-            <TrendingGames limit={5} />
-          </div>
-        </div>
-      )}
-
       {isLoading ? (
         <div className="w-full max-w-6xl text-center py-12">
           <p
@@ -97,16 +85,36 @@ function GamesPageContent() {
             Loading games...
           </p>
         </div>
-      ) : gamesData ? (
-        <GamesContentClient
-          games={gamesData.items}
-          allTags={gamesData.tags || []}
-          total={gamesData.total}
-          page={gamesData.page}
-          totalPages={gamesData.totalPages}
-          activeTags={searchParams.get('tags')?.split(',').filter(Boolean) || []}
-          viewOnly={isViewOnly}
-        />
+      ) : pageData ? (
+        <>
+          {/* Featured & Trending - Only show on main games page without search/filters */}
+          {!isMyGames && !searchParams.get('q') && !searchParams.get('tags') && (
+            <div className="w-full max-w-6xl mb-8">
+              {/* Featured Games Carousel - Pass data from combined endpoint */}
+              {pageData.featured && pageData.featured.length > 0 && (
+                <FeaturedGames games={pageData.featured} />
+              )}
+
+              {/* Trending Games Sidebar - Pass data from combined endpoint */}
+              {pageData.trending && pageData.trending.length > 0 && (
+                <div className="hidden lg:block mt-8">
+                  <TrendingGames games={pageData.trending} />
+                </div>
+              )}
+            </div>
+          )}
+
+          <GamesContentClient
+            games={pageData.items}
+            allTags={pageData.tags || []}
+            total={pageData.total}
+            page={pageData.page}
+            totalPages={pageData.totalPages}
+            activeTags={searchParams.get('tags')?.split(',').filter(Boolean) || []}
+            viewOnly={isViewOnly}
+            isMyGames={isMyGames}
+          />
+        </>
       ) : (
         <div className="w-full max-w-6xl text-center py-12">
           <p

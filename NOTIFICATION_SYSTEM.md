@@ -164,3 +164,5 @@ npx prisma generate
 3. Test mark as read functionality
 4. Test notification preferences in settings
 
+
+

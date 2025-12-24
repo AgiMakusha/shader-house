@@ -9,7 +9,7 @@ Shader House is an indie game marketplace that connects developers with gamers. 
 | Revenue Source | Developer Gets | Platform Gets |
 |----------------|----------------|---------------|
 | **Direct Game Sales** | **85%** | **15%** |
-| **Tips/Donations** | **80%** | **20%** |
+| **Tips/Donations** | **85%** | **15%** |
 | **Creator Support Subscriptions** | Split among devs (after 15% fee) | **15%** |
 | **Gamer Pro Playtime** | Based on playtime (after 15% fee) | **15%** |
 
@@ -72,15 +72,15 @@ When a gamer tips a developer:
 Example: $20.00 tip
 
 Supporter gives:      $20.00
-Platform fee (20%):    $4.00
-Developer receives:   $16.00
+Platform fee (15%):    $3.00
+Developer receives:   $17.00
 ```
 
-**Why 20% on tips:**
+**Why 15% on tips:**
 - Payment processing fees (~3%)
 - Platform sustainability
 - Feature development
-- Still significantly better than Patreon (8-12% + fees)
+- Significantly better than Patreon (8-12% + fees)
 
 ### 4. Creator Support Pass ($14.99/month)
 
@@ -231,7 +231,7 @@ All payment configuration is stored in:
 Key constants:
 ```typescript
 GAME_SALE_PLATFORM_FEE_PERCENT = 15     // 15% on sales
-DONATION_PLATFORM_FEE_PERCENT = 20       // 20% on tips
+DONATION_PLATFORM_FEE_PERCENT = 15       // 15% on tips
 GAME_PUBLISHING_FEE_CENTS = 5000         // $50.00
 MINIMUM_PAYOUT_THRESHOLD_CENTS = 2500    // $25.00
 CREATOR_SUPPORT_PRICE_CENTS = 1499       // $14.99/month
@@ -254,4 +254,6 @@ For disputes or issues:
 ---
 
 **Last Updated:** December 2024
+
+
 

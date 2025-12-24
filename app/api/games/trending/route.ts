@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { ReleaseStatus } from '@prisma/client';
+import { apiCache, CACHE_TTL, CACHE_KEYS } from '@/lib/cache/api-cache';
+
+// PERFORMANCE FIX: Added caching for trending games
 
 /**
  * GET /api/games/trending
@@ -18,13 +21,29 @@ export async function GET(request: NextRequest) {
     const period = Math.min(90, Math.max(1, parseInt(searchParams.get('period') || '7', 10)));
     const includeFeatured = searchParams.get('includeFeatured') !== 'false';
 
+    // PERFORMANCE FIX: Check cache first
+    const cacheKey = CACHE_KEYS.trendingGames(limit, period);
+    const cached = apiCache.get(cacheKey);
+    
+    if (cached) {
+      return NextResponse.json(cached, {
+        headers: {
+          'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+          'X-Cache-Status': 'HIT',
+        },
+      });
+    }
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - period);
 
-    // Get released games with their recent activity metrics
+    // PERFORMANCE FIX: Filter by publishing fee at database level
     const games = await prisma.game.findMany({
       where: {
         releaseStatus: ReleaseStatus.RELEASED,
+        publishingFee: {
+          paymentStatus: 'completed',
+        },
       },
       include: {
         developer: {
@@ -171,7 +190,7 @@ export async function GET(request: NextRequest) {
       createdAt: game.createdAt,
     }));
 
-    return NextResponse.json({
+    const response = {
       trending: results,
       period: {
         days: period,
@@ -191,6 +210,16 @@ export async function GET(request: NextRequest) {
           highRating: 'Up to 1.3x for games rated 4.5+ with 5+ reviews',
           featured: '+1000 points for featured games',
         },
+      },
+    };
+
+    // PERFORMANCE FIX: Cache the response
+    apiCache.set(cacheKey, response, CACHE_TTL.TRENDING_GAMES);
+
+    return NextResponse.json(response, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
+        'X-Cache-Status': 'MISS',
       },
     });
   } catch (error: any) {
@@ -229,10 +258,13 @@ export async function POST(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 7); // Default to 7 days
 
-    // Get all released games
+    // PERFORMANCE FIX: Only update trending scores for published games with fee paid
     const games = await prisma.game.findMany({
       where: {
         releaseStatus: ReleaseStatus.RELEASED,
+        publishingFee: {
+          paymentStatus: 'completed',
+        },
       },
       select: {
         id: true,
@@ -322,4 +354,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
 

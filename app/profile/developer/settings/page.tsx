@@ -1088,7 +1088,7 @@ export default function DeveloperSettingsPage() {
                 className="text-sm"
                 style={{ color: "rgba(200, 240, 200, 0.65)" }}
               >
-                Connect your bank account to receive payments from game sales and tips. You'll earn <strong style={{ color: "rgba(150, 255, 150, 0.95)" }}>85%</strong> from game sales and <strong style={{ color: "rgba(150, 255, 150, 0.95)" }}>80%</strong> from tips.
+                Connect your bank account to receive payments from game sales and tips. You'll earn <strong style={{ color: "rgba(150, 255, 150, 0.95)" }}>85%</strong> from game sales and <strong style={{ color: "rgba(150, 255, 150, 0.95)" }}>85%</strong> from tips.
               </p>
               <StripeConnectSetup />
             </GameCardContent>

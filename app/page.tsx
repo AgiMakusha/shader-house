@@ -152,8 +152,8 @@ export default function Page() {
           ease: "easeInOut" as const 
         }}
         style={{
-          background: "rgba(0, 0, 0, 0.3)",
-          backdropFilter: "blur(4px)",
+          background: "rgba(0, 0, 0, 0.4)",
+          // PERFORMANCE FIX: Removed backdrop-filter for better performance
         }}
       />
 

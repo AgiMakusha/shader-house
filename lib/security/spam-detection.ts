@@ -280,3 +280,5 @@ export function getContentQualityScore(content: string): number {
   return Math.max(0, 100 - spamResult.score);
 }
 
+
+
