@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flag, X, AlertTriangle, Send, Loader2 } from "lucide-react";
 
@@ -145,9 +146,9 @@ export default function ReportButton({
 
       {/* Report Modal */}
       <AnimatePresence>
-        {showModal && (
+        {showModal && typeof document !== "undefined" && createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
             style={{ background: "rgba(0, 0, 0, 0.85)" }}
             onClick={handleClose}
           >
@@ -328,7 +329,8 @@ export default function ReportButton({
                 )}
               </div>
             </motion.div>
-          </div>
+          </div>,
+          document.body
         )}
       </AnimatePresence>
     </>
