@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Flag, X, AlertTriangle, Send, Loader2 } from "lucide-react";
@@ -31,12 +31,17 @@ export default function ReportButton({
   variant = "icon",
   className = "",
 }: ReportButtonProps) {
+  const [mounted, setMounted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSubmit = async () => {
     if (!selectedReason) {
@@ -145,13 +150,14 @@ export default function ReportButton({
       )}
 
       {/* Report Modal */}
-      <AnimatePresence>
-        {showModal && typeof document !== "undefined" && createPortal(
-          <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-            style={{ background: "rgba(0, 0, 0, 0.85)" }}
-            onClick={handleClose}
-          >
+      {mounted && (
+        <AnimatePresence>
+          {showModal && createPortal(
+            <div
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+              style={{ background: "rgba(0, 0, 0, 0.85)" }}
+              onClick={handleClose}
+            >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -331,8 +337,9 @@ export default function ReportButton({
             </motion.div>
           </div>,
           document.body
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 }
