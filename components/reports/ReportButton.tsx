@@ -146,26 +146,25 @@ export default function ReportButton({
       {/* Report Modal */}
       <AnimatePresence>
         {showModal && (
-          <motion.div
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            style={{ background: "rgba(0, 0, 0, 0.85)" }}
+            onClick={handleClose}
           >
-            <div className="absolute inset-0 bg-black/80" onClick={handleClose} />
             <motion.div
-              className="relative w-full max-w-md max-h-[90vh] rounded-2xl overflow-hidden flex flex-col"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="rounded-xl w-full max-w-md max-h-[85vh] flex flex-col"
               style={{
-                background: "linear-gradient(135deg, rgba(15, 35, 25, 0.98) 0%, rgba(10, 25, 20, 0.98) 100%)",
-                border: "2px solid rgba(200, 240, 200, 0.3)",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                background: "linear-gradient(145deg, rgba(15, 35, 25, 0.98) 0%, rgba(10, 25, 20, 0.98) 100%)",
+                border: "1px solid rgba(200, 240, 200, 0.3)",
+                boxShadow: "0 8px 32px rgba(100, 200, 100, 0.3)",
               }}
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="p-6 border-b border-white/20 flex items-center justify-between">
+              <div className="p-6 border-b border-white/20 flex items-center justify-between flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center"
@@ -199,7 +198,7 @@ export default function ReportButton({
               </div>
 
               {/* Body */}
-              <div className="p-6 overflow-y-auto">
+              <div className="p-6 overflow-y-auto flex-1">
                 {submitted ? (
                   <div className="text-center py-6">
                     <div
@@ -329,7 +328,7 @@ export default function ReportButton({
                 )}
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </>
