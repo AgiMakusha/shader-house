@@ -156,29 +156,35 @@ export default function ReportButton({
             <motion.div
               className="relative w-full max-w-md rounded-2xl overflow-hidden"
               style={{
-                background: "linear-gradient(135deg, rgba(20, 40, 30, 0.98) 0%, rgba(15, 30, 25, 0.98) 100%)",
-                border: "1px solid rgba(200, 240, 200, 0.2)",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                background: "linear-gradient(135deg, rgba(15, 35, 25, 0.98) 0%, rgba(10, 25, 20, 0.98) 100%)",
+                border: "2px solid rgba(200, 240, 200, 0.3)",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
               }}
               initial={{ scale: 0.95, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
             >
               {/* Header */}
-              <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <div className="p-6 border-b border-white/20 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ background: "rgba(248, 113, 113, 0.2)", border: "1px solid rgba(248, 113, 113, 0.3)" }}
+                    style={{ background: "rgba(248, 113, 113, 0.25)", border: "1px solid rgba(248, 113, 113, 0.4)" }}
                   >
                     <Flag className="w-5 h-5 text-red-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold" style={{ color: "rgba(200, 240, 200, 0.95)" }}>
+                    <h3 
+                      className="text-lg font-bold pixelized" 
+                      style={{ 
+                        color: "rgba(220, 255, 220, 0.98)",
+                        textShadow: "0 0 8px rgba(100, 200, 100, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)"
+                      }}
+                    >
                       Report {typeLabels[type]}
                     </h3>
                     {targetName && (
-                      <p className="text-sm" style={{ color: "rgba(200, 240, 200, 0.6)" }}>
+                      <p className="text-sm font-medium" style={{ color: "rgba(200, 240, 200, 0.75)" }}>
                         {targetName}
                       </p>
                     )}
@@ -188,7 +194,7 @@ export default function ReportButton({
                   onClick={handleClose}
                   className="p-2 rounded-lg hover:bg-white/10 transition-colors"
                 >
-                  <X className="w-5 h-5" style={{ color: "rgba(200, 240, 200, 0.7)" }} />
+                  <X className="w-5 h-5" style={{ color: "rgba(220, 255, 220, 0.8)" }} />
                 </button>
               </div>
 
@@ -226,7 +232,10 @@ export default function ReportButton({
                   <>
                     {/* Reason Selection */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium mb-2" style={{ color: "rgba(200, 240, 200, 0.8)" }}>
+                      <label className="block text-sm font-bold mb-3 pixelized" style={{ 
+                        color: "rgba(220, 255, 220, 0.95)",
+                        textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
+                      }}>
                         Why are you reporting this {typeLabels[type]}?
                       </label>
                       <div className="space-y-2">
@@ -234,19 +243,23 @@ export default function ReportButton({
                           <button
                             key={reason.value}
                             onClick={() => { setSelectedReason(reason.value); setError(null); }}
-                            className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
-                              selectedReason === reason.value ? "ring-2 ring-green-400" : ""
+                            className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-all ${
+                              selectedReason === reason.value ? "ring-2" : ""
                             }`}
                             style={{
                               background: selectedReason === reason.value 
-                                ? "rgba(100, 200, 100, 0.25)" 
-                                : "rgba(255, 255, 255, 0.12)",
+                                ? "rgba(100, 200, 100, 0.3)" 
+                                : "rgba(30, 50, 40, 0.8)",
                               border: selectedReason === reason.value
-                                ? "1px solid rgba(100, 200, 100, 0.4)"
-                                : "1px solid rgba(200, 240, 200, 0.2)",
+                                ? "1px solid rgba(150, 250, 150, 0.6)"
+                                : "1px solid rgba(200, 240, 200, 0.3)",
                               color: selectedReason === reason.value
-                                ? "rgba(200, 255, 200, 0.95)"
-                                : "rgba(200, 240, 200, 0.95)",
+                                ? "rgba(220, 255, 220, 1)"
+                                : "rgba(220, 255, 220, 0.95)",
+                              ringColor: "rgba(150, 250, 150, 0.8)",
+                              textShadow: selectedReason === reason.value 
+                                ? "0 0 8px rgba(100, 200, 100, 0.5)" 
+                                : "none",
                             }}
                           >
                             {reason.label}
@@ -257,7 +270,10 @@ export default function ReportButton({
 
                     {/* Description */}
                     <div className="mb-4">
-                      <label className="block text-sm font-medium mb-2" style={{ color: "rgba(200, 240, 200, 0.8)" }}>
+                      <label className="block text-sm font-bold mb-3 pixelized" style={{ 
+                        color: "rgba(220, 255, 220, 0.95)",
+                        textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
+                      }}>
                         Additional details {selectedReason === "OTHER" ? "(required)" : "(optional)"}
                       </label>
                       <textarea
@@ -265,11 +281,11 @@ export default function ReportButton({
                         onChange={(e) => { setDescription(e.target.value); setError(null); }}
                         placeholder="Provide more context about the issue..."
                         rows={3}
-                        className="w-full p-3 rounded-lg text-sm resize-none"
+                        className="w-full p-3 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50"
                         style={{
-                          background: "rgba(255, 255, 255, 0.1)",
-                          border: "1px solid rgba(255, 255, 255, 0.2)",
-                          color: "rgba(200, 240, 200, 0.95)",
+                          background: "rgba(30, 50, 40, 0.8)",
+                          border: "1px solid rgba(200, 240, 200, 0.3)",
+                          color: "rgba(220, 255, 220, 0.95)",
                         }}
                       />
                     </div>

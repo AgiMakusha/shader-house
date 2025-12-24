@@ -525,7 +525,7 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
 
                   {/* Report Game Button */}
                   {session?.user && !isOwner && !isViewOnly && (
-                    <div className="pt-2 border-t border-white/10">
+                    <div className="pt-2 border-t border-white/10 flex justify-center">
                       <ReportButton
                         type="GAME"
                         targetId={game.id}
