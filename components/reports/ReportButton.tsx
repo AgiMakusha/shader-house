@@ -154,7 +154,7 @@ export default function ReportButton({
           >
             <div className="absolute inset-0 bg-black/80" onClick={handleClose} />
             <motion.div
-              className="relative w-full max-w-md rounded-2xl overflow-hidden"
+              className="relative w-full max-w-md max-h-[90vh] rounded-2xl overflow-hidden flex flex-col"
               style={{
                 background: "linear-gradient(135deg, rgba(15, 35, 25, 0.98) 0%, rgba(10, 25, 20, 0.98) 100%)",
                 border: "2px solid rgba(200, 240, 200, 0.3)",
@@ -199,7 +199,7 @@ export default function ReportButton({
               </div>
 
               {/* Body */}
-              <div className="p-6">
+              <div className="p-6 overflow-y-auto">
                 {submitted ? (
                   <div className="text-center py-6">
                     <div
@@ -232,18 +232,18 @@ export default function ReportButton({
                   <>
                     {/* Reason Selection */}
                     <div className="mb-4">
-                      <label className="block text-sm font-bold mb-3 pixelized" style={{ 
+                      <label className="block text-sm font-bold mb-2 pixelized" style={{ 
                         color: "rgba(220, 255, 220, 0.95)",
                         textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
                       }}>
                         Why are you reporting this {typeLabels[type]}?
                       </label>
-                      <div className="space-y-2">
+                      <div className="space-y-1.5">
                         {REPORT_REASONS.map((reason) => (
                           <button
                             key={reason.value}
                             onClick={() => { setSelectedReason(reason.value); setError(null); }}
-                            className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-all ${
+                            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                               selectedReason === reason.value ? "ring-2 ring-green-400/60" : ""
                             }`}
                             style={{
@@ -269,7 +269,7 @@ export default function ReportButton({
 
                     {/* Description */}
                     <div className="mb-4">
-                      <label className="block text-sm font-bold mb-3 pixelized" style={{ 
+                      <label className="block text-sm font-bold mb-2 pixelized" style={{ 
                         color: "rgba(220, 255, 220, 0.95)",
                         textShadow: "0 0 6px rgba(100, 200, 100, 0.4)"
                       }}>
@@ -279,7 +279,7 @@ export default function ReportButton({
                         value={description}
                         onChange={(e) => { setDescription(e.target.value); setError(null); }}
                         placeholder="Provide more context about the issue..."
-                        rows={3}
+                        rows={2}
                         className="w-full p-3 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400/50"
                         style={{
                           background: "rgba(30, 50, 40, 0.8)",
