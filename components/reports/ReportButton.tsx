@@ -244,7 +244,7 @@ export default function ReportButton({
                             key={reason.value}
                             onClick={() => { setSelectedReason(reason.value); setError(null); }}
                             className={`w-full text-left p-3 rounded-lg text-sm font-medium transition-all ${
-                              selectedReason === reason.value ? "ring-2" : ""
+                              selectedReason === reason.value ? "ring-2 ring-green-400/60" : ""
                             }`}
                             style={{
                               background: selectedReason === reason.value 
@@ -256,7 +256,6 @@ export default function ReportButton({
                               color: selectedReason === reason.value
                                 ? "rgba(220, 255, 220, 1)"
                                 : "rgba(220, 255, 220, 0.95)",
-                              ringColor: "rgba(150, 250, 150, 0.8)",
                               textShadow: selectedReason === reason.value 
                                 ? "0 0 8px rgba(100, 200, 100, 0.5)" 
                                 : "none",
