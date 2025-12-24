@@ -239,10 +239,14 @@ export default function ReportButton({
                             }`}
                             style={{
                               background: selectedReason === reason.value 
-                                ? "rgba(100, 200, 100, 0.2)" 
-                                : "rgba(255, 255, 255, 0.05)",
-                              border: "1px solid rgba(255, 255, 255, 0.1)",
-                              color: "rgba(200, 240, 200, 0.9)",
+                                ? "rgba(100, 200, 100, 0.25)" 
+                                : "rgba(255, 255, 255, 0.12)",
+                              border: selectedReason === reason.value
+                                ? "1px solid rgba(100, 200, 100, 0.4)"
+                                : "1px solid rgba(200, 240, 200, 0.2)",
+                              color: selectedReason === reason.value
+                                ? "rgba(200, 255, 200, 0.95)"
+                                : "rgba(200, 240, 200, 0.95)",
                             }}
                           >
                             {reason.label}

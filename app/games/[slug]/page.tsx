@@ -522,6 +522,18 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                       </p>
                     </div>
                   )}
+
+                  {/* Report Game Button */}
+                  {session?.user && !isOwner && !isViewOnly && (
+                    <div className="pt-2 border-t border-white/10">
+                      <ReportButton
+                        type="GAME"
+                        targetId={game.id}
+                        targetName={game.title}
+                        variant="full"
+                      />
+                    </div>
+                  )}
                 </div>
               </GameCardContent>
             </GameCard>
@@ -531,20 +543,6 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
 
             {/* Similar Games */}
             <SimilarGames gameId={game.id} limit={4} />
-
-            {/* Report Game */}
-            {session?.user && !isOwner && !isViewOnly && (
-              <GameCard>
-                <GameCardContent className="p-4">
-                  <ReportButton
-                    type="GAME"
-                    targetId={game.id}
-                    targetName={game.title}
-                    variant="full"
-                  />
-                </GameCardContent>
-              </GameCard>
-            )}
           </div>
         </div>
       </main>
