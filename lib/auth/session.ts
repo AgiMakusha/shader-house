@@ -76,7 +76,14 @@ export async function getSessionFromRequest(request: NextRequest): Promise<Sessi
 
 export async function destroySession() {
   const cookieStore = await cookies();
-  cookieStore.delete("session");
+  // Delete the cookie with the same options used when creating it
+  cookieStore.set("session", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0), // Set to past date to delete
+  });
 }
 
 export async function refreshSession(rememberMe: boolean = false) {

@@ -54,9 +54,13 @@ export default function GamerProfilePage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      play("door");
-      setTimeout(() => router.push("/login"), 300);
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok) {
+        play("door");
+        setTimeout(() => router.push("/login"), 300);
+      } else {
+        console.error("Logout failed:", await response.text());
+      }
     } catch (error) {
       console.error("Logout error:", error);
     }
