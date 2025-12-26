@@ -6,7 +6,7 @@ import { checkIndieEligibility } from "@/lib/indie/eligibility";
 import { generateVerificationToken } from "@/lib/auth/tokens";
 import { sendVerificationEmail } from "@/lib/email/service";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
-import { validateEmailAsync } from "@/lib/security/email-validation";
+import { validateEmailAsync, validateEmailWithSMTP } from "@/lib/security/email-validation";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { isLikelyBot, calculateBotScore } from "@/lib/security/behavioral-signals";
 import { detectBot, logBotDetection } from "@/lib/security/bot-detection";
@@ -142,8 +142,12 @@ export async function POST(request: NextRequest) {
     const { name, email, password, role } = validation.data;
     const developerProfile = isDeveloperWithProfile ? body.developerProfile : null;
     
-    // 4. Enhanced email validation (disposable email check + MX record verification)
-    const emailValidation = await validateEmailAsync(email);
+    // 4. Enhanced email validation (disposable email check + MX record verification + optional SMTP)
+    // Use SMTP validation if enabled (can be disabled via ENABLE_SMTP_VALIDATION=false)
+    const emailValidation = process.env.ENABLE_SMTP_VALIDATION === 'true'
+      ? await validateEmailWithSMTP(email)
+      : await validateEmailAsync(email);
+    
     if (!emailValidation.valid) {
       logSecurityEvent('REGISTER_BLOCKED_INVALID_EMAIL', {
         ipAddress: clientIP,

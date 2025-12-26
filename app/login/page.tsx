@@ -410,30 +410,25 @@ export default function LoginPage() {
                     {isLoading ? 'Signing in...' : 'Sign In'}
                   </motion.button>
 
+                  {/* Sign Up Link */}
+                  <div className="text-center pt-2">
+                    <p className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.7)' }}>
+                      Don't have an account?{' '}
+                      <Link 
+                        href="/register" 
+                        className="font-semibold hover:underline transition-all"
+                        style={{ color: 'rgba(200, 240, 200, 0.95)' }}
+                      >
+                        Sign up
+                      </Link>
+                    </p>
+                  </div>
+
                   {/* OAuth Buttons */}
                   <OAuthButtons mode="login" />
                 </form>
               </GameCardContent>
             </GameCard>
-          </motion.div>
-
-          {/* Sign Up Link */}
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <p className="text-sm" style={{ color: 'rgba(200, 240, 200, 0.7)' }}>
-              Don't have an account?{' '}
-              <Link 
-                href="/register" 
-                className="font-semibold hover:underline transition-all"
-                style={{ color: 'rgba(200, 240, 200, 0.95)' }}
-              >
-                Sign up
-              </Link>
-            </p>
           </motion.div>
 
           {/* Back to Home */}
