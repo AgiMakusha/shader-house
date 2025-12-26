@@ -41,6 +41,15 @@ export function getVerificationMessage(verified: boolean): string {
 }
 
 /**
+ * Get error response for unverified email
+ */
+export function getUnverifiedEmailError(): { error: string } {
+  return {
+    error: "Please verify your email address to perform this action. Check your inbox for the verification link or request a new one."
+  };
+}
+
+/**
  * Check if action is allowed based on email verification status
  */
 export function canPerformAction(

@@ -135,8 +135,7 @@ export async function POST(request: NextRequest) {
                      'unknown';
     
     // 1. Email verification check
-    const emailCheck = await isEmailVerified(session.user.id);
-    if (!emailCheck.verified) {
+    if (!isEmailVerified(session)) {
       logSecurityEvent('CONTENT_BLOCKED_UNVERIFIED', {
         userId: session.user.id,
         ipAddress: clientIP,
