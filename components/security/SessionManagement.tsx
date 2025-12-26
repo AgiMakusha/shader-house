@@ -111,7 +111,7 @@ export function SessionManagement() {
     <GameCard>
       <GameCardContent className="p-8 space-y-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Shield size={24} style={{ color: "rgba(180, 220, 180, 0.9)" }} />
             <h2
               className="text-2xl font-bold pixelized"
@@ -124,7 +124,7 @@ export function SessionManagement() {
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <motion.button
               onClick={fetchSessions}
               disabled={isLoading}
