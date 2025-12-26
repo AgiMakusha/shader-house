@@ -15,6 +15,7 @@ import { GameAccessTracker } from "@/components/games/GameAccessTracker";
 import { RecentReviews } from "@/components/games/RecentReviews";
 import { SimilarGames } from "@/components/games/SimilarGames";
 import { VersionHistory } from "@/components/games/VersionHistory";
+import { ScreenshotGallery } from "@/components/games/ScreenshotGallery";
 import ReportButton from "@/components/reports/ReportButton";
 import { TipButton } from "@/components/payments";
 import { DeveloperNameLink } from "./DeveloperNameLink";
@@ -276,19 +277,10 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
                     >
                       Screenshots
                     </h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {game.screenshots.map((screenshot: string, index: number) => (
-                        <div key={index} className="relative aspect-video rounded-lg overflow-hidden">
-                          <Image
-                            src={screenshot}
-                            alt={`${game.title} screenshot ${index + 1}`}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 1024px) 50vw, 33vw"
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    <ScreenshotGallery 
+                      screenshots={game.screenshots} 
+                      gameTitle={game.title}
+                    />
                   </div>
                 )}
               </GameCardContent>
