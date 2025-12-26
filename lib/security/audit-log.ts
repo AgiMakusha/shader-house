@@ -22,6 +22,7 @@ export type SecurityEventType =
   | 'REGISTER_BLOCKED_RATE_LIMIT'
   | 'REGISTER_BLOCKED_BOT'
   | 'REGISTER_BLOCKED_DISPOSABLE_EMAIL'
+  | 'REGISTER_BLOCKED_INVALID_EMAIL'
   // Password events
   | 'PASSWORD_CHANGED'
   | 'PASSWORD_RESET_REQUESTED'
@@ -138,6 +139,7 @@ function getEventSeverity(eventType: SecurityEventType): SecuritySeverity {
     'REGISTER_BLOCKED_RATE_LIMIT': 'error',
     'REGISTER_BLOCKED_BOT': 'error',
     'REGISTER_BLOCKED_DISPOSABLE_EMAIL': 'error',
+    'REGISTER_BLOCKED_INVALID_EMAIL': 'error',
     'BOT_DETECTED': 'error',
     'HONEYPOT_TRIGGERED': 'error',
     'MULTIPLE_FAILED_ATTEMPTS': 'error',
@@ -299,6 +301,7 @@ export function getSuspiciousActivityCount(
     'LOGIN_BLOCKED_BOT',
     'REGISTER_BLOCKED_RATE_LIMIT',
     'REGISTER_BLOCKED_BOT',
+    'REGISTER_BLOCKED_INVALID_EMAIL',
     'BOT_DETECTED',
     'HONEYPOT_TRIGGERED',
     'SUSPICIOUS_ACTIVITY',
