@@ -27,9 +27,27 @@ export async function createConnectAccount(
     // In demo mode, simulate account creation
     const demoAccountId = `acct_demo_${developerId.slice(0, 8)}`;
     
-    await prisma.developerProfile.update({
+    // Use upsert to create profile if it doesn't exist
+    await prisma.developerProfile.upsert({
       where: { userId: developerId },
-      data: {
+      create: {
+        userId: developerId,
+        stripeAccountId: demoAccountId,
+        stripeAccountStatus: 'active',
+        stripeOnboardedAt: new Date(),
+        payoutEnabled: true,
+        // Required fields with defaults (for developers who haven't completed verification)
+        developerType: 'INDIE',
+        teamSize: 1,
+        hasPublisher: false,
+        ownsIP: true,
+        fundingSources: ['SELF'],
+        companyType: 'NONE',
+        evidenceLinks: [],
+        attestIndie: false,
+        isIndieEligible: false,
+      },
+      update: {
         stripeAccountId: demoAccountId,
         stripeAccountStatus: 'active',
         stripeOnboardedAt: new Date(),
@@ -82,10 +100,25 @@ export async function createConnectAccount(
       },
     });
 
-    // Save account ID to database
-    await prisma.developerProfile.update({
+    // Save account ID to database (create profile if it doesn't exist)
+    await prisma.developerProfile.upsert({
       where: { userId: developerId },
-      data: {
+      create: {
+        userId: developerId,
+        stripeAccountId: account.id,
+        stripeAccountStatus: 'pending',
+        // Required fields with defaults (for developers who haven't completed verification)
+        developerType: 'INDIE',
+        teamSize: 1,
+        hasPublisher: false,
+        ownsIP: true,
+        fundingSources: ['SELF'],
+        companyType: 'NONE',
+        evidenceLinks: [],
+        attestIndie: false,
+        isIndieEligible: false,
+      },
+      update: {
         stripeAccountId: account.id,
         stripeAccountStatus: 'pending',
       },
@@ -205,10 +238,27 @@ export async function checkAccountStatus(
 
     const payoutEnabled = account.payouts_enabled || false;
 
-    // Update local database
-    await prisma.developerProfile.update({
+    // Update local database (create profile if it doesn't exist)
+    await prisma.developerProfile.upsert({
       where: { userId: developerId },
-      data: {
+      create: {
+        userId: developerId,
+        stripeAccountId: profile.stripeAccountId,
+        stripeAccountStatus: status,
+        payoutEnabled,
+        // Required fields with defaults (for developers who haven't completed verification)
+        developerType: 'INDIE',
+        teamSize: 1,
+        hasPublisher: false,
+        ownsIP: true,
+        fundingSources: ['SELF'],
+        companyType: 'NONE',
+        evidenceLinks: [],
+        attestIndie: false,
+        isIndieEligible: false,
+        ...(status === 'active' ? { stripeOnboardedAt: new Date() } : {}),
+      },
+      update: {
         stripeAccountStatus: status,
         payoutEnabled,
         ...(status === 'active' && !profile.payoutEnabled

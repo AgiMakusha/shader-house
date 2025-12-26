@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionFromRequest } from "@/lib/auth/session";
+import { requiresEmailVerification, isEmailVerified } from "@/lib/security/email-verification-guard";
 
 // Define which routes require authentication
 const protectedRoutes = [
@@ -91,7 +92,24 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Email verification check for critical routes
+  if (isAuthenticated && requiresEmailVerification(pathname)) {
+    if (!isEmailVerified(session)) {
+      // Block access to critical routes if email is not verified
+      const response = NextResponse.redirect(
+        new URL(`/profile/${isDeveloper ? 'developer' : 'gamer'}?error=email_verification_required`, request.url)
+      );
+      return response;
+    }
+  }
+
+  // Add email verification status to response headers (for UI components to check)
+  const response = NextResponse.next();
+  if (isAuthenticated) {
+    response.headers.set('x-email-verified', isEmailVerified(session) ? 'true' : 'false');
+  }
+
+  return response;
 }
 
 // PERFORMANCE FIX: Optimized matcher to skip more static routes

@@ -3,6 +3,7 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 import { promoteToRelease } from '@/lib/queries/games';
 import { notifyGameUpdate, notifyGamePublished } from '@/lib/notifications/triggers';
 import { prisma } from '@/lib/db/prisma';
+import { canPerformAction } from '@/lib/security/email-verification-guard';
 
 /**
  * POST /api/games/:id/promote
@@ -18,6 +19,15 @@ export async function POST(
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check email verification for publishing games
+    const verificationCheck = canPerformAction(session, 'publish_game');
+    if (!verificationCheck.allowed) {
+      return NextResponse.json(
+        { error: verificationCheck.reason },
+        { status: 403 }
+      );
     }
 
     const { id: gameId } = await params;

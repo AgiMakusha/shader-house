@@ -6,7 +6,7 @@ import { checkIndieEligibility } from "@/lib/indie/eligibility";
 import { generateVerificationToken } from "@/lib/auth/tokens";
 import { sendVerificationEmail } from "@/lib/email/service";
 import { verifyTurnstileToken } from "@/lib/security/turnstile";
-import { validateEmail } from "@/lib/security/email-validation";
+import { validateEmailAsync } from "@/lib/security/email-validation";
 import { checkRateLimit, getClientIdentifier } from "@/lib/security/rate-limit";
 import { isLikelyBot, calculateBotScore } from "@/lib/security/behavioral-signals";
 import { detectBot, logBotDetection } from "@/lib/security/bot-detection";
@@ -142,10 +142,10 @@ export async function POST(request: NextRequest) {
     const { name, email, password, role } = validation.data;
     const developerProfile = isDeveloperWithProfile ? body.developerProfile : null;
     
-    // 4. Email validation (disposable email check)
-    const emailValidation = validateEmail(email);
+    // 4. Enhanced email validation (disposable email check + MX record verification)
+    const emailValidation = await validateEmailAsync(email);
     if (!emailValidation.valid) {
-      logSecurityEvent('REGISTER_BLOCKED_DISPOSABLE_EMAIL', {
+      logSecurityEvent('REGISTER_BLOCKED_INVALID_EMAIL', {
         ipAddress: clientIP,
         userAgent: userAgent || undefined,
         endpoint: '/api/auth/register',
@@ -251,6 +251,7 @@ export async function POST(request: NextRequest) {
       name: newUser.name,
       role: newUser.role as "DEVELOPER" | "GAMER" | "ADMIN",
       subscriptionTier: newUser.subscriptionTier as "FREE" | "CREATOR_SUPPORT" | "GAMER_PRO",
+      emailVerified: !!newUser.emailVerified,
       createdAt: newUser.createdAt.getTime(),
     }, true); // Remember me = true by default for new registrations
 

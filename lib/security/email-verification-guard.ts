@@ -1,151 +1,70 @@
 /**
- * Email Verification Guard
- * Blocks users from posting content until email is verified
+ * Email verification guard utility
+ * Used to enforce email verification for critical actions
  */
 
-import { prisma } from '@/lib/db/prisma';
-
-export interface EmailVerificationResult {
-  verified: boolean;
-  email?: string;
-  verifiedAt?: Date | null;
-  error?: string;
-}
+import { SessionPayload } from "@/lib/auth/session";
 
 /**
- * Check if a user's email is verified
+ * Routes that require email verification
  */
-export async function isEmailVerified(userId: string): Promise<EmailVerificationResult> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        email: true,
-        emailVerified: true,
-      },
-    });
-
-    if (!user) {
-      return {
-        verified: false,
-        error: 'User not found',
-      };
-    }
-
-    return {
-      verified: user.emailVerified !== null,
-      email: user.email,
-      verifiedAt: user.emailVerified,
-    };
-  } catch (error) {
-    console.error('Error checking email verification:', error);
-    return {
-      verified: false,
-      error: 'Failed to check verification status',
-    };
-  }
-}
-
-/**
- * Actions that require email verification
- */
-export const VERIFICATION_REQUIRED_ACTIONS = [
-  'create_thread',
-  'create_post',
-  'create_review',
-  'create_devlog',
-  'create_devlog_comment',
-  'submit_feedback',
-  'send_tip',
-  'join_beta',
-  'report_content',
-] as const;
-
-export type VerificationRequiredAction = typeof VERIFICATION_REQUIRED_ACTIONS[number];
-
-/**
- * Check if an action requires email verification
- */
-export function requiresEmailVerification(action: string): boolean {
-  return VERIFICATION_REQUIRED_ACTIONS.includes(action as VerificationRequiredAction);
-}
-
-/**
- * Standard error response for unverified email
- */
-export function getUnverifiedEmailError(): {
-  error: string;
-  code: string;
-  action: string;
-} {
-  return {
-    error: 'Please verify your email address before posting. Check your inbox for the verification link.',
-    code: 'EMAIL_NOT_VERIFIED',
-    action: 'verify_email',
-  };
-}
-
-/**
- * Grace period check - allows some actions for new users
- * who just registered (within first 24 hours)
- */
-export async function isInGracePeriod(userId: string): Promise<boolean> {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { createdAt: true },
-    });
-
-    if (!user) return false;
-
-    const hoursSinceCreation = (Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60);
-    return hoursSinceCreation < 24;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Actions allowed during grace period (even without verification)
- */
-const GRACE_PERIOD_ACTIONS: VerificationRequiredAction[] = [
-  'join_beta', // Allow joining beta during grace period
+export const VERIFICATION_REQUIRED_ROUTES = [
+  "/dashboard/games/upload",
+  "/dashboard/games/publish",
+  "/api/games/upload",
+  "/api/games/publish",
+  "/api/payments",
 ];
 
 /**
- * Combined check: is user allowed to perform action?
- * Takes into account verification status and grace period
+ * Check if a route requires email verification
  */
-export async function canPerformAction(
-  userId: string,
-  action: VerificationRequiredAction
-): Promise<{ allowed: boolean; reason?: string }> {
-  // Check if action requires verification
-  if (!requiresEmailVerification(action)) {
-    return { allowed: true };
-  }
-
-  // Check email verification
-  const verificationResult = await isEmailVerified(userId);
-  
-  if (verificationResult.verified) {
-    return { allowed: true };
-  }
-
-  // Check grace period for certain actions
-  if (GRACE_PERIOD_ACTIONS.includes(action)) {
-    const inGracePeriod = await isInGracePeriod(userId);
-    if (inGracePeriod) {
-      return { allowed: true };
-    }
-  }
-
-  // Not verified and not in grace period
-  return {
-    allowed: false,
-    reason: 'Email verification required',
-  };
+export function requiresEmailVerification(pathname: string): boolean {
+  return VERIFICATION_REQUIRED_ROUTES.some(route => pathname.startsWith(route));
 }
 
+/**
+ * Check if user has verified their email
+ */
+export function isEmailVerified(session: SessionPayload | null): boolean {
+  return !!session?.user?.emailVerified;
+}
 
+/**
+ * Get verification status message for user
+ */
+export function getVerificationMessage(verified: boolean): string {
+  if (verified) {
+    return "Your email is verified";
+  }
+  return "Please verify your email to access all features";
+}
 
+/**
+ * Check if action is allowed based on email verification status
+ */
+export function canPerformAction(
+  session: SessionPayload | null,
+  action: "publish_game" | "upload_game" | "make_payment" | "access_beta" | "general"
+): { allowed: boolean; reason?: string } {
+  if (!session) {
+    return { allowed: false, reason: "You must be logged in" };
+  }
+
+  // General actions don't require verification
+  if (action === "general") {
+    return { allowed: true };
+  }
+
+  // Critical actions require email verification
+  const verified = isEmailVerified(session);
+  
+  if (!verified) {
+    return { 
+      allowed: false, 
+      reason: "Please verify your email address to perform this action. Check your inbox for the verification link or request a new one." 
+    };
+  }
+
+  return { allowed: true };
+}

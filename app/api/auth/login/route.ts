@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
         role: true,
         password: true,
         subscriptionTier: true,
+        emailVerified: true,
         createdAt: true,
       },
     });
@@ -150,6 +151,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role as "DEVELOPER" | "GAMER" | "ADMIN",
       subscriptionTier: user.subscriptionTier as "FREE" | "CREATOR_SUPPORT" | "GAMER_PRO",
+      emailVerified: !!user.emailVerified,
       createdAt: user.createdAt.getTime(),
     }, rememberMe);
 

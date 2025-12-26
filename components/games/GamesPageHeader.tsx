@@ -42,8 +42,11 @@ export function GamesPageHeader({ isMyGames }: GamesPageHeaderProps) {
           {showBackLink && (
             <Link
               href={backLink}
-              className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all"
-              style={{ color: "rgba(200, 240, 200, 0.75)" }}
+              className="text-xs font-semibold uppercase tracking-[0.2em] hover:underline transition-all hover:scale-105 inline-flex items-center gap-1"
+              style={{ 
+                color: "rgba(180, 220, 180, 0.9)",
+                textShadow: "0 0 6px rgba(120, 200, 120, 0.5), 1px 1px 0px rgba(0, 0, 0, 0.8)"
+              }}
             >
               ← {userRole === 'DEVELOPER' ? 'Back to Developer Hub' : 'Back to Gamer Hub'}
             </Link>

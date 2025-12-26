@@ -148,6 +148,7 @@ export async function GET(
       name: user.name,
       role: user.role as 'DEVELOPER' | 'GAMER' | 'ADMIN',
       subscriptionTier: user.subscriptionTier as 'FREE' | 'CREATOR_SUPPORT' | 'GAMER_PRO',
+      emailVerified: !!user.emailVerified,
       createdAt: user.createdAt.getTime(),
     }, true);
 

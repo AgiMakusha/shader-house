@@ -5,6 +5,7 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 import { notifyBetaGamePublished } from '@/lib/notifications/triggers';
 import { prisma } from '@/lib/db/prisma';
 import { ReleaseStatus } from '@prisma/client';
+import { canPerformAction } from '@/lib/security/email-verification-guard';
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,6 +68,15 @@ export async function POST(request: NextRequest) {
     const userRole = session.user.role?.toUpperCase();
     if (userRole !== 'DEVELOPER' && userRole !== 'ADMIN') {
       return NextResponse.json({ error: 'Only developers can create games' }, { status: 403 });
+    }
+
+    // Check email verification for uploading games
+    const verificationCheck = canPerformAction(session, 'upload_game');
+    if (!verificationCheck.allowed) {
+      return NextResponse.json(
+        { error: verificationCheck.reason },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

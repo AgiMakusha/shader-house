@@ -3,6 +3,7 @@ import { getSessionFromRequest } from '@/lib/auth/session';
 import { prisma } from '@/lib/db/prisma';
 import { stripe, isStripeConfigured, getBaseUrl } from '@/lib/payments/stripe';
 import { GAME_PUBLISHING_FEE_CENTS, formatCurrency } from '@/lib/payments/config';
+import { canPerformAction } from '@/lib/security/email-verification-guard';
 
 /**
  * Publishing Fee API
@@ -27,6 +28,15 @@ export async function POST(req: NextRequest) {
     if (session.user.role?.toUpperCase() !== 'DEVELOPER') {
       return NextResponse.json(
         { error: 'Only developers can publish games' },
+        { status: 403 }
+      );
+    }
+
+    // Check email verification for making payments
+    const verificationCheck = canPerformAction(session, 'make_payment');
+    if (!verificationCheck.allowed) {
+      return NextResponse.json(
+        { error: verificationCheck.reason },
         { status: 403 }
       );
     }
