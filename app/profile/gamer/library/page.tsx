@@ -308,7 +308,7 @@ export default function LibraryPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
                 >
-                  <GameCard game={game} userTier={userTier} />
+                  <GameCard game={game} userTier={userTier} referrer="library" />
                 </motion.div>
               ))}
             </motion.div>

@@ -167,7 +167,7 @@ export default function ProLibraryPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index }}
                 >
-                  <GameCardComponent game={game} userTier={user?.subscriptionTier} />
+                  <GameCardComponent game={game} userTier={user?.subscriptionTier} referrer="library" />
                 </motion.div>
               ))}
             </motion.div>

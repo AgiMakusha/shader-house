@@ -26,12 +26,13 @@ interface PageProps {
   }>;
   searchParams: Promise<{
     viewOnly?: string;
+    from?: string;
   }>;
 }
 
 export default async function GameDetailPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
-  const { viewOnly } = await searchParams;
+  const { viewOnly, from } = await searchParams;
   const session = await getSession();
   const game = await getGameBySlug(slug, session?.user?.id);
   const isViewOnly = viewOnly === 'true';
@@ -89,11 +90,17 @@ export default async function GameDetailPage({ params, searchParams }: PageProps
         {/* Header */}
         <div className="w-full max-w-6xl mb-8 flex items-center justify-between">
           <Link
-            href={isViewOnly ? "/games?viewOnly=true" : "/games"}
+            href={
+              from === 'library' 
+                ? "/games/pro-library"
+                : isViewOnly 
+                  ? "/games?viewOnly=true" 
+                  : "/games"
+            }
             className="text-sm font-semibold uppercase tracking-wider hover:underline transition-all"
             style={{ color: "rgba(200, 240, 200, 0.75)" }}
           >
-            ← Back to Games
+            ← {from === 'library' ? 'Back to Library' : 'Back to Games'}
           </Link>
           
           {isOwner && (

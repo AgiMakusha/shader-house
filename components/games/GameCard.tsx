@@ -34,16 +34,22 @@ interface GameCardProps {
   };
   userTier?: SubscriptionTier | null;
   viewOnly?: boolean;
+  referrer?: string;
 }
 
-export const GameCard = memo(function GameCard({ game, userTier, viewOnly = false }: GameCardProps) {
+export const GameCard = memo(function GameCard({ game, userTier, viewOnly = false, referrer }: GameCardProps) {
   const price = game.priceCents === 0 ? 'Free' : `$${(game.priceCents / 100).toFixed(2)}`;
   const isFree = game.priceCents === 0;
   const hasUnlimitedAccess = hasFeatureAccess(userTier, FeatureFlag.UNLIMITED_LIBRARY);
   const showCrown = hasUnlimitedAccess && !isFree; // Show crown for premium users on paid games
   const isBeta = game.releaseStatus === 'BETA';
 
-  const gameUrl = viewOnly ? `/games/${game.slug}?viewOnly=true` : `/games/${game.slug}`;
+  // Build game URL with optional referrer and viewOnly params
+  let gameUrl = `/games/${game.slug}`;
+  const params = new URLSearchParams();
+  if (viewOnly) params.append('viewOnly', 'true');
+  if (referrer) params.append('from', referrer);
+  if (params.toString()) gameUrl += `?${params.toString()}`;
 
   return (
     <Link href={gameUrl}>
