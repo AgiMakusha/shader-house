@@ -16,17 +16,30 @@ const protectedRoutes = [
 // Define which routes are auth-only (redirect if already authenticated)
 const authRoutes = ["/login", "/signup"];
 
+// Routes that are always accessible (public pages)
+const publicPagesNoAuth = [
+  '/terms',
+  '/privacy',
+  '/icons',
+  '/register',
+  '/verify-email', // Email verification page
+  '/reset', // Password reset
+  '/reset-password', // Password reset
+];
+
+// Routes that authenticated but unverified users can access
+const allowedForUnverified = [
+  '/verify-email',
+  '/api/auth/send-verification',
+  '/api/auth/verify-email',
+  '/api/auth/session',
+  '/api/auth/logout',
+];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // PERFORMANCE FIX: Skip session check for public pages that don't need auth
-  const publicPagesNoAuth = [
-    '/terms',
-    '/privacy',
-    '/icons',
-    '/register',
-  ];
-  
+  // Skip session check for public pages that don't need auth
   const isPublicNoAuth = publicPagesNoAuth.some(route => pathname.startsWith(route));
   
   if (isPublicNoAuth) {
@@ -37,6 +50,9 @@ export async function middleware(request: NextRequest) {
 
   // Check if user is authenticated
   const isAuthenticated = !!session?.user;
+  
+  // Check if email is verified (for authenticated users)
+  const emailVerified = isAuthenticated ? isEmailVerified(session) : true;
 
   // Normalize role to uppercase for comparison (handles legacy lowercase roles)
   const userRole = session?.user?.role?.toUpperCase();
@@ -44,14 +60,35 @@ export async function middleware(request: NextRequest) {
   const isGamer = userRole === "GAMER";
   const isAdmin = userRole === "ADMIN";
 
-  // Redirect authenticated users away from auth pages
-  if (isAuthenticated && authRoutes.includes(pathname)) {
+  // Redirect authenticated users away from auth pages (only if verified)
+  if (isAuthenticated && emailVerified && authRoutes.includes(pathname)) {
     const redirectUrl = isAdmin
       ? "/admin"
       : isDeveloper
         ? "/profile/developer" 
-        : "/profile/gamer"; // Existing gamers go to their profile
+        : "/profile/gamer";
     return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  // CRITICAL: Block all platform access for unverified users
+  // Allow only verification page, auth pages, home page, and public pages
+  if (isAuthenticated && !emailVerified) {
+    const isAllowedRoute = 
+      pathname === '/' || // Home page (to show verification message)
+      pathname.startsWith('/verify-email') ||
+      pathname.startsWith('/login') ||
+      pathname.startsWith('/signup') ||
+      pathname.startsWith('/api/auth/send-verification') ||
+      pathname.startsWith('/api/auth/verify-email') ||
+      pathname.startsWith('/api/auth/session') ||
+      pathname.startsWith('/api/auth/logout') ||
+      pathname.startsWith('/api/games') && !pathname.includes('/upload') && !pathname.includes('/publish') || // Allow viewing games
+      publicPagesNoAuth.some(route => pathname.startsWith(route));
+    
+    if (!isAllowedRoute) {
+      // Redirect to verification required page
+      return NextResponse.redirect(new URL("/verify-email?required=true", request.url));
+    }
   }
 
   // Redirect unauthenticated users away from protected pages
@@ -62,12 +99,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Admin routes - restrict to admin users only
+  // Admin routes - restrict to admin users only (and verified)
   if (pathname.startsWith("/admin")) {
     if (!isAuthenticated) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("from", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+    if (!emailVerified) {
+      return NextResponse.redirect(new URL("/verify-email?required=true", request.url));
     }
     if (!isAdmin) {
       // Non-admin users get redirected to home
@@ -75,31 +115,20 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Dashboard routes are developer-only
-  if (isAuthenticated && pathname.startsWith("/dashboard")) {
+  // Dashboard routes are developer-only (and verified)
+  if (isAuthenticated && emailVerified && pathname.startsWith("/dashboard")) {
     if (!isDeveloper) {
       return NextResponse.redirect(new URL("/profile/gamer", request.url));
     }
   }
 
-  // Profile routes - redirect to correct profile based on role
-  if (isAuthenticated) {
+  // Profile routes - redirect to correct profile based on role (and verified)
+  if (isAuthenticated && emailVerified) {
     if (pathname.startsWith("/profile/developer") && !isDeveloper && !isAdmin) {
       return NextResponse.redirect(new URL("/profile/gamer", request.url));
     }
     if (pathname.startsWith("/profile/gamer") && !isGamer && !isAdmin) {
       return NextResponse.redirect(new URL("/profile/developer", request.url));
-    }
-  }
-
-  // Email verification check for critical routes
-  if (isAuthenticated && requiresEmailVerification(pathname)) {
-    if (!isEmailVerified(session)) {
-      // Block access to critical routes if email is not verified
-      const response = NextResponse.redirect(
-        new URL(`/profile/${isDeveloper ? 'developer' : 'gamer'}?error=email_verification_required`, request.url)
-      );
-      return response;
     }
   }
 

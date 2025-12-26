@@ -6,19 +6,49 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { GameCard, GameCardContent } from "@/components/game/GameCard";
 import Particles from "@/components/fx/Particles";
+import { Mail, AlertCircle } from "lucide-react";
 
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const required = searchParams.get("required") === "true";
   
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [status, setStatus] = useState<'verifying' | 'success' | 'error' | 'pending'>(
+    token ? 'verifying' : required ? 'pending' : 'error'
+  );
   const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Fetch user session to get email
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user?.email) {
+            setUserEmail(data.user.email);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch session:', error);
+      }
+    };
+    fetchSession();
+  }, []);
 
   useEffect(() => {
     if (!token) {
-      setStatus('error');
-      setMessage('No verification token provided');
+      if (required) {
+        setStatus('pending');
+        setMessage('Please verify your email address to access the platform.');
+      } else {
+        setStatus('error');
+        setMessage('No verification token provided');
+      }
       return;
     }
 
@@ -36,10 +66,13 @@ function VerifyEmailContent() {
           setStatus('success');
           setMessage('Your email has been verified successfully!');
           
-          // Redirect to home after 3 seconds
+          // Refresh session to get updated verification status
+          await fetch('/api/auth/session', { method: 'GET' });
+          
+          // Redirect to appropriate page after 2 seconds
           setTimeout(() => {
             router.push('/');
-          }, 3000);
+          }, 2000);
         } else {
           setStatus('error');
           setMessage(data.error || 'Failed to verify email');
@@ -51,7 +84,28 @@ function VerifyEmailContent() {
     };
 
     verifyEmail();
-  }, [token, router]);
+  }, [token, required, router]);
+
+  const handleResendEmail = async () => {
+    setSending(true);
+    try {
+      const response = await fetch('/api/auth/send-verification', {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        setEmailSent(true);
+        setTimeout(() => setEmailSent(false), 5000);
+      } else {
+        const data = await response.json();
+        setMessage(data.error || 'Failed to send verification email');
+      }
+    } catch (error) {
+      setMessage('An error occurred while sending verification email');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
@@ -85,6 +139,11 @@ function VerifyEmailContent() {
                     {status === 'verifying' && (
                       <div className="w-16 h-16 rounded-full border-4 border-white/20 border-t-white/80 animate-spin" />
                     )}
+                    {status === 'pending' && (
+                      <div className="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                        <AlertCircle className="w-10 h-10" style={{ color: 'rgba(255, 200, 100, 0.9)' }} />
+                      </div>
+                    )}
                     {status === 'success' && (
                       <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
                         <svg className="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,55 +169,95 @@ function VerifyEmailContent() {
                         0 0 20px rgba(80, 160, 80, 0.4),
                         2px 2px 0px rgba(0, 0, 0, 0.8)
                       `,
-                      color: 'rgba(150, 250, 150, 0.95)',
+                      color: status === 'pending' 
+                        ? 'rgba(255, 200, 100, 0.95)' 
+                        : 'rgba(150, 250, 150, 0.95)',
                     }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
                   >
                     {status === 'verifying' && 'Verifying Email'}
+                    {status === 'pending' && 'Email Verification Required'}
                     {status === 'success' && 'Email Verified!'}
                     {status === 'error' && 'Verification Failed'}
                   </motion.h1>
 
                   {/* Message */}
-                  <motion.p
-                    className="text-sm"
+                  <motion.div
+                    className="text-sm space-y-3"
                     style={{ color: 'rgba(200, 240, 200, 0.8)' }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.5 }}
                   >
-                    {status === 'verifying' && 'Please wait while we verify your email address...'}
-                    {status === 'success' && (
+                    {status === 'verifying' && <p>Please wait while we verify your email address...</p>}
+                    {status === 'pending' && (
                       <>
-                        {message}
-                        <br />
-                        <span className="text-xs opacity-70">Redirecting you to the home page...</span>
+                        <p className="font-semibold" style={{ color: 'rgba(255, 220, 150, 0.95)' }}>
+                          You must verify your email address before accessing the platform.
+                        </p>
+                        {userEmail && (
+                          <p className="text-xs">
+                            We sent a verification link to <strong>{userEmail}</strong>
+                          </p>
+                        )}
+                        <p className="text-xs opacity-70">
+                          Check your inbox (and spam folder) for the verification email.
+                        </p>
                       </>
                     )}
-                    {status === 'error' && message}
-                  </motion.p>
+                    {status === 'success' && (
+                      <>
+                        <p>{message}</p>
+                        <p className="text-xs opacity-70">Redirecting you to the platform...</p>
+                      </>
+                    )}
+                    {status === 'error' && <p>{message}</p>}
+                  </motion.div>
 
                   {/* Actions */}
-                  {status === 'error' && (
+                  {(status === 'pending' || status === 'error') && (
                     <motion.div
-                      className="pt-4"
+                      className="pt-4 space-y-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.6, delay: 0.6 }}
                     >
-                      <Link
-                        href="/login"
-                        className="inline-block px-6 py-3 rounded-lg font-medium text-sm transition-all"
-                        style={{
-                          background: 'rgba(100, 200, 100, 0.2)',
-                          border: '1px solid rgba(200, 240, 200, 0.3)',
-                          color: 'rgba(200, 240, 200, 0.9)',
-                        }}
-                      >
-                        Back to Login
-                      </Link>
+                      {status === 'pending' && (
+                        <button
+                          onClick={handleResendEmail}
+                          disabled={sending || emailSent}
+                          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            background: emailSent 
+                              ? 'rgba(100, 200, 100, 0.2)' 
+                              : 'rgba(255, 200, 100, 0.2)',
+                            border: emailSent
+                              ? '1px solid rgba(150, 255, 150, 0.3)'
+                              : '1px solid rgba(255, 200, 100, 0.3)',
+                            color: emailSent
+                              ? 'rgba(200, 255, 200, 0.95)'
+                              : 'rgba(255, 220, 150, 0.95)',
+                          }}
+                        >
+                          <Mail size={16} />
+                          {sending ? 'Sending...' : emailSent ? 'Verification email sent!' : 'Resend verification email'}
+                        </button>
+                      )}
+                      {status === 'error' && (
+                        <Link
+                          href="/login"
+                          className="inline-block px-6 py-3 rounded-lg font-medium text-sm transition-all"
+                          style={{
+                            background: 'rgba(100, 200, 100, 0.2)',
+                            border: '1px solid rgba(200, 240, 200, 0.3)',
+                            color: 'rgba(200, 240, 200, 0.9)',
+                          }}
+                        >
+                          Back to Login
+                        </Link>
+                      )}
                     </motion.div>
                   )}
                 </div>
